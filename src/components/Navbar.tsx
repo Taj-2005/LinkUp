@@ -1,8 +1,25 @@
 "use client";
 
 import Image from "next/image";
+import React from "react";
 import { FiMenu, FiHome, FiSearch, FiMessageCircle, FiBell, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
+
+interface NavItemProps {
+    Icon: React.ElementType;
+    size: number;
+    label: string;
+    text: string;
+}
+
+function NavItem({Icon, size, label, text} : NavItemProps) {
+    return (
+        <div className="flex justify-start items-center p-6 gap-4">
+            <Icon className="text-white" size={size}/>
+            <div className={`${text} font-montserrat font-bold text-white`}>{label}</div>
+        </div>
+    )
+}
 
 export default function Navbar() {
     return (
@@ -18,36 +35,16 @@ export default function Navbar() {
                     />
                 </div>
                 <div className="flex flex-col justify-center items-start">
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <FiHome className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Home</div>
-                    </div>
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <FiSearch className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Search</div>
-                    </div>
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <FiMessageCircle className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Messages</div>
-                    </div>
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <FiBell className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Notifications</div>
-                    </div>
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <FiPlusSquare className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Create</div>
-                    </div>
-                    <div className="flex justify-start items-center p-6 gap-4">
-                        <HiUserCircle className="text-white" size={26}/>
-                        <div className="text-1xl font-montserrat font-bold text-white">Profile</div>
-                    </div>
+                    <NavItem Icon={FiHome} size={26} label="Home" text="text-1xl"/>
+                    <NavItem Icon={FiSearch} size={26} label="Search" text="text-1xl"/>
+                    <NavItem Icon={FiMessageCircle} size={26} label="Messages" text="text-1xl"/>
+                    <NavItem Icon={FiBell} size={26} label="Notifications" text="text-1xl"/>
+                    <NavItem Icon={FiPlusSquare} size={26} label="Create" text="text-1xl"/>
+                    <NavItem Icon={HiUserCircle} size={26} label="Profile" text="text-1xl"/>
                 </div>
             </div>
-            <div className="flex justify-start items-center p-6 gap-4">
-                <FiMenu className="text-white" size={30}/>
-                <div className="text-2xl font-montserrat font-bold text-white">More</div>
-            </div>
+            <NavItem Icon={FiMenu} size={30} label="More" text="text-2xl"/>
+            
         </div>
     )
-}
+};
