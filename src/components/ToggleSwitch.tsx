@@ -20,7 +20,7 @@ export default function ToggleSwitch() {
         <button
             aria-label="Toggle Dark Mode"
             type="button"
-            className="text-black dark:text-white hover:opacity-75 transition-opacity"
+            className="text-black dark:text-white hover:opacity-75 transition-opacity p-4"
             onClick={() =>
                 setTheme(resolvedTheme === "dark" ? "light" : "dark")
             }

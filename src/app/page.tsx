@@ -1,12 +1,15 @@
 "use client";
 
+import Image from "next/image";
+
 import ToggleSwitch from "@/components/ToggleSwitch";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
+
   return (
-    <div className="flex flex-row justify-between items-center bg-primary-light dark:bg-primary-dark min-h-screen">
-      <div className="w-[15%] min-h-screen">
-      </div>
+    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark min-h-screen">
+      <Navbar />
 
       <div className="w-[85%] m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
         <div className="w-[20%]"></div>
