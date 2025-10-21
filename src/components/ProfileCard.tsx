@@ -47,7 +47,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
           <div>
             <p className="text-2xl">{user.posts}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
-              Posts
+              Links
             </p>
           </div>
           <div>
