@@ -17,15 +17,17 @@ export default function ToggleSwitch() {
     }
 
     return (
-        <button
-            aria-label="Toggle Dark Mode"
-            type="button"
-            className="text-black dark:text-white hover:opacity-75 transition-opacity p-4 flex justify-end items-end"
-            onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-        >
-            {resolvedTheme === "dark" ? <FiSun size={30}/> : <FiMoon size={30}/>}
-        </button>
+        <div className="flex justify-end items-end w-full">
+            <button
+                aria-label="Toggle Dark Mode"
+                type="button"
+                className="text-black dark:text-white hover:opacity-75 transition-opacity flex justify-end items-end"
+                onClick={() =>
+                    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
+            >
+                {resolvedTheme === "dark" ? <FiSun size={30}/> : <FiMoon size={30}/>}
+            </button>
+        </div>
     )
 }

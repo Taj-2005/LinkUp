@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function AdsPlaceholderMobile() {
   return (
-    <div className="h-full bg-left-nav-light dark:bg-left-nav-dark flex flex-col items-center py-8 px-4 transition-colors duration-500">
+    <div className="h-full bg-right-nav-light dark:bg-right-nav-dark flex flex-col items-center py-8 px-4">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
