@@ -17,7 +17,7 @@ export default function User({username, name, isFollowing} : UserProps) {
                     <div className="text-gray-500">{name}</div>
                 </div>
             </div>
-            <button className="border-2 border-black dark:border-white px-4 rounded-lg hover:bg-white hover:text-black transition-colors w-fit h-fit py-1">
+            <button className="border-2 font-bold border-black dark:border-white px-4 rounded-lg hover:bg-white hover:text-black transition-colors w-fit h-fit py-1">
                 {isFollowing ? "Following" : "Follow"}
             </button>
         </div>
