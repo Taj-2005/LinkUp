@@ -9,7 +9,7 @@ interface UserProps {
 }
 export default function User({username, name, onClick} : UserProps) {
     return (
-        <div onClick={onClick} className="flex justify-between px-4 py-2">
+        <div onClick={onClick} className="flex justify-between px-4 py-2 w-full">
             <div className="flex gap-2">
                 <HiUserCircle size={50} className="text-black dark:text-white"/>
                 <div className="flex flex-col">

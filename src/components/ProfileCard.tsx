@@ -11,9 +11,9 @@ interface ProfileCardProps {
     location: string;
     bio: string;
     posts: number;
-    followers: number;
-    following: number;
-    isFollowing?: boolean;
+    linked_by: number;
+    linked_to: number;
+    isLinked?: boolean;
   };
 }
 
@@ -51,15 +51,15 @@ export default function ProfileCard({ user }: ProfileCardProps) {
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.followers}</p>
+            <p className="text-2xl">{user.linked_by}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
-              Followers
+              Linked By
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.following}</p>
+            <p className="text-2xl">{user.linked_to}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
-              Following
+              Linked To
             </p>
           </div>
         </div>
@@ -77,22 +77,22 @@ export default function ProfileCard({ user }: ProfileCardProps) {
 
         {/* Action Buttons */}
         <div className="mt-4 flex flex-wrap gap-4">
-          {user.username === "tajuddinshaik_6" ? (
+          {user.username !== "tajuddinshaik_6" ? (
             <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
               Edit Profile
             </button>
-          ) : user.isFollowing ? (
+          ) : user.isLinked ? (
             <>
               <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
-                Following
+                Linked
               </button>
               <button className="bg-left-nav-light dark:bg-left-nav-dark border border-primary-light dark:border-primary-dark text-primary-light dark:text-gray-200 px-6 py-2 rounded-2xl font-semibold shadow hover:brightness-110 transition">
-                Message
+                Start LinkUp
               </button>
             </>
           ) : (
             <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
-              Follow
+              Link
             </button>
           )}
         </div>

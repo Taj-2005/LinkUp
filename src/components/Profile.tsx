@@ -9,16 +9,17 @@ const user = {
     name: "Tajuddin Shaik",
     location: "Hyderabad, India",
     bio: "Web Developer | Tech Enthusiast | Lifelong LearnerWeb Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner ",
-    followers: 1200,
-    following: 300,
-    posts: 150
+    linked_by: 1200,
+    linked_to: 300,
+    posts: 150,
+    isLinked: true
 }
 
 export default function Profile(){
     return(
       <div className="w-[85%] m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
         <div className="w-full">
-        <div className="p-6 md:p-10 flex flex-col gap-8 items-center">
+        <div className="flex flex-col gap-8 items-center">
           <ToggleSwitch />
           <ProfileCard user={user} />
         </div>

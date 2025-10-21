@@ -13,15 +13,21 @@ interface ChatProps {
 export default function Chat({ username, name, isFollowing }: ChatProps) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center p-2 border-b border-gray-500">
-        <User username={username} name={name} />
+      <header className="flex items-center justify-between border-b border-primary-light/50 dark:border-primary-dark/50 p-4 sticky top-0 bg-right-nav-light dark:bg-right-nav-dark z-10 shadow-sm">
+        <User username={username} name={name}/>
         <ToggleSwitch />
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-4 bg-left-nav-light dark:bg-left-nav-dark no-scrollbar scrollbar-thumb-rounded-lg scrollbar-thin scrollbar-thumb-primary-light/40 dark:scrollbar-thumb-primary-dark/60 shadow-inner">
+        {/* Message bubbles will load here */}
+        <p className="text-center text-primary-light dark:text-primary-light/80 mt-10 select-none opacity-70">
+          Conversation content coming soon...
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
-      </div>
-
-      <SendText />
+      <footer className="p-4 border-t border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark rounded-b-xl shadow-inner">
+        <SendText />
+      </footer>
     </div>
   );
 }

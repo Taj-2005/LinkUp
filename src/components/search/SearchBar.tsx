@@ -61,7 +61,7 @@ export default function SearchBar() {
 
       {/* Results/Filtered Users List */}
       {isFocused && (
-        <div className="max-h-[600px] overflow-y-auto hide-scrollbar p-4 space-y-4">
+        <div className="max-h-[80vh] overflow-y-auto hide-scrollbar p-4 space-y-4">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user) => (
               <User

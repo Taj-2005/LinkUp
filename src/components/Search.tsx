@@ -6,7 +6,7 @@ import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/search/Profile";
 import SearchBar from "@/components/search/SearchBar";
 import Suggestions from "@/components/search/Suggestions";
-import Ads from "@/components/search/Ads";
+import Ads from "@/components/Ads";
 import { HiUserCircle } from "react-icons/hi";
 
 export default function Search(){

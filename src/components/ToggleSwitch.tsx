@@ -17,7 +17,7 @@ export default function ToggleSwitch() {
     }
 
     return (
-        <div className="flex justify-end items-end w-full">
+        <div className="flex justify-end items-end w-full p-4">
             <button
                 aria-label="Toggle Dark Mode"
                 type="button"

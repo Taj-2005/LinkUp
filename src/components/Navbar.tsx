@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import { FiMenu, FiHome, FiSearch, FiMessageCircle, FiBell, FiPlusSquare } from "react-icons/fi";
+import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 
 interface NavItemProps {
@@ -61,7 +61,7 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                         key={"home"}
                         Icon={FiHome} 
                         size={26} 
-                        label="Home" 
+                        label="LiveLinks" 
                         text="text-1xl"
                         isActive={selectedItem === "Home"}
                         onClick={() => handleNavClick("Home")}
@@ -70,25 +70,25 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                         key="search"
                         Icon={FiSearch} 
                         size={26} 
-                        label="Search" 
+                        label="LinkFinder" 
                         text="text-1xl"
                         isActive={selectedItem === "Search"}
                         onClick={() => handleNavClick("Search")}
                     />
                     <NavItem 
-                        key="messages"
-                        Icon={FiMessageCircle} 
+                        key="linkups"
+                        Icon={FiLink} 
                         size={26} 
-                        label="Messages" 
+                        label="LinkUps" 
                         text="text-1xl"
                         isActive={selectedItem === "Messages"}
                         onClick={() => handleNavClick("Messages")}
                     />
                     <NavItem 
-                        key="notifications"
-                        Icon={FiBell} 
+                        key="link_requests"
+                        Icon={FiExternalLink} 
                         size={26} 
-                        label="Notifications" 
+                        label="LinkUp Req" 
                         text="text-1xl"
                         isActive={selectedItem === "Notifications"}
                         onClick={() => handleNavClick("Notifications")}
@@ -97,7 +97,7 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                         key="create"
                         Icon={FiPlusSquare} 
                         size={26} 
-                        label="Create" 
+                        label="New Link" 
                         text="text-1xl"
                         isActive={selectedItem === "Create"}
                         onClick={() => handleNavClick("Create")}
@@ -106,7 +106,7 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                         key="profile"
                         Icon={HiUserCircle} 
                         size={26} 
-                        label="Profile" 
+                        label="LinkHub" 
                         text="text-1xl"
                         isActive={selectedItem === "Profile"}
                         onClick={() => handleNavClick("Profile")}
@@ -116,9 +116,9 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
             <NavItem 
                 key="more"
                 Icon={FiMenu} 
-                size={30} 
-                label="More" 
-                text="text-2xl"
+                size={26} 
+                label="LinkUpCenter" 
+                text="text-1xl"
                 isActive={selectedItem === "More"}
                 onClick={() => handleNavClick("More")}
             />

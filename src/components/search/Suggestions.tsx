@@ -21,7 +21,7 @@ export default function Suggestions(){
                     {showAll ? "Show less" : "See all"}
                 </div>
             </div>
-            <div className="overflow-y-auto max-h-[600px] hide-scrollbar">
+            <div className="overflow-y-auto max-h-[70vh] hide-scrollbar">
                 {
                     displayedUsers.map((user) => (
                         <User 
