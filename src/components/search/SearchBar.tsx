@@ -75,7 +75,7 @@ export default function SearchBar(){
                         ))
                     ) : (
                         <div className="p-10 text-center text-gray-500">
-                            No users found
+                            No users found 
                         </div>
                     )}
                 </div>
