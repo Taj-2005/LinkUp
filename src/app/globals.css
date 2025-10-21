@@ -20,14 +20,18 @@
 
 html, body {
   overscroll-behavior: none;
-  transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
-}
-
-* {
-  transition: background-color 300ms ease-in-out, color 300ms ease-in-out, border-color 300ms ease-in-out;
 }
 
 body {
   margin: 0;
   padding: 0;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
