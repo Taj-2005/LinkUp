@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaRegBookmark, FaBookmark, FaRegSquare, FaTh } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaTh } from "react-icons/fa";
 
 interface NavbarProps {
     user: string;

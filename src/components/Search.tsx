@@ -5,9 +5,7 @@ import { useState } from "react";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/search/Profile";
 import SearchBar from "@/components/search/SearchBar";
-import Suggestions from "@/components/search/Suggestions";
 import Ads from "@/components/Ads";
-import { HiUserCircle } from "react-icons/hi";
 
 const user = {
     user_avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000",
