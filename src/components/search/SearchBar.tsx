@@ -68,7 +68,7 @@ export default function SearchBar() {
                 key={user.username}
                 username={user.username}
                 name={user.name}
-                isFollowing={user.isFollowing}
+                isFollowing={user.isLinked}
               />
             ))
           ) : (

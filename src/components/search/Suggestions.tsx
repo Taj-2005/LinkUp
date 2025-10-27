@@ -7,7 +7,7 @@ import User from "@/components/search/User";
 export default function Suggestions(){
     const [showAll, setShowAll] = useState(false);
     
-    const followingUsers = users.filter(user => user.isFollowing);
+    const followingUsers = users.filter(user => !user.isLinked);
     const displayedUsers = showAll ? followingUsers : followingUsers.slice(0, 5);
     
     return (
@@ -28,7 +28,7 @@ export default function Suggestions(){
                             key={user.username} 
                             username={user.username} 
                             name={user.name} 
-                            isFollowing={user.isFollowing}
+                            isFollowing={user.isLinked}
                         />
                     ))
                 }

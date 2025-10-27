@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import RightNavbar from "@/components/RightNavbar";
 
 export default function Home() {
-  const [selectedItem, setSelectedItem] = useState("livelinks");
+  const [selectedItem, setSelectedItem] = useState("linkupreqs");
 
   useEffect(() => console.log(selectedItem), [selectedItem]);
   return (

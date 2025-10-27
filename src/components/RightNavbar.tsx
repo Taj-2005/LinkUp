@@ -12,17 +12,17 @@ interface RightNavbarProps {
 }
 
 export default function RightNavbar({selectedItem} : RightNavbarProps){
-    if (selectedItem === "Home"){
+    if (selectedItem === "livelinks"){
         return <Home />;
-    }else if (selectedItem === "Search"){
+    }else if (selectedItem === "linkfinder"){
         return <Search />;
-    }else if (selectedItem === "Messages"){
+    }else if (selectedItem === "linkups"){
         return <Messages />;
-    }else if (selectedItem === "Notifications"){
+    }else if (selectedItem === "linkupreqs"){
         return <Notifications />;
-    }else if (selectedItem === "Create"){
+    }else if (selectedItem === "newlink"){
         return <Create />; 
-    }else if (selectedItem === "Profile"){
+    }else if (selectedItem === "linkhub"){
         return <Profile />;
     }
 }

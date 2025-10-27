@@ -4,6 +4,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
+import { useRouter } from "next/navigation";
 
 interface NavItemProps {
     Icon: React.ElementType;
@@ -39,9 +40,19 @@ function NavItem({Icon, size, label, text, isActive, onClick} : NavItemProps) {
 }
 
 export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
+    const router = useRouter();
 
     const handleNavClick = (label: string) => {
         setSelectedItem(label);
+        if (label === "more"){
+            router.push(`/`);
+            return;
+        }
+        if (label === "livelinks"){
+            router.push(`/`);
+            return;
+        }
+        router.push(`/${label.toLowerCase()}`);
     };
 
     return (
@@ -58,22 +69,22 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                 </div>
                 <div className="flex flex-col justify-center items-start">
                     <NavItem 
-                        key={"home"}
+                        key={"livelinks"}
                         Icon={FiHome} 
                         size={26} 
                         label="LiveLinks" 
                         text="text-1xl"
-                        isActive={selectedItem === "Home"}
-                        onClick={() => handleNavClick("Home")}
+                        isActive={selectedItem === "livelinks"}
+                        onClick={() => handleNavClick("livelinks")}
                     />
                     <NavItem 
-                        key="search"
+                        key="linkfinder"
                         Icon={FiSearch} 
                         size={26} 
                         label="LinkFinder" 
                         text="text-1xl"
-                        isActive={selectedItem === "Search"}
-                        onClick={() => handleNavClick("Search")}
+                        isActive={selectedItem === "linkfinder"}
+                        onClick={() => handleNavClick("linkfinder")}
                     />
                     <NavItem 
                         key="linkups"
@@ -81,35 +92,35 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                         size={26} 
                         label="LinkUps" 
                         text="text-1xl"
-                        isActive={selectedItem === "Messages"}
-                        onClick={() => handleNavClick("Messages")}
+                        isActive={selectedItem === "linkups"}
+                        onClick={() => handleNavClick("linkups")}
                     />
                     <NavItem 
-                        key="link_requests"
+                        key="linkupreqs"
                         Icon={FiExternalLink} 
                         size={26} 
-                        label="LinkUp Req" 
+                        label="LinkUpReqs" 
                         text="text-1xl"
-                        isActive={selectedItem === "Notifications"}
-                        onClick={() => handleNavClick("Notifications")}
+                        isActive={selectedItem === "linkupreqs"}
+                        onClick={() => handleNavClick("linkupreqs")}
                     />
                     <NavItem 
-                        key="create"
+                        key="newlink"
                         Icon={FiPlusSquare} 
                         size={26} 
                         label="New Link" 
                         text="text-1xl"
-                        isActive={selectedItem === "Create"}
-                        onClick={() => handleNavClick("Create")}
+                        isActive={selectedItem === "newlink"}
+                        onClick={() => handleNavClick("newlink")}
                     />
                     <NavItem 
-                        key="profile"
+                        key="linkhub"
                         Icon={HiUserCircle} 
                         size={26} 
                         label="LinkHub" 
                         text="text-1xl"
-                        isActive={selectedItem === "Profile"}
-                        onClick={() => handleNavClick("Profile")}
+                        isActive={selectedItem === "linkhub"}
+                        onClick={() => handleNavClick("linkhub")}
                     />
                 </div>
             </div>
@@ -117,10 +128,10 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                 key="more"
                 Icon={FiMenu} 
                 size={26} 
-                label="LinkUpCenter" 
+                label="more" 
                 text="text-1xl"
-                isActive={selectedItem === "More"}
-                onClick={() => handleNavClick("More")}
+                isActive={selectedItem === "more"}
+                onClick={() => handleNavClick("more")}
             />
         </div>
     )

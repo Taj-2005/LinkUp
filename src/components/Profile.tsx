@@ -2,6 +2,7 @@
 
 import ToggleSwitch from "@/components/ToggleSwitch";
 import ProfileCard from "@/components/ProfileCard";
+import Navbar from "@/components/profile/Navbar";
 
 const user = {
     user_avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000",
@@ -22,6 +23,7 @@ export default function Profile(){
         <div className="flex flex-col gap-8 items-center">
           <ToggleSwitch />
           <ProfileCard user={user} />
+          <Navbar user={user.username}/>
         </div>
         </div>
       </div>
