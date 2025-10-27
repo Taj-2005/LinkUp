@@ -40,9 +40,9 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="w-full  mx-auto bg-right-nav-light dark:bg-right-nav-dark rounded-xl">
+    <div className="w-full  mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl">
       {/* Sticky Search Input */}
-      <div className="sticky top-0 z-10 bg-right-nav-light dark:bg-right-nav-dark border-b border-primary-light/30 dark:border-primary-dark/30 p-5 flex items-center rounded-t-xl">
+      <div className="sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark border-b border-primary-light/30 dark:border-primary-dark/30 p-5 flex items-center rounded-t-xl">
         <input
           ref={inputRef}
           type="search"
@@ -69,6 +69,7 @@ export default function SearchBar() {
                 username={user.username}
                 name={user.name}
                 isFollowing={user.isLinked}
+                user_avatar={user.user_avatar}
               />
             ))
           ) : (

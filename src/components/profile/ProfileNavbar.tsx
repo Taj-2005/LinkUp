@@ -5,7 +5,7 @@ interface NavbarProps {
     user: string;
 }
 
-const Navbar = ({user} : NavbarProps) => {
+const ProfileNavbar = ({user} : NavbarProps) => {
     const [selected , setSelected] = useState('links');
 
     return (
@@ -49,4 +49,4 @@ const Navbar = ({user} : NavbarProps) => {
     )
 }
 
-export default Navbar
+export default ProfileNavbar

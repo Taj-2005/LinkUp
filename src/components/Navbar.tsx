@@ -6,6 +6,18 @@ import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 
+const user = {
+    user_avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000",
+    username: "tajuddinshaik_6",
+    name: "Tajuddin Shaik",
+    location: "Hyderabad, India",
+    bio: "Web Developer | Tech Enthusiast | Lifelong LearnerWeb Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner Web Developer | Tech Enthusiast | Lifelong Learner ",
+    linked_by: 1200,
+    linked_to: 300,
+    posts: 150,
+    isLinked: true
+}
+
 interface NavItemProps {
     Icon: React.ElementType;
     size: number;
@@ -28,10 +40,21 @@ function NavItem({Icon, size, label, text, isActive, onClick} : NavItemProps) {
             }`}
             onClick={onClick}
         >
-            <Icon 
-                className="text-white" 
-                size={size}
-            />
+            {
+            label === "LinkHub" ?
+                <Image
+                src={user.user_avatar}
+                width={26}
+                height={26}
+                alt={`${user.username} avatar`}
+                className="rounded-full object-cover"
+                />
+                :
+                <Icon 
+                    className="text-white" 
+                    size={size}
+                />
+            }
             <div className={`${text} font-montserrat font-bold text-white`}>
                 {label}
             </div>
@@ -42,17 +65,17 @@ function NavItem({Icon, size, label, text, isActive, onClick} : NavItemProps) {
 export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
     const router = useRouter();
 
-    const handleNavClick = (label: string) => {
-        setSelectedItem(label);
-        if (label === "more"){
+    const handleNavClick = (item: string) => {
+        setSelectedItem(item);
+        if (item === "more"){
             router.push(`/`);
             return;
         }
-        if (label === "livelinks"){
+        if (item === "livelinks"){
             router.push(`/`);
             return;
         }
-        router.push(`/${label.toLowerCase()}`);
+        router.push(`/${item.toLowerCase()}`);
     };
 
     return (
@@ -128,7 +151,7 @@ export default function Navbar({selectedItem, setSelectedItem} : NavbarProps) {
                 key="more"
                 Icon={FiMenu} 
                 size={26} 
-                label="more" 
+                label="More" 
                 text="text-1xl"
                 isActive={selectedItem === "more"}
                 onClick={() => handleNavClick("more")}

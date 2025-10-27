@@ -2,16 +2,37 @@
 
 import { HiUserCircle } from "react-icons/hi";
 
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+
 interface UserProps {
     username: string;
     name: string;
     isFollowing: boolean;
+    user_avatar: string;
 }
-export default function User({username, name, isFollowing} : UserProps) {
+export default function User({username, name, isFollowing, user_avatar} : UserProps) {
+    const router = useRouter();
+
+    const handleClick = () => {
+        router.push(`/linkhub/${username}`)
+        return
+    }
     return (
-        <div className="flex justify-between px-8 py-2">
+        <div className="flex justify-between px-8 py-2 hover:bg-right-nav-light dark:hover:bg-gray-700 hover:shadow-sm duration-500 rounded-2xl items-center" onClick={() => handleClick()}>
             <div className="flex gap-2">
-                <HiUserCircle size={50} className="text-black dark:text-white"/>
+                {
+                user_avatar ?
+                    <Image
+                    src={user_avatar}
+                    width={50}
+                    height={50}
+                    alt={`${username} avatar`}
+                    className="rounded-full object-cover"
+                    />
+                    :
+                    <HiUserCircle size={50} className="text-black dark:text-white"/>
+                }
                 <div className="flex flex-col">
                     <div className="font-bold text-black dark:text-white">{username}</div>
                     <div className="text-gray-500">{name}</div>

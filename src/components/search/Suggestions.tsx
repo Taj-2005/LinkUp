@@ -29,6 +29,7 @@ export default function Suggestions(){
                             username={user.username} 
                             name={user.name} 
                             isFollowing={user.isLinked}
+                            user_avatar={user.user_avatar}
                         />
                     ))
                 }

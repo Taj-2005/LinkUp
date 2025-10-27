@@ -6,17 +6,24 @@ import users from "@/constants/User";
 import User from "@/components/messages/User";
 
 interface ChatsProps {
-  setUser: (user: { username: string; name: string; isFollowing: boolean }) => void;
+  setUser: (user: { 
+    username: string; 
+    name: string; 
+    user_avatar: String; 
+    isLinked: boolean }) => void;
 }
 
 export default function Chats({ setUser }: ChatsProps) {
-  const [filteredUsers, setFilteredUsers] = useState<
-    { username: string; name: string; isFollowing: boolean }[]
+  const [filteredUsers, setFilteredUsers] = useState<{ 
+      username: string; 
+      name: string; 
+      user_avatar: string; 
+      isLinked: boolean;
+    }[]
   >([]);
 
   useEffect(() => {
-    // Show users not followed (adjust your logic as needed)
-    const filtered = users.filter((user) => !user.isFollowing);
+    const filtered = users.filter((user) => !user.isLinked);
     setFilteredUsers(filtered);
   }, []);
 
@@ -32,6 +39,7 @@ export default function Chats({ setUser }: ChatsProps) {
           key={user.username}
           username={user.username}
           name={user.name}
+          user_avatar={user.user_avatar}
           onClick={() => setUser(user)}
         />
       ))}

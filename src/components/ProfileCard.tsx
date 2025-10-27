@@ -77,7 +77,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
 
         {/* Action Buttons */}
         <div className="mt-4 flex flex-wrap gap-4">
-          {user.username !== "tajuddinshaik_6" ? (
+          {user.username === "tajuddinshaik_6" ? (
             <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
               Edit Profile
             </button>

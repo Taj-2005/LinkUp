@@ -7,14 +7,15 @@ import SendText from "@/components/messages/SendText";
 interface ChatProps {
   username: string;
   name: string;
-  isFollowing: boolean;
+  user_avatar: string;
+  isLinked: boolean;
 }
 
-export default function Chat({ username, name, isFollowing }: ChatProps) {
+export default function Chat({ username, name, user_avatar, isLinked }: ChatProps) {
   return (
     <div className="flex flex-col h-full">
       <header className="flex items-center justify-between border-b border-primary-light/50 dark:border-primary-dark/50 p-4 sticky top-0 bg-right-nav-light dark:bg-right-nav-dark z-10 shadow-sm">
-        <User username={username} name={name}/>
+        <User username={username} name={name} user_avatar={user_avatar}/>
         <ToggleSwitch />
       </header>
 

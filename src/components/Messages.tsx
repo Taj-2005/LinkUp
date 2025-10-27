@@ -11,14 +11,16 @@ import { FiMessageCircle } from "react-icons/fi";
 interface UserProps {
   username: string;
   name: string;
-  isFollowing: boolean;
+  user_avatar: string;
+  isLinked: boolean;
 }
 
 export default function Messages() {
   const [user, setUser] = useState<UserProps>({
     username: "",
     name: "",
-    isFollowing: false,
+    user_avatar: "",
+    isLinked: false,
   });
 
   return (
@@ -51,7 +53,8 @@ export default function Messages() {
           <Chat
             username={user.username}
             name={user.name}
-            isFollowing={user.isFollowing}
+            isLinked={user.isLinked}
+            user_avatar={user.user_avatar}
           />
         )}
       </div>

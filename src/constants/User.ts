@@ -1,6 +1,6 @@
 const users = [
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john_doe",
+        user_avatar: "https://randomuser.me/api/portraits/men/1.jpg",
         username: "john_doe",
         name: "John Doe",
         location: "San Francisco, CA",
@@ -11,7 +11,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane_smith",
+        user_avatar: "https://randomuser.me/api/portraits/women/2.jpg",
         username: "jane_smith",
         name: "Jane Smith",
         location: "New York, NY",
@@ -22,7 +22,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice_jones",
+        user_avatar: "https://randomuser.me/api/portraits/women/3.jpg",
         username: "alice_jones",
         name: "Alice Jones",
         location: "Austin, TX",
@@ -33,7 +33,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=tech_mike",
+        user_avatar: "https://randomuser.me/api/portraits/men/4.jpg",
         username: "tech_mike",
         name: "Mike Wilson",
         location: "Seattle, WA",
@@ -44,7 +44,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarahb_23",
+        user_avatar: "https://randomuser.me/api/portraits/women/5.jpg",
         username: "sarahb_23",
         name: "Sarah Brown",
         location: "Boston, MA",
@@ -55,7 +55,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=dave_codes",
+        user_avatar: "https://randomuser.me/api/portraits/men/6.jpg",
         username: "dave_codes",
         name: "David Miller",
         location: "Denver, CO",
@@ -66,7 +66,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emma_creates",
+        user_avatar: "https://randomuser.me/api/portraits/women/7.jpg",
         username: "emma_creates",
         name: "Emma Davis",
         location: "Portland, OR",
@@ -77,7 +77,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=chris_g",
+        user_avatar: "https://randomuser.me/api/portraits/men/8.jpg",
         username: "chris_g",
         name: "Chris Garcia",
         location: "Miami, FL",
@@ -88,7 +88,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=lisa_designs",
+        user_avatar: "https://randomuser.me/api/portraits/women/9.jpg",
         username: "lisa_designs",
         name: "Lisa Martinez",
         location: "Los Angeles, CA",
@@ -99,7 +99,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=tom_dev",
+        user_avatar: "https://randomuser.me/api/portraits/men/10.jpg",
         username: "tom_dev",
         name: "Tom Rodriguez",
         location: "Chicago, IL",
@@ -110,7 +110,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=nina_art",
+        user_avatar: "https://randomuser.me/api/portraits/women/11.jpg",
         username: "nina_art",
         name: "Nina Lopez",
         location: "Santa Fe, NM",
@@ -121,7 +121,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alex_photos",
+        user_avatar: "https://randomuser.me/api/portraits/men/12.jpg",
         username: "alex_photos",
         name: "Alex Hernandez",
         location: "San Diego, CA",
@@ -132,7 +132,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sophie_writes",
+        user_avatar: "https://randomuser.me/api/portraits/women/13.jpg",
         username: "sophie_writes",
         name: "Sophie Gonzalez",
         location: "Nashville, TN",
@@ -143,7 +143,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ryan_fitness",
+        user_avatar: "https://randomuser.me/api/portraits/men/14.jpg",
         username: "ryan_fitness",
         name: "Ryan Perez",
         location: "Phoenix, AZ",
@@ -154,7 +154,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=olivia_music",
+        user_avatar: "https://randomuser.me/api/portraits/women/15.jpg",
         username: "olivia_music",
         name: "Olivia Taylor",
         location: "Nashville, TN",
@@ -165,7 +165,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=kevin_tech",
+        user_avatar: "https://randomuser.me/api/portraits/men/16.jpg",
         username: "kevin_tech",
         name: "Kevin Anderson",
         location: "San Jose, CA",
@@ -176,7 +176,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mia_travels",
+        user_avatar: "https://randomuser.me/api/portraits/women/17.jpg",
         username: "mia_travels",
         name: "Mia Thomas",
         location: "Honolulu, HI",
@@ -187,7 +187,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=dan_gamer",
+        user_avatar: "https://randomuser.me/api/portraits/men/18.jpg",
         username: "dan_gamer",
         name: "Daniel Jackson",
         location: "Atlanta, GA",
@@ -198,7 +198,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=amy_bakes",
+        user_avatar: "https://randomuser.me/api/portraits/women/19.jpg",
         username: "amy_bakes",
         name: "Amy White",
         location: "Portland, ME",
@@ -209,7 +209,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=brian_sports",
+        user_avatar: "https://randomuser.me/api/portraits/men/20.jpg",
         username: "brian_sports",
         name: "Brian Harris",
         location: "Dallas, TX",
@@ -220,7 +220,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jess_fashion",
+        user_avatar: "https://randomuser.me/api/portraits/women/21.jpg",
         username: "jess_fashion",
         name: "Jessica Martin",
         location: "New York, NY",
@@ -231,7 +231,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=mark_outdoors",
+        user_avatar: "https://randomuser.me/api/portraits/men/22.jpg",
         username: "mark_outdoors",
         name: "Mark Thompson",
         location: "Boulder, CO",
@@ -242,7 +242,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=laura_yoga",
+        user_avatar: "https://randomuser.me/api/portraits/women/23.jpg",
         username: "laura_yoga",
         name: "Laura Lee",
         location: "San Francisco, CA",
@@ -253,7 +253,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=pete_runner",
+        user_avatar: "https://randomuser.me/api/portraits/men/24.jpg",
         username: "pete_runner",
         name: "Peter Walker",
         location: "Boston, MA",
@@ -264,7 +264,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=rachel_chef",
+        user_avatar: "https://randomuser.me/api/portraits/women/25.jpg",
         username: "rachel_chef",
         name: "Rachel Hall",
         location: "New Orleans, LA",
@@ -275,7 +275,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=steve_painter",
+        user_avatar: "https://randomuser.me/api/portraits/men/26.jpg",
         username: "steve_painter",
         name: "Steven Allen",
         location: "Taos, NM",
@@ -286,7 +286,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=kate_blogger",
+        user_avatar: "https://randomuser.me/api/portraits/women/27.jpg",
         username: "kate_blogger",
         name: "Kate Young",
         location: "Seattle, WA",
@@ -297,7 +297,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jason_vlogger",
+        user_avatar: "https://randomuser.me/api/portraits/men/28.jpg",
         username: "jason_vlogger",
         name: "Jason King",
         location: "Las Vegas, NV",
@@ -308,7 +308,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=maria_dancer",
+        user_avatar: "https://randomuser.me/api/portraits/women/29.jpg",
         username: "maria_dancer",
         name: "Maria Wright",
         location: "Miami, FL",
@@ -319,7 +319,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=paul_musician",
+        user_avatar: "https://randomuser.me/api/portraits/men/30.jpg",
         username: "paul_musician",
         name: "Paul Scott",
         location: "Austin, TX",
@@ -330,7 +330,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=hannah_reader",
+        user_avatar: "https://randomuser.me/api/portraits/women/31.jpg",
         username: "hannah_reader",
         name: "Hannah Green",
         location: "Portland, OR",
@@ -341,7 +341,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=eric_cyclist",
+        user_avatar: "https://randomuser.me/api/portraits/men/32.jpg",
         username: "eric_cyclist",
         name: "Eric Adams",
         location: "San Francisco, CA",
@@ -352,7 +352,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=julia_artist",
+        user_avatar: "https://randomuser.me/api/portraits/women/33.jpg",
         username: "julia_artist",
         name: "Julia Baker",
         location: "Brooklyn, NY",
@@ -363,7 +363,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=adam_coder",
+        user_avatar: "https://randomuser.me/api/portraits/men/34.jpg",
         username: "adam_coder",
         name: "Adam Nelson",
         location: "Palo Alto, CA",
@@ -374,7 +374,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=lily_photographer",
+        user_avatar: "https://randomuser.me/api/portraits/women/35.jpg",
         username: "lily_photographer",
         name: "Lily Carter",
         location: "Charleston, SC",
@@ -385,7 +385,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sam_explorer",
+        user_avatar: "https://randomuser.me/api/portraits/men/36.jpg",
         username: "sam_explorer",
         name: "Sam Mitchell",
         location: "Anchorage, AK",
@@ -396,7 +396,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=grace_writer",
+        user_avatar: "https://randomuser.me/api/portraits/women/37.jpg",
         username: "grace_writer",
         name: "Grace Roberts",
         location: "Chicago, IL",
@@ -407,7 +407,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=nick_streamer",
+        user_avatar: "https://randomuser.me/api/portraits/men/38.jpg",
         username: "nick_streamer",
         name: "Nick Phillips",
         location: "Los Angeles, CA",
@@ -418,7 +418,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bella_stylist",
+        user_avatar: "https://randomuser.me/api/portraits/women/39.jpg",
         username: "bella_stylist",
         name: "Bella Campbell",
         location: "New York, NY",
@@ -429,7 +429,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jacob_gamer_pro",
+        user_avatar: "https://randomuser.me/api/portraits/men/40.jpg",
         username: "jacob_gamer_pro",
         name: "Jacob Parker",
         location: "Seattle, WA",
@@ -440,7 +440,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=zoe_crafts",
+        user_avatar: "https://randomuser.me/api/portraits/women/41.jpg",
         username: "zoe_crafts",
         name: "Zoe Evans",
         location: "Asheville, NC",
@@ -451,7 +451,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=luke_foodie",
+        user_avatar: "https://randomuser.me/api/portraits/men/42.jpg",
         username: "luke_foodie",
         name: "Luke Turner",
         location: "San Francisco, CA",
@@ -462,7 +462,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=chloe_makeup",
+        user_avatar: "https://randomuser.me/api/portraits/women/43.jpg",
         username: "chloe_makeup",
         name: "Chloe Collins",
         location: "Los Angeles, CA",
@@ -473,7 +473,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=max_adventurer",
+        user_avatar: "https://randomuser.me/api/portraits/men/44.jpg",
         username: "max_adventurer",
         name: "Max Stewart",
         location: "Denver, CO",
@@ -484,7 +484,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=isla_bookworm",
+        user_avatar: "https://randomuser.me/api/portraits/women/45.jpg",
         username: "isla_bookworm",
         name: "Isla Morris",
         location: "Boston, MA",
@@ -495,7 +495,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=owen_filmmaker",
+        user_avatar: "https://randomuser.me/api/portraits/men/46.jpg",
         username: "owen_filmmaker",
         name: "Owen Rogers",
         location: "Austin, TX",
@@ -506,7 +506,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ava_wellness",
+        user_avatar: "https://randomuser.me/api/portraits/women/47.jpg",
         username: "ava_wellness",
         name: "Ava Reed",
         location: "San Diego, CA",
@@ -517,7 +517,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ethan_skater",
+        user_avatar: "https://randomuser.me/api/portraits/men/48.jpg",
         username: "ethan_skater",
         name: "Ethan Cook",
         location: "Venice Beach, CA",
@@ -528,7 +528,7 @@ const users = [
         isLinked: false
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ruby_singer",
+        user_avatar: "https://randomuser.me/api/portraits/women/49.jpg",
         username: "ruby_singer",
         name: "Ruby Morgan",
         location: "Nashville, TN",
@@ -539,7 +539,7 @@ const users = [
         isLinked: true
     },
     {
-        user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=liam_architect",
+        user_avatar: "https://randomuser.me/api/portraits/men/50.jpg",
         username: "liam_architect",
         name: "Liam Bell",
         location: "Chicago, IL",
