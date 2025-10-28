@@ -9,7 +9,7 @@ interface ChatsProps {
   setUser: (user: { 
     username: string; 
     name: string; 
-    user_avatar: String; 
+    user_avatar: string; 
     isLinked: boolean }) => void;
 }
 
