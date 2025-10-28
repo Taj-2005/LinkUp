@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/search/Profile";
 import SearchBar from "@/components/search/SearchBar";
