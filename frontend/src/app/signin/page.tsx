@@ -164,7 +164,7 @@ export default function SignInPage() {
 
           {/* Sign Up Link */}
           <p className={`text-center text-sm ${theme.textSecondary} pt-4`}>
-            Don't have an account?{" "}
+            {`Don't have an account?`}
             <a href="/signup" className={`font-semibold ${theme.link} transition-colors`}>
               Sign up
             </a>

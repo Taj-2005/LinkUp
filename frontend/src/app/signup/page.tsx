@@ -72,9 +72,10 @@ export default function SignUpPage() {
       toast.dismiss();
       toast.success("Account created 🎉");
       router.push("/signin");
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Signup failed";
       toast.dismiss();
-      toast.error(err.message);
+      toast.error(message);
     }
   };
 
