@@ -92,7 +92,7 @@ export async function signin(req: Request, res: Response) {
     await user.save();
 
     res.cookie("jid", refreshToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
@@ -138,7 +138,7 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     await user.save();
 
     res.cookie("jid", newRefreshToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
