@@ -2,32 +2,24 @@
 
 import Image from "next/image";
 import { FiMapPin } from "react-icons/fi";
+import { IUserClient } from "@/types/user";
 
 interface ProfileCardProps {
-  user: {
-    user_avatar: string;
-    username: string;
-    name: string;
-    location: string;
-    bio: string;
-    links?: number;
-    linked_by: number;
-    linked_to: number;
-    isLinked?: boolean;
-  };
+  user: IUserClient;
 }
+
 
 export default function ProfileCard({ user }: ProfileCardProps) {
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       {/* Avatar */}
       <div className="flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark">
-        <Image
-          src={user.user_avatar}
-          alt={`${user.name} avatar`}
-          fill
-          className="object-cover"
-        />
+      <Image
+        src={user.user_avatar ?? "/profile.png"}
+        alt={`${user.name} avatar`}
+        fill
+        className="object-cover"
+      />
       </div>
 
       {/* User Info */}

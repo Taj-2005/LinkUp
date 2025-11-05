@@ -15,8 +15,7 @@ export default function SignInPage() {
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter()
 
-  const handleSignin = async (e: any) => {
-    e.preventDefault();
+  const handleSignin = async () => {
     try {
       toast.loading("Signing in...");
       await signin(emailOrUsername, password);

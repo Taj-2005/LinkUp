@@ -7,6 +7,7 @@ import ToggleSwitch from "@/components/ToggleSwitch";
 import ProfileCard from "@/components/ProfileCard";
 import ProfileNavbar from "@/components/profile/ProfileNavbar";
 import Navbar from "@/components/Navbar";
+import { IUserClient } from "@/types/user";
 
 import users from "@/constants/User";
 
@@ -14,7 +15,6 @@ export default function UserProfile() {
   const params = useParams();
   const username = params.username as string;
   const [selectedItem, setSelectedItem] = useState(`/linkhub/${username}`);
-
   const user = users.find((u) => u.username === username);
 
   if (!user) return <div className="text-center mt-10">User not found</div>;
@@ -26,7 +26,7 @@ export default function UserProfile() {
         <div className="w-full">
           <div className="flex flex-col gap-8 items-center">
             <ToggleSwitch />
-            <ProfileCard user={user} />
+            <ProfileCard user={user as IUserClient} />
             <ProfileNavbar user={user.username}/>
           </div>
         </div>

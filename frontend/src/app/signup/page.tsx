@@ -74,7 +74,7 @@ export default function SignUpPage() {
       router.push("/signin");
     } catch (err: any) {
       toast.dismiss();
-      toast.error(err.message || "Signup failed");
+      toast.error(err.message);
     }
   };
 

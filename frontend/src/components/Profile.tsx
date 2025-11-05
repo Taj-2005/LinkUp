@@ -6,8 +6,22 @@ import ProfileCard from "@/components/ProfileCard";
 import Navbar from "@/components/profile/ProfileNavbar";
 import { getCurrentUser } from "@/utils/api";
 
+
+interface ProfileCardProps {
+    user_avatar: string;
+    username: string;
+    email: string;
+    name: string;
+    location: string;
+    bio: string;
+    links?: number;
+    linked_by: number;
+    linked_to: number;
+    isLinked?: boolean;
+}
+
 export default function Profile() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState< ProfileCardProps| null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -5,10 +5,11 @@ const users = [
         name: "John Doe",
         location: "San Francisco, CA",
         bio: "Software engineer passionate about clean code and open source",
-        posts: 127,
+        links: 127,
         linked_by: 342,
         linked_to: 198,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/2.jpg",
@@ -16,10 +17,11 @@ const users = [
         name: "Jane Smith",
         location: "New York, NY",
         bio: "Designer | Coffee enthusiast | Creating beautiful experiences",
-        posts: 89,
+        links: 89,
         linked_by: 521,
         linked_to: 287,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/3.jpg",
@@ -27,10 +29,11 @@ const users = [
         name: "Alice Jones",
         location: "Austin, TX",
         bio: "Product manager building the future of tech",
-        posts: 156,
+        links: 156,
         linked_by: 289,
         linked_to: 421,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/4.jpg",
@@ -38,10 +41,11 @@ const users = [
         name: "Mike Wilson",
         location: "Seattle, WA",
         bio: "Full-stack developer | Tech blogger | Always learning",
-        posts: 234,
+        links: 234,
         linked_by: 678,
         linked_to: 445,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/5.jpg",
@@ -49,10 +53,11 @@ const users = [
         name: "Sarah Brown",
         location: "Boston, MA",
         bio: "Data scientist exploring the world through numbers",
-        posts: 98,
+        links: 98,
         linked_by: 412,
         linked_to: 356,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/6.jpg",
@@ -60,10 +65,11 @@ const users = [
         name: "David Miller",
         location: "Denver, CO",
         bio: "Coding by day, gaming by night 🎮",
-        posts: 176,
+        links: 176,
         linked_by: 298,
         linked_to: 512,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/7.jpg",
@@ -71,10 +77,11 @@ const users = [
         name: "Emma Davis",
         location: "Portland, OR",
         bio: "Creative director | Art lover | Storyteller",
-        posts: 312,
+        links: 312,
         linked_by: 892,
         linked_to: 634,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/8.jpg",
@@ -82,10 +89,11 @@ const users = [
         name: "Chris Garcia",
         location: "Miami, FL",
         bio: "Entrepreneur | Startup enthusiast | Making ideas happen",
-        posts: 145,
+        links: 145,
         linked_by: 567,
         linked_to: 389,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/9.jpg",
@@ -93,10 +101,11 @@ const users = [
         name: "Lisa Martinez",
         location: "Los Angeles, CA",
         bio: "UI/UX designer crafting delightful digital experiences",
-        posts: 289,
+        links: 289,
         linked_by: 743,
         linked_to: 521,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/10.jpg",
@@ -104,10 +113,11 @@ const users = [
         name: "Tom Rodriguez",
         location: "Chicago, IL",
         bio: "Backend developer | API architect | Problem solver",
-        posts: 198,
+        links: 198,
         linked_by: 456,
         linked_to: 612,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/11.jpg",
@@ -115,10 +125,11 @@ const users = [
         name: "Nina Lopez",
         location: "Santa Fe, NM",
         bio: "Digital artist painting dreams into reality",
-        posts: 267,
+        links: 267,
         linked_by: 834,
         linked_to: 423,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/12.jpg",
@@ -126,10 +137,11 @@ const users = [
         name: "Alex Hernandez",
         location: "San Diego, CA",
         bio: "Travel photographer capturing moments around the globe 📸",
-        posts: 423,
+        links: 423,
         linked_by: 1205,
         linked_to: 789,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/13.jpg",
@@ -137,10 +149,11 @@ const users = [
         name: "Sophie Gonzalez",
         location: "Nashville, TN",
         bio: "Content writer | Words are my craft",
-        posts: 156,
+        links: 156,
         linked_by: 378,
         linked_to: 445,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/14.jpg",
@@ -148,10 +161,11 @@ const users = [
         name: "Ryan Perez",
         location: "Phoenix, AZ",
         bio: "Personal trainer helping you reach your fitness goals 💪",
-        posts: 312,
+        links: 312,
         linked_by: 956,
         linked_to: 567,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/15.jpg",
@@ -159,10 +173,11 @@ const users = [
         name: "Olivia Taylor",
         location: "Nashville, TN",
         bio: "Singer-songwriter | Music is life 🎵",
-        posts: 189,
+        links: 189,
         linked_by: 623,
         linked_to: 412,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/16.jpg",
@@ -170,10 +185,11 @@ const users = [
         name: "Kevin Anderson",
         location: "San Jose, CA",
         bio: "Tech reviewer | Gadget geek | Early adopter",
-        posts: 245,
+        links: 245,
         linked_by: 789,
         linked_to: 534,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/17.jpg",
@@ -181,10 +197,11 @@ const users = [
         name: "Mia Thomas",
         location: "Honolulu, HI",
         bio: "Travel blogger exploring hidden gems ✈️",
-        posts: 378,
+        links: 378,
         linked_by: 1123,
         linked_to: 892,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/18.jpg",
@@ -192,10 +209,11 @@ const users = [
         name: "Daniel Jackson",
         location: "Atlanta, GA",
         bio: "Pro gamer | Streaming daily | Join the squad",
-        posts: 567,
+        links: 567,
         linked_by: 2345,
         linked_to: 1234,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/19.jpg",
@@ -203,10 +221,11 @@ const users = [
         name: "Amy White",
         location: "Portland, ME",
         bio: "Baker | Pastry chef | Spreading sweetness one dessert at a time 🧁",
-        posts: 289,
+        links: 289,
         linked_by: 867,
         linked_to: 445,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/20.jpg",
@@ -214,10 +233,11 @@ const users = [
         name: "Brian Harris",
         location: "Dallas, TX",
         bio: "Sports analyst | Fantasy football expert",
-        posts: 198,
+        links: 198,
         linked_by: 534,
         linked_to: 678,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/21.jpg",
@@ -225,10 +245,11 @@ const users = [
         name: "Jessica Martin",
         location: "New York, NY",
         bio: "Fashion blogger | Style is a way to say who you are 👗",
-        posts: 412,
+        links: 412,
         linked_by: 1456,
         linked_to: 823,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/22.jpg",
@@ -236,10 +257,11 @@ const users = [
         name: "Mark Thompson",
         location: "Boulder, CO",
         bio: "Outdoor enthusiast | Hiking & camping adventures 🏔️",
-        posts: 345,
+        links: 345,
         linked_by: 923,
         linked_to: 712,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/23.jpg",
@@ -247,10 +269,11 @@ const users = [
         name: "Laura Lee",
         location: "San Francisco, CA",
         bio: "Yoga instructor | Mindfulness coach | Finding balance 🧘‍♀️",
-        posts: 234,
+        links: 234,
         linked_by: 712,
         linked_to: 489,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/24.jpg",
@@ -258,10 +281,11 @@ const users = [
         name: "Peter Walker",
         location: "Boston, MA",
         bio: "Marathon runner | Running coach | One mile at a time 🏃",
-        posts: 276,
+        links: 276,
         linked_by: 645,
         linked_to: 534,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/25.jpg",
@@ -269,10 +293,11 @@ const users = [
         name: "Rachel Hall",
         location: "New Orleans, LA",
         bio: "Chef | Food lover | Cooking with passion 🍳",
-        posts: 389,
+        links: 389,
         linked_by: 1089,
         linked_to: 756,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/26.jpg",
@@ -280,10 +305,11 @@ const users = [
         name: "Steven Allen",
         location: "Taos, NM",
         bio: "Abstract painter | Colors speak louder than words 🎨",
-        posts: 167,
+        links: 167,
         linked_by: 489,
         linked_to: 312,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/27.jpg",
@@ -291,10 +317,11 @@ const users = [
         name: "Kate Young",
         location: "Seattle, WA",
         bio: "Lifestyle blogger | Mom of two | Sharing my journey",
-        posts: 423,
+        links: 423,
         linked_by: 1234,
         linked_to: 867,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/28.jpg",
@@ -302,10 +329,11 @@ const users = [
         name: "Jason King",
         location: "Las Vegas, NV",
         bio: "Daily vlogger | Living life unfiltered 🎥",
-        posts: 612,
+        links: 612,
         linked_by: 2134,
         linked_to: 1456,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/29.jpg",
@@ -313,10 +341,11 @@ const users = [
         name: "Maria Wright",
         location: "Miami, FL",
         bio: "Professional dancer | Dance is my language 💃",
-        posts: 298,
+        links: 298,
         linked_by: 823,
         linked_to: 612,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/30.jpg",
@@ -324,10 +353,11 @@ const users = [
         name: "Paul Scott",
         location: "Austin, TX",
         bio: "Guitarist | Session musician | Making music magic happen 🎸",
-        posts: 245,
+        links: 245,
         linked_by: 678,
         linked_to: 534,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/31.jpg",
@@ -335,10 +365,11 @@ const users = [
         name: "Hannah Green",
         location: "Portland, OR",
         bio: "Bookworm | Literary critic | Always reading 📚",
-        posts: 189,
+        links: 189,
         linked_by: 456,
         linked_to: 389,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/32.jpg",
@@ -346,10 +377,11 @@ const users = [
         name: "Eric Adams",
         location: "San Francisco, CA",
         bio: "Cyclist | Road racing enthusiast | Two wheels, endless roads 🚴",
-        posts: 334,
+        links: 334,
         linked_by: 789,
         linked_to: 645,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/33.jpg",
@@ -357,10 +389,11 @@ const users = [
         name: "Julia Baker",
         location: "Brooklyn, NY",
         bio: "Contemporary artist | Gallery exhibitions | Art is freedom",
-        posts: 223,
+        links: 223,
         linked_by: 612,
         linked_to: 445,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/34.jpg",
@@ -368,10 +401,11 @@ const users = [
         name: "Adam Nelson",
         location: "Palo Alto, CA",
         bio: "Software architect | Open source contributor | Building the future",
-        posts: 367,
+        links: 367,
         linked_by: 923,
         linked_to: 712,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/35.jpg",
@@ -379,10 +413,11 @@ const users = [
         name: "Lily Carter",
         location: "Charleston, SC",
         bio: "Portrait photographer | Capturing authentic moments 📷",
-        posts: 278,
+        links: 278,
         linked_by: 734,
         linked_to: 523,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/36.jpg",
@@ -390,10 +425,11 @@ const users = [
         name: "Sam Mitchell",
         location: "Anchorage, AK",
         bio: "Adventure seeker | Exploring the unexplored 🗺️",
-        posts: 401,
+        links: 401,
         linked_by: 1045,
         linked_to: 878,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/37.jpg",
@@ -401,10 +437,11 @@ const users = [
         name: "Grace Roberts",
         location: "Chicago, IL",
         bio: "Fiction writer | Published author | Stories are my passion ✍️",
-        posts: 312,
+        links: 312,
         linked_by: 867,
         linked_to: 612,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/38.jpg",
@@ -412,10 +449,11 @@ const users = [
         name: "Nick Phillips",
         location: "Los Angeles, CA",
         bio: "Content creator | Streaming live daily | Join the community",
-        posts: 534,
+        links: 534,
         linked_by: 1876,
         linked_to: 1234,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/39.jpg",
@@ -423,10 +461,11 @@ const users = [
         name: "Bella Campbell",
         location: "New York, NY",
         bio: "Personal stylist | Fashion consultant | Style transformation expert",
-        posts: 289,
+        links: 289,
         linked_by: 945,
         linked_to: 678,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/40.jpg",
@@ -434,10 +473,11 @@ const users = [
         name: "Jacob Parker",
         location: "Seattle, WA",
         bio: "Esports player | Tournament champion | Game on! 🎮",
-        posts: 678,
+        links: 678,
         linked_by: 2567,
         linked_to: 1789,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/41.jpg",
@@ -445,10 +485,11 @@ const users = [
         name: "Zoe Evans",
         location: "Asheville, NC",
         bio: "DIY crafter | Handmade creations | Making the world prettier ✂️",
-        posts: 345,
+        links: 345,
         linked_by: 1012,
         linked_to: 756,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/42.jpg",
@@ -456,10 +497,11 @@ const users = [
         name: "Luke Turner",
         location: "San Francisco, CA",
         bio: "Food blogger | Restaurant critic | Eating my way through the city 🍕",
-        posts: 456,
+        links: 456,
         linked_by: 1345,
         linked_to: 923,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/43.jpg",
@@ -467,10 +509,11 @@ const users = [
         name: "Chloe Collins",
         location: "Los Angeles, CA",
         bio: "Makeup artist | Beauty influencer | Enhancing natural beauty 💄",
-        posts: 523,
+        links: 523,
         linked_by: 1678,
         linked_to: 1123,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/44.jpg",
@@ -478,10 +521,11 @@ const users = [
         name: "Max Stewart",
         location: "Denver, CO",
         bio: "Rock climber | Adventure photographer | Living on the edge 🧗",
-        posts: 389,
+        links: 389,
         linked_by: 1089,
         linked_to: 834,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/45.jpg",
@@ -489,10 +533,11 @@ const users = [
         name: "Isla Morris",
         location: "Boston, MA",
         bio: "Book reviewer | Library advocate | Reading is my superpower 📖",
-        posts: 267,
+        links: 267,
         linked_by: 623,
         linked_to: 489,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/46.jpg",
@@ -500,10 +545,11 @@ const users = [
         name: "Owen Rogers",
         location: "Austin, TX",
         bio: "Independent filmmaker | Telling stories through cinema 🎬",
-        posts: 198,
+        links: 198,
         linked_by: 567,
         linked_to: 423,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/47.jpg",
@@ -511,10 +557,11 @@ const users = [
         name: "Ava Reed",
         location: "San Diego, CA",
         bio: "Wellness coach | Holistic health advocate | Mind, body, spirit 🌿",
-        posts: 312,
+        links: 312,
         linked_by: 892,
         linked_to: 645,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/48.jpg",
@@ -522,10 +569,11 @@ const users = [
         name: "Ethan Cook",
         location: "Venice Beach, CA",
         bio: "Skateboarder | Street style | Shredding daily 🛹",
-        posts: 423,
+        links: 423,
         linked_by: 1234,
         linked_to: 978,
-        isLinked: false
+        isLinked: false,
+        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/women/49.jpg",
@@ -533,10 +581,11 @@ const users = [
         name: "Ruby Morgan",
         location: "Nashville, TN",
         bio: "Jazz vocalist | Live performer | Music is my soul 🎤",
-        posts: 234,
+        links: 234,
         linked_by: 745,
         linked_to: 534,
         isLinked: true
+,        email: "random.user@gmail.com"
     },
     {
         user_avatar: "https://randomuser.me/api/portraits/men/50.jpg",
@@ -544,7 +593,7 @@ const users = [
         name: "Liam Bell",
         location: "Chicago, IL",
         bio: "Architect | Urban designer | Building dreams into reality 🏗️",
-        posts: 189,
+        links: 189,
         linked_by: 512,
         linked_to: 378,
         isLinked: false
