@@ -1,0 +1,189 @@
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+dotenv.config();
+import { User } from "../models/User";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/tokens";
+
+const SALT_ROUNDS: number = parseInt(process.env.BCRYPT_SALT_ROUNDS!);
+
+// ✅ Signup now automatically logs in user
+export async function signup(req: Request, res: Response) {
+  try {
+    const { username, name, email, password, location, bio } = req.body;
+
+    if (!username || !name || !email || !password) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // check existing user
+    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    if (existing) return res.status(409).json({ error: "User already exists" });
+
+    // hash password
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const user = new User({
+      username,
+      name,
+      email,
+      password: hashed,
+      location,
+      bio,
+    });
+
+    await user.save();
+
+    // ✅ AUTO-LOGIN after signup
+    const payload = { userId: user._id, username: user.username };
+    const accessToken = signAccessToken(payload);          // NEW
+    const refreshToken = signRefreshToken(payload);        // NEW
+
+    user.refreshToken = refreshToken;                      // NEW
+    await user.save();                                     // NEW
+
+    // ✅ Set refresh token cookie (HTTP ONLY)
+    res.cookie("jid", refreshToken, {
+      httpOnly: true,
+      secure: false,         
+      sameSite: "lax",
+      path: "/",
+    });
+
+    // ✅ Set access token cookie (READABLE by middleware)
+    // ⚠️ not httpOnly — Next.js middleware needs to read it
+    res.cookie("accessToken", accessToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return res.status(201).json({
+      message: "Signup successful",
+      user: { id: user._id, username: user.username, email: user.email },
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+// ✅ Signin sets cookies too (unchanged logic but cookie added)
+export async function signin(req: Request, res: Response) {
+  try {
+    const { emailOrUsername, password } = req.body;
+
+    if (!emailOrUsername || !password) {
+      return res.status(400).json({ error: "Missing credentials" });
+    }
+
+    const user = await User.findOne({
+      $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    });
+
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+
+    const payload = { userId: user._id, username: user.username };
+    const accessToken = signAccessToken(payload);
+    const refreshToken = signRefreshToken(payload);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Refresh token cookie
+    res.cookie("jid", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    // ✅ NEW — accessToken cookie for Next.js middleware
+    res.cookie("accessToken", accessToken, {
+      httpOnly: false, 
+      secure: false, 
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return res.json({
+      user: { id: user._id, email: user.email, username: user.username },
+    });
+
+  } catch {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function refreshTokenHandler(req: Request, res: Response) {
+  try {
+    const token = req.cookies.jid || req.body?.refreshToken || req.headers["x-refresh-token"];
+    if (!token) return res.status(401).json({ error: "No refresh token provided" });
+
+    let payload: any;
+    try {
+      payload = verifyRefreshToken(token);
+    } catch {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const user = await User.findById(payload.userId);
+    if (!user || user.refreshToken !== token) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const newAccessToken = signAccessToken({ userId: user._id, username: user.username });
+    const newRefreshToken = signRefreshToken({ userId: user._id, username: user.username });
+
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.cookie("jid", newRefreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    // ✅ Set NEW access token cookie
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    return res.json({ accessToken: newAccessToken });
+
+  } catch {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function signout(req: Request, res: Response) {
+  try {
+    const token = req.cookies?.jid;
+
+    if (token) {
+      const user = await User.findOne({ refreshToken: token });
+      if (user) {
+        user.refreshToken = undefined as any;
+        await user.save();
+      }
+    }
+
+    // ✅ clear both cookies
+    res.clearCookie("jid", { path: "/" });
+    res.clearCookie("accessToken", { path: "/" });
+
+    return res.json({ ok: true });
+
+  } catch {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
