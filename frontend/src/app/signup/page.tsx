@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Moon, Sun, Check, ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Moon, Sun, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {signup} from "@/utils/api"
 import Image from "next/image";
@@ -394,7 +394,7 @@ export default function SignUpPage() {
                 >
                   <Check className="w-5 h-5" />
                   Create Account
-                </button>
+                </button> 
               </>
             )}
           </div>

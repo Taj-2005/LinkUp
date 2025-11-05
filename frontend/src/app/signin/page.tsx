@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Moon, Sun, LogIn, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Moon, Sun, LogIn } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";

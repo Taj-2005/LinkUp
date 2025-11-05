@@ -16,7 +16,7 @@ export default function Profile() {
         const res = await getCurrentUser();
         setUser(res.user);
       } catch (err) {
-        console.error("Not logged in");
+        console.error("Not logged in",err);
         setUser(null);
       } finally {
         setLoading(false);
