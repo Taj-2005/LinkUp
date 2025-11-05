@@ -7,7 +7,6 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/
 
 const SALT_ROUNDS: number = parseInt(process.env.BCRYPT_SALT_ROUNDS!);
 
-// ✅ Signup now automatically logs in user
 export async function signup(req: Request, res: Response) {
   try {
     const { username, name, email, password, location, bio } = req.body;
@@ -34,15 +33,13 @@ export async function signup(req: Request, res: Response) {
 
     await user.save();
 
-    // ✅ AUTO-LOGIN after signup
     const payload = { userId: user._id, username: user.username };
-    const accessToken = signAccessToken(payload);          // NEW
-    const refreshToken = signRefreshToken(payload);        // NEW
+    const accessToken = signAccessToken(payload);          
+    const refreshToken = signRefreshToken(payload);
 
-    user.refreshToken = refreshToken;                      // NEW
-    await user.save();                                     // NEW
+    user.refreshToken = refreshToken;
+    await user.save();
 
-    // ✅ Set refresh token cookie (HTTP ONLY)
     res.cookie("jid", refreshToken, {
       httpOnly: true,
       secure: false,         
@@ -50,8 +47,6 @@ export async function signup(req: Request, res: Response) {
       path: "/",
     });
 
-    // ✅ Set access token cookie (READABLE by middleware)
-    // ⚠️ not httpOnly — Next.js middleware needs to read it
     res.cookie("accessToken", accessToken, {
       httpOnly: false,
       secure: false,
@@ -70,7 +65,6 @@ export async function signup(req: Request, res: Response) {
   }
 }
 
-// ✅ Signin sets cookies too (unchanged logic but cookie added)
 export async function signin(req: Request, res: Response) {
   try {
     const { emailOrUsername, password } = req.body;
@@ -95,7 +89,6 @@ export async function signin(req: Request, res: Response) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Refresh token cookie
     res.cookie("jid", refreshToken, {
       httpOnly: true,
       secure: false,
@@ -103,7 +96,6 @@ export async function signin(req: Request, res: Response) {
       path: "/",
     });
 
-    // ✅ NEW — accessToken cookie for Next.js middleware
     res.cookie("accessToken", accessToken, {
       httpOnly: false, 
       secure: false, 
@@ -150,7 +142,6 @@ export async function refreshTokenHandler(req: Request, res: Response) {
       path: "/",
     });
 
-    // ✅ Set NEW access token cookie
     res.cookie("accessToken", newAccessToken, {
       httpOnly: false,
       secure: false,
@@ -177,7 +168,6 @@ export async function signout(req: Request, res: Response) {
       }
     }
 
-    // ✅ clear both cookies
     res.clearCookie("jid", { path: "/" });
     res.clearCookie("accessToken", { path: "/" });
 
