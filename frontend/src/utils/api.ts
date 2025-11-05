@@ -13,7 +13,17 @@ export async function signin(emailOrUsername: string, password: string) {
   return await res.json();
 }
 
-export async function signup(data: Object) {
+interface SignupData {
+  username: string;
+  name: string;
+  email: string;
+  password: string;
+  location?: string;
+  bio?: string;
+}
+
+
+export async function signup(data: SignupData) {
   const res = await fetch(`${API_URL}/api/auth/signup`, {
     method: "POST",
     credentials: "include",
