@@ -1,3 +1,5 @@
+const isProd = process.env.NODE_ENV === "production";
+
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
@@ -42,15 +44,15 @@ export async function signup(req: Request, res: Response) {
 
     res.cookie("jid", refreshToken, {
       httpOnly: true,
-      secure: false,         
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: false,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 
@@ -90,16 +92,16 @@ export async function signin(req: Request, res: Response) {
     await user.save();
 
     res.cookie("jid", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: false, 
-      secure: false, 
-      sameSite: "lax",
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 
@@ -136,16 +138,16 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     await user.save();
 
     res.cookie("jid", newRefreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: false,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
     });
 

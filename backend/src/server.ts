@@ -18,24 +18,17 @@ app.use(cookieParser());
 
 const allowedOrigins = ["http://localhost:3000", /\.vercel\.app$/];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (/\.vercel\.app$/.test(origin) || origin === "http://localhost:3000") {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
-      if (
-        allowedOrigins.some((pattern) =>
-          pattern instanceof RegExp ? pattern.test(origin) : pattern === origin
-        )
-      ) {
-        return callback(null, true);
-      }
-
-      callback(new Error("Not allowed by CORS: " + origin));
-    },
-    credentials: true,
-  })
-);
 
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);

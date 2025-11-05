@@ -62,13 +62,11 @@ export default function SignInPage() {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}>
-      {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-20 left-10 w-72 h-72 ${darkMode ? 'bg-violet-500/10' : 'bg-violet-300/30'} rounded-full blur-3xl`} />
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      {/* Theme Toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
@@ -82,7 +80,6 @@ export default function SignInPage() {
       </button>
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10`}>
-        {/* Header Section */}
         <div className="p-8 pb-6 text-center">
           <div className={`inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-4 relative`}>
               <Image
@@ -97,9 +94,7 @@ export default function SignInPage() {
           <p className={`${theme.textSecondary} text-sm`}>Sign in to continue your journey</p>
         </div>
 
-        {/* Form Section */}
         <div className="px-8 pb-8 space-y-5">
-          {/* Email or Username Field */}
           <div>
             <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
               Email or Username
@@ -118,7 +113,6 @@ export default function SignInPage() {
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
               Password
@@ -146,14 +140,12 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Forgot Password Link */}
           <div className="text-right">
             <div className={`text-sm font-medium ${theme.link} transition-colors`}>
               Forgot password?
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             onClick={handleSignin}
             className={`w-full ${theme.button} ${theme.buttonText} py-3.5 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-6`}
@@ -162,7 +154,6 @@ export default function SignInPage() {
             Sign In
           </button>
 
-          {/* Sign Up Link */}
           <p className={`text-center text-sm ${theme.textSecondary} pt-4`}>
             {`Don't have an account?`}
             <a href="/signup" className={`font-semibold ${theme.link} transition-colors`}>

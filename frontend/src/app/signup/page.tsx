@@ -128,13 +128,11 @@ export default function SignUpPage() {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden `}>
-      {/* Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-20 left-10 w-72 h-72 ${darkMode ? 'bg-violet-500/10' : 'bg-violet-300/30'} rounded-full blur-3xl`} />
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      {/* Theme Toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
@@ -148,7 +146,6 @@ export default function SignUpPage() {
       </button>
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-lg h-[80vh] transition-all duration-500 relative z-10 flex flex-col`}>
-        {/* Header Section */}
         <div className="p-8 pb-6 text-center flex-shrink-0">
           <div className={`inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-4 relative`}>
               <Image
@@ -163,7 +160,6 @@ export default function SignUpPage() {
           <p className={`${theme.textSecondary} text-sm`}>{steps[currentStep].subtitle}</p>
         </div>
 
-        {/* Progress Bar */}
         <div className="px-8 mb-6 flex-shrink-0">
           <div className={`h-2 ${theme.progress} rounded-full overflow-hidden`}>
             <div 
@@ -183,12 +179,10 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Form Content with Slide Animation */}
         <div className="flex-1 overflow-hidden relative w-lg">
           <div 
             className="absolute inset-0 px-8 pb-8"
           >
-            {/* Step 1: Account Details */}
             {currentStep === 0 && (
               <div className="w-md h-full space-y-5 animate-fadeIn">
                 <div>
@@ -278,7 +272,6 @@ export default function SignUpPage() {
               </div>
             )}
 
-            {/* Step 2: Personal Info */}
             {currentStep === 1 && (
               <div className="w-full h-full space-y-5 animate-fadeIn">
                 <div>
@@ -317,7 +310,6 @@ export default function SignUpPage() {
               </div>
             )}
 
-            {/* Step 3: Additional Details */}
             {currentStep === 2 && (
               <div className="w-full h-full space-y-5 animate-fadeIn">
                 <div>
@@ -360,7 +352,6 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
         <div className="px-8 pb-8 flex-shrink-0 space-y-3 z-10 relative">
           <div className="flex gap-3">
             {currentStep > 0 && (
