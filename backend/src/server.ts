@@ -16,7 +16,6 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const allowedOrigins = ["http://localhost:3000", /\.vercel\.app$/];
 
 app.use(cors({
   origin: (origin, callback) => {
