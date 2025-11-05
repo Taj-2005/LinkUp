@@ -148,9 +148,9 @@ export default function SignInPage() {
 
           {/* Forgot Password Link */}
           <div className="text-right">
-            <a href="/forgot-password" className={`text-sm font-medium ${theme.link} transition-colors`}>
+            <div className={`text-sm font-medium ${theme.link} transition-colors`}>
               Forgot password?
-            </a>
+            </div>
           </div>
 
           {/* Submit Button */}
