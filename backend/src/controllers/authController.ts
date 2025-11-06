@@ -42,41 +42,22 @@ export async function signup(req: Request, res: Response) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    if (isProd) {
-      res.cookie("jid", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("jid", refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 15 * 60 * 1000,
-      });
-    } else {
-      res.cookie("jid", refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60 * 1000,
-      });
-    }
 
 
     return res.status(201).json({
@@ -114,41 +95,22 @@ export async function signin(req: Request, res: Response) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    if (isProd) {
-      res.cookie("jid", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("jid", refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 15 * 60 * 1000,
-      });
-    } else {
-      res.cookie("jid", refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
 
-      res.cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60 * 1000,
-      });
-    }
 
 
     return res.json({
@@ -183,41 +145,22 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    if (isProd) {
-      res.cookie("jid", newRefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("jid", newRefreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: false,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        domain: ".link-up-web.vercel.app",
-        maxAge: 15 * 60 * 1000,
-      });
-    } else {
-      res.cookie("jid", newRefreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: "none",
+      path: "/",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
 
-      res.cookie("accessToken", newAccessToken, {
-        httpOnly: false,
-        secure: false,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 15 * 60 * 1000,
-      });
-    }
 
 
     return res.json({ accessToken: newAccessToken });
