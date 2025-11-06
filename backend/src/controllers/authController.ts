@@ -47,7 +47,8 @@ export async function signup(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      partitioned: true,
     });
 
     res.cookie("accessToken", accessToken, {
@@ -55,7 +56,8 @@ export async function signup(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
+      partitioned: true, 
     });
 
 
@@ -100,7 +102,8 @@ export async function signin(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      partitioned: true, 
     });
 
     res.cookie("accessToken", accessToken, {
@@ -108,7 +111,8 @@ export async function signin(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
+      partitioned: true, 
     });
 
 
@@ -150,7 +154,8 @@ export async function refreshTokenHandler(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      partitioned: true, 
     });
 
     res.cookie("accessToken", newAccessToken, {
@@ -158,7 +163,8 @@ export async function refreshTokenHandler(req: Request, res: Response) {
       secure: isProd,
       sameSite: "none",
       path: "/",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
+      partitioned: true, 
     });
 
 
