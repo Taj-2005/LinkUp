@@ -14,18 +14,15 @@ const db_1 = require("./config/db");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 6969;
+const isProd = process.env.NODE_ENV === "production";
+const FRONTEND_URL = process.env.NEXT_FRONTEND_URL;
 app.use(express_1.default.json());
 app.use(body_parser_1.default.json());
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        if (!origin)
-            return callback(null, true);
-        if (/\.vercel\.app$/.test(origin) || origin === "http://localhost:3000") {
-            return callback(null, true);
-        }
-        callback(new Error("Not allowed by CORS"));
-    },
+    origin: isProd
+        ? FRONTEND_URL
+        : "http://localhost:3000",
     credentials: true,
 }));
 app.use("/api/auth", auth_1.default);

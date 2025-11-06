@@ -45,12 +45,16 @@ async function signup(req, res) {
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.cookie("accessToken", accessToken, {
             httpOnly: false,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 15 * 60 * 1000,
         });
         return res.status(201).json({
             message: "Signup successful",
@@ -86,12 +90,16 @@ async function signin(req, res) {
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.cookie("accessToken", accessToken, {
             httpOnly: false,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 15 * 60 * 1000,
         });
         return res.json({
             user: { id: user._id, email: user.email, username: user.username },
@@ -126,12 +134,16 @@ async function refreshTokenHandler(req, res) {
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.cookie("accessToken", newAccessToken, {
             httpOnly: false,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             path: "/",
+            domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000",
+            maxAge: 15 * 60 * 1000,
         });
         return res.json({ accessToken: newAccessToken });
     }
