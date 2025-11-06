@@ -87,13 +87,13 @@ export default function SignUpPage() {
         text: "text-slate-100",
         textSecondary: "text-slate-400",
         input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
-        inputFocus: "border-violet-500 ring-violet-500/20 bg-[#181818]",
-        button: "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500",
+        inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
+        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
         buttonSecondary: "bg-[#606468] hover:bg-[#3E434C] text-slate-300",
         buttonText: "text-white",
-        link: "text-violet-400 hover:text-violet-300",
+        link: "text-gray-400 hover:text-white",
         progress: "bg-[#181818]",
-        progressFill: "bg-gradient-to-r from-violet-500 to-purple-500",
+        progressFill: "bg-gradient-to-r from-gray-400 to-gray-400",
       }
     : {
         bg: "bg-[#606468]",
@@ -102,13 +102,13 @@ export default function SignUpPage() {
         text: "text-slate-900",
         textSecondary: "text-slate-600",
         input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
-        inputFocus: "border-violet-500 ring-violet-500/20 bg-[#ffffff]",
-        button: "bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700",
+        inputFocus: "border-gray-500 ring-gray-500/20 bg-[#ffffff]",
+        button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
         buttonSecondary: "bg-[#e1e1e1] hover:bg-[#606468] text-slate-700",
         buttonText: "text-white",
-        link: "text-violet-600 hover:text-violet-700",
+        link: "text-gray-600 hover:text-black",
         progress: "bg-[#e1e1e1]",
-        progressFill: "bg-gradient-to-r from-violet-500 to-purple-500",
+        progressFill: "bg-gradient-to-r from-gray-500 to-gray-500",
       };
 
   const steps = [
@@ -392,7 +392,7 @@ export default function SignUpPage() {
           </div>
 
           <p className={`text-center text-sm ${theme.textSecondary}`}>
-            Already have an account?{" "}
+            {`Already have an account? `}
             <a href="/signin" className={`font-semibold ${theme.link} transition-colors`}>
               Sign in
             </a>

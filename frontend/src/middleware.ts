@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PROTECTED = [
-  "/",
+  "/livelinks",
   "/linkfinder",
   "/linkhub",
   "/linkupreqs",
@@ -15,10 +15,10 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("accessToken")?.value;
 
   // Block logged-in from /signin & /signup
-  if (path.startsWith("/signin") || path.startsWith("/signup")) {
+  if (path.startsWith("/signin") || path.startsWith("/signup") || path === "/") {
     if (token) {
       const url = req.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = "/livelinks";
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -29,7 +29,7 @@ export function middleware(req: NextRequest) {
 
   if (needsAuth && !token) {
     const url = req.nextUrl.clone();
-    url.pathname = "/signin";
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
@@ -39,6 +39,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/livelinks/:path*",
     "/signin",
     "/signup",
     "/linkfinder/:path*",
