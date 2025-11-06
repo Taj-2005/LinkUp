@@ -47,6 +47,8 @@ export async function signup(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("accessToken", accessToken, {
@@ -54,6 +56,8 @@ export async function signup(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 15 * 60 * 1000,
     });
 
     return res.status(201).json({
@@ -96,6 +100,8 @@ export async function signin(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("accessToken", accessToken, {
@@ -103,6 +109,8 @@ export async function signin(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 15 * 60 * 1000,
     });
 
     return res.json({
@@ -142,6 +150,8 @@ export async function refreshTokenHandler(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("accessToken", newAccessToken, {
@@ -149,6 +159,8 @@ export async function refreshTokenHandler(req: Request, res: Response) {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       path: "/",
+      domain: isProd ? process.env.NEXT_FRONTEND_URL : "http://localhost:3000", 
+      maxAge: 15 * 60 * 1000,
     });
 
     return res.json({ accessToken: newAccessToken });
