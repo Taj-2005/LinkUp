@@ -7,27 +7,25 @@ const PROTECTED = [
   "/linkhub",
   "/linkupreqs",
   "/linkups",
-  "/newlink"
+  "/newlink",
 ];
 
 export function middleware(req: NextRequest) {
-  const path = req.nextUrl.pathname;
+  const { pathname } = req.nextUrl;
   const token = req.cookies.get("accessToken")?.value;
 
-  // Block logged-in from /signin & /signup
-  if (path.startsWith("/signin") || path.startsWith("/signup") || path === "/") {
-    if (token) {
-      const url = req.nextUrl.clone();
-      url.pathname = "/livelinks";
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
+  const publicRoutes = ["/", "/signin", "/signup"];
+  const isPublic = publicRoutes.includes(pathname);
+
+  if (isPublic && token) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/livelinks";
+    return NextResponse.redirect(url);
   }
 
-  // Protect auth pages
-  const needsAuth = PROTECTED.some(route => path.startsWith(route));
+  const isProtected = PROTECTED.some(route => pathname.startsWith(route));
 
-  if (needsAuth && !token) {
+  if (isProtected && !token) {
     const url = req.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
@@ -39,9 +37,9 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/",
-    "/livelinks/:path*",
     "/signin",
     "/signup",
+    "/livelinks/:path*",
     "/linkfinder/:path*",
     "/linkhub/:path*",
     "/linkupreqs/:path*",
