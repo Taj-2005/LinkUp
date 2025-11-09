@@ -27,4 +27,5 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
 
+
 export default app;
