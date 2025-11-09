@@ -8,6 +8,7 @@ import protectedRoutes from './routes/protected';
 import { connectDB } from "./config/db";
 
 dotenv.config();
+connectDB()
 
 const app = express();
 const PORT = process.env.PORT || 6969;
@@ -32,8 +33,4 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
-});
+export default app;
