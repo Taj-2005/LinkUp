@@ -44,20 +44,16 @@ export async function signup(req: Request, res: Response) {
 
     res.cookie("jid", refreshToken, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      partitioned: true,
     });
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: false,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 15 * 60 * 1000,
-      partitioned: true, 
     });
 
 
@@ -99,20 +95,16 @@ export async function signin(req: Request, res: Response) {
 
     res.cookie("jid", refreshToken, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      partitioned: true, 
     });
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: false,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
       maxAge: 15 * 60 * 1000,
-      partitioned: true, 
     });
 
 
@@ -151,20 +143,16 @@ export async function refreshTokenHandler(req: Request, res: Response) {
 
     res.cookie("jid", newRefreshToken, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      partitioned: true, 
     });
 
     res.cookie("accessToken", newAccessToken, {
-      httpOnly: false,
-      secure: isProd,
-      sameSite: "none",
-      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 15 * 60 * 1000,
-      partitioned: true, 
     });
 
 
