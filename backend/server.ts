@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 
 app.use(cors({
-  origin: "https://link-up-web.vercel.app",
+  origin: ["https://link-up-web.vercel.app", "http://localhost:3000"],
   credentials: true
 }));
 
@@ -27,5 +27,10 @@ app.use(cors({
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);
 
+if (process.env.NODE_ENV !== "production"){
+  app.listen(6969, () => {
+    console.log(`Server listening at http://localhost:6969`)
+  })
+}
 
 export default app;

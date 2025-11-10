@@ -41,27 +41,10 @@ export async function signup(req: Request, res: Response) {
 
     user.refreshToken = refreshToken;
     await user.save();
-
-    res.cookie("jid", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true,
-      maxAge: 15 * 60 * 1000,
-    });
-
-
-
     return res.status(201).json({
       message: "Signup successful",
+      accessToken,
+      refreshToken,
       user: { id: user._id, username: user.username, email: user.email },
     });
 
@@ -95,25 +78,9 @@ export async function signin(req: Request, res: Response) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.cookie("jid", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true, 
-      maxAge: 15 * 60 * 1000,
-    });
-
-
-
     return res.json({
+      accessToken,
+      refreshToken,
       user: { id: user._id, email: user.email, username: user.username },
     });
 
@@ -145,25 +112,7 @@ export async function refreshTokenHandler(req: Request, res: Response) {
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    res.cookie("jid", newRefreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie("accessToken", newAccessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      partitioned: true,
-      maxAge: 15 * 60 * 1000,
-    });
-
-
-
-    return res.json({ accessToken: newAccessToken });
+    return res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
 
   } catch {
     return res.status(500).json({ error: "Server error" });

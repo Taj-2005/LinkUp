@@ -1,5 +1,6 @@
 import axios from "axios";
 import api from "@/utils/axios"
+import Cookies from "js-cookie";
 
 interface SignupData {
   username: string;
@@ -8,6 +9,16 @@ interface SignupData {
   password: string;
   location?: string;
   bio?: string;
+}
+
+interface SigninResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+  };
 }
 
 interface APIErrorResponse {
@@ -26,8 +37,23 @@ function extractErrorMessage(error: unknown): string {
 
 export async function signin(emailOrUsername: string, password: string) {
   try {
-    const { data } = await api.post("/api/auth/signin", { emailOrUsername, password });
-    return data;
+    const { data } = await api.post<SigninResponse>("/auth/signin", { emailOrUsername, password });
+
+    Cookies.set("accessToken", data.accessToken, {
+      httpOnly: true,
+      expires: 1 / 24,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    });
+
+    Cookies.set("refreshToken", data.refreshToken, {
+      httpOnly: true,
+      expires: 7, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    });
+
+    return data.user;
   } catch (error: unknown) {
     throw new Error(extractErrorMessage(error) || "Signin failed");
   }
