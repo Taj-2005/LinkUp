@@ -37,20 +37,8 @@ function extractErrorMessage(error: unknown): string {
 
 export async function signin(emailOrUsername: string, password: string) {
   try {
-    const { data } = await api.post<SigninResponse>("/auth/signin", { emailOrUsername, password });
-
-    Cookies.set("accessToken", data.accessToken, {
-      httpOnly: true,
-      expires: 1 / 24,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    });
-
-    Cookies.set("refreshToken", data.refreshToken, {
-      httpOnly: true,
-      expires: 7, 
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+    const { data } = await api.post("/auth/signin", { emailOrUsername, password }, {
+      withCredentials: true, 
     });
 
     return data.user;
@@ -58,6 +46,7 @@ export async function signin(emailOrUsername: string, password: string) {
     throw new Error(extractErrorMessage(error) || "Signin failed");
   }
 }
+
 
 export async function signup(data: SignupData) {
   try {

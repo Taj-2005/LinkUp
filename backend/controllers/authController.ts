@@ -78,16 +78,29 @@ export async function signin(req: Request, res: Response) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    return res.json({
-      accessToken,
-      refreshToken,
-      user: { id: user._id, email: user.email, username: user.username },
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 15 * 60 * 1000,
     });
 
-  } catch {
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      user: { id: user._id, email: user.email, username: user.username },
+    });
+  } catch (error) {
+    console.error("Signin error:", error);
     return res.status(500).json({ error: "Server error" });
   }
 }
+
 
 export async function refreshTokenHandler(req: Request, res: Response) {
   try {
