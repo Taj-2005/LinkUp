@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 
 app.use(cors({
-  origin: process.env.NEXT_FRONTEND_URL,
+  origin: "https://link-up-web.vercel.app",
   credentials: true
 }));
 
