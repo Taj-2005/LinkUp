@@ -44,6 +44,7 @@ export async function signup(data: SignupData) {
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || json.message || "Signup failed");
 
+    window.location.href = "/livelinks";
     return json;
   } catch (error: unknown) {
     throw new Error(extractErrorMessage(error));
@@ -69,7 +70,7 @@ export async function signin(emailOrUsername: string, password: string) {
           : "Request failed";
       throw new Error(message);
     }
-
+    window.location.href = "/livelinks";
     return json.user;
   } catch (error: unknown) {
     throw new Error(extractErrorMessage(error) || "Signin failed");
