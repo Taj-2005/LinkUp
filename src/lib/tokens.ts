@@ -18,3 +18,10 @@ export function signRefreshToken(payload: object) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(token, REFRESH_SECRET);
 }
+
+export interface JWTPayload {
+  userId: string;
+  username: string;
+  iat?: number;
+  exp?: number;
+}
