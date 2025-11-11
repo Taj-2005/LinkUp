@@ -1,7 +1,3 @@
-import axios from "axios";
-import api from "@/utils/axios"
-import Cookies from "js-cookie";
-
 interface SignupData {
   username: string;
   name: string;
@@ -12,8 +8,6 @@ interface SignupData {
 }
 
 interface SigninResponse {
-  accessToken: string;
-  refreshToken: string;
   user: {
     id: string;
     email: string;
@@ -27,49 +21,72 @@ interface APIErrorResponse {
 }
 
 function extractErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as APIErrorResponse | undefined;
-    return data?.error || data?.message || "Request failed";
-  }
   if (error instanceof Error) return error.message;
   return "Unknown error occurred";
 }
 
-export async function signin(emailOrUsername: string, password: string) {
+
+export async function signup(data: SignupData) {
   try {
-    const { data } = await api.post("/auth/signin", { emailOrUsername, password }, {
-      withCredentials: true, 
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
     });
 
-    return data.user;
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || json.message || "Signup failed");
+
+    return json;
+  } catch (error: unknown) {
+    throw new Error(extractErrorMessage(error));
+  }
+}
+
+
+export async function signin(emailOrUsername: string, password: string) {
+  try {
+    const res = await fetch("/api/auth/signin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ emailOrUsername, password }),
+    });
+
+    const json: SigninResponse = await res.json();
+    if (!res.ok) throw new Error(json as any);
+
+    return json.user;
   } catch (error: unknown) {
     throw new Error(extractErrorMessage(error) || "Signin failed");
   }
 }
 
 
-export async function signup(data: SignupData) {
+export async function refreshAccessToken() {
   try {
-    const res = await api.post("/api/auth/signup", data);
-    return res.data;
+    const res = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Failed to refresh");
+
+    return json;
   } catch (error: unknown) {
-    throw new Error(extractErrorMessage(error) || "Signup failed");
+    throw new Error(extractErrorMessage(error));
   }
 }
 
-export async function refreshAccessToken() {
-  try {
-    const res = await api.post("/api/auth/refresh");
-    return res.data;
-  } catch (error: unknown) {
-    throw new Error("Failed to refresh");
-  }
-}
 
 export async function signout() {
   try {
-    await api.post("/api/auth/signout");
-    document.cookie = "accessToken=; path=/; Max-Age=0";
+    await fetch("/api/auth/signout", {
+      method: "POST",
+      credentials: "include",
+    });
   } catch (error: unknown) {
     console.error(extractErrorMessage(error));
   }
@@ -77,14 +94,19 @@ export async function signout() {
 
 export async function getCurrentUser() {
   try {
-    let res = await api.get("/api/me");
+    let res = await fetch("/api/me", { credentials: "include" });
+
     if (res.status === 401) {
       const refreshed = await refreshAccessToken().catch(() => null);
       if (!refreshed) throw new Error("Not authenticated");
-      res = await api.get("/api/me");
+      res = await fetch("/api/me", { credentials: "include" });
     }
-    return res.data;
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Failed to fetch user");
+
+    return json;
   } catch (error: unknown) {
-    throw new Error(extractErrorMessage(error) || "Failed to fetch user");
+    throw new Error(extractErrorMessage(error));
   }
 }
