@@ -51,7 +51,7 @@ export default function SignUpPage() {
   };
 
   const handleSignup = async () => {
-    if (!username || !firstName || !lastName || !email || !password) {
+    if (!username || !firstName || !email || !password) {
       return toast.error("Fill all required fields");
     }
 
@@ -71,7 +71,7 @@ export default function SignUpPage() {
       await signup(data);
       toast.dismiss();
       toast.success("Account created 🎉");
-      router.push("/signin");
+      router.push("/");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Signup failed";
       toast.dismiss();

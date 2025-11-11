@@ -3,7 +3,6 @@ import { verifyAccessToken } from "@/lib/tokens";
 import { User, IUser } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
 
-
 export async function requireAuth(): Promise<IUser> {
   await dbConnect();
 
@@ -16,12 +15,10 @@ export async function requireAuth(): Promise<IUser> {
 
   try {
     const payload = verifyAccessToken(token) as { userId: string; username: string };
-
     const user = await User.findById(payload.userId).select("-password -__v");
 
     if (!user) throw new Error("User not found");
-
-    return user; 
+    return user;
   } catch {
     throw new Error("Invalid or expired access token");
   }

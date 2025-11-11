@@ -100,8 +100,10 @@ export async function signout() {
       method: "POST",
       credentials: "include",
     });
-  } catch (error: unknown) {
-    console.error(extractErrorMessage(error));
+
+    window.location.href = "/";
+  } catch (err) {
+    console.error("Signout failed:", err);
   }
 }
 
@@ -119,11 +121,13 @@ export async function getCurrentUser() {
 
     const json = await res.json();
     if (!res.ok){
+      await signout()
       throw new Error(json.error || "Failed to fetch user");
     }
 
     return json;
   } catch (error: unknown) {
+    await signout()
     throw new Error(extractErrorMessage(error));
   }
 }
