@@ -22,7 +22,7 @@ export async function requireAuth(): Promise<IUser> {
     if (!user) throw new Error("User not found");
 
     return user; 
-  } catch (err) {
+  } catch {
     throw new Error("Invalid or expired access token");
   }
 }

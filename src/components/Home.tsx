@@ -5,7 +5,6 @@ import {useState, useEffect} from "react";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
-import user from "@/constants/Self"
 import Stories from "@/components/home/Stories";
 import { getCurrentUser } from "@/utils/api";
 
