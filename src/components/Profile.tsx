@@ -14,9 +14,9 @@ interface ProfileCardProps {
     name: string;
     location: string;
     bio: string;
-    links?: number;
-    linked_by: number;
-    linked_to: number;
+    links?: [];
+    linked_by: [];
+    linked_to: [];
     isLinked?: boolean;
 }
 

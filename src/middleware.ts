@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED = [
+const PROTECTED_ROUTES = [
   "/livelinks",
   "/linkfinder",
   "/linkhub",
@@ -10,20 +10,31 @@ const PROTECTED = [
   "/newlink",
 ];
 
+const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/static") ||
+    pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
+  }
+
   const token = req.cookies.get("accessToken")?.value;
 
-  const publicRoutes = ["/", "/signin", "/signup"];
-  const isPublic = publicRoutes.includes(pathname);
-
-  if (isPublic && token) {
+  if (PUBLIC_ROUTES.includes(pathname) && token) {
     const url = req.nextUrl.clone();
     url.pathname = "/livelinks";
     return NextResponse.redirect(url);
   }
 
-  const isProtected = PROTECTED.some(route => pathname.startsWith(route));
+  const isProtected = PROTECTED_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
 
   if (isProtected && !token) {
     const url = req.nextUrl.clone();

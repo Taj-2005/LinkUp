@@ -10,6 +10,7 @@ export interface IUser extends Document {
     password: string;
     linked_to: string[];
     linked_by: string[];
+    links: string[];
     createdAt: Date;
     updatedAt: Date;
     refreshToken?: string;
@@ -59,6 +60,10 @@ const UserSchema: Schema = new Schema<IUser>({
         linked_to: {
             type: [String],
             default: []
+        },
+        links: {
+            type: [String], 
+            default: [] 
         },
         createdAt: {
             type: Date,

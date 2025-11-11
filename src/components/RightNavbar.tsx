@@ -12,7 +12,7 @@ interface RightNavbarProps {
 }
 
 export default function RightNavbar({selectedItem} : RightNavbarProps){
-    if (selectedItem === "livelinks" || selectedItem === "more"){
+    if (selectedItem === "livelinks"){
         return <Home />;
     }else if (selectedItem === "linkfinder"){
         return <Search />;

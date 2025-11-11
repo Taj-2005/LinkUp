@@ -37,19 +37,19 @@ export default function ProfileCard({ user }: ProfileCardProps) {
         {/* Stats */}
         <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mb-6">
           <div>
-            <p className="text-2xl">{user.links}</p>
+            <p className="text-2xl">{user.links ? user.links.length : 0}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Links
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.linked_by}</p>
+            <p className="text-2xl">{user.linked_by.length}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Linked By
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.linked_to}</p>
+            <p className="text-2xl">{user.linked_to.length}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Linked To
             </p>

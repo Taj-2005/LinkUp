@@ -5,8 +5,8 @@ export interface IUserClient {
   location?: string;
   bio?: string;
   email: string;
-  links?: number;
-  linked_by: number;
-  linked_to: number;
+  links?: [];
+  linked_by: [];
+  linked_to: [];
   isLinked?: boolean;
 }
