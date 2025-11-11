@@ -16,3 +16,4 @@ export function startAutoTokenRefresh() {
 
   setInterval(refresh, interval);
 }
+

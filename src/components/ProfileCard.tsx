@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { FiMapPin } from "react-icons/fi";
 import { IUserClient } from "@/types/user";
+import { HiUserCircle } from "react-icons/hi";
 
 interface ProfileCardProps {
   user: IUserClient;
@@ -13,13 +14,19 @@ export default function ProfileCard({ user }: ProfileCardProps) {
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       {/* Avatar */}
-      <div className="flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark">
-      <Image
-        src={user.user_avatar ?? "/profile.png"}
-        alt={`${user.name} avatar`}
-        fill
-        className="object-cover"
-      />
+      <div className={`flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark ${!user.user_avatar && "border-none"}`}>
+      {
+        user.user_avatar ?
+          <Image
+            src={user.user_avatar ?? "/profile.png"}
+            alt={`${user.name} avatar`}
+            fill
+            className="object-cover"
+          /> : 
+        <HiUserCircle 
+          className="w-full h-full text-black dark:text-white object-cover" 
+        />
+    }
       </div>
 
       {/* User Info */}
