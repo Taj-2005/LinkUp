@@ -12,6 +12,12 @@ export async function GET() {
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Unexpected server error";
-    return NextResponse.json({ error: message }, { status: 401 });
+
+    const res = NextResponse.json({ error: message }, { status: 401 });
+
+    res.cookies.delete("accessToken");
+    res.cookies.delete("refreshToken");
+
+    return res;
   }
 }

@@ -75,9 +75,9 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   };
 
   const handleSignout = async () => {
-    await signout(); // Calls your /api/auth/signout route
+    await signout(); 
     setShowMore(false);
-    router.push("/signin");
+    router.push("/");
   };
 
   // ✅ Close popup when clicking outside

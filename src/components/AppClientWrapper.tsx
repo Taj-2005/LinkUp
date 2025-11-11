@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { startAutoTokenRefresh } from "@/utils/tokenRefresh";
+import startAutoTokenRefresh from "@/utils/tokenRefresh";
 import { Toaster } from "react-hot-toast";
 
 export default function AppClientWrapper({
@@ -10,7 +10,11 @@ export default function AppClientWrapper({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    startAutoTokenRefresh();
+    const intervalId = startAutoTokenRefresh();
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
 
   return (

@@ -1,6 +1,6 @@
 import { refreshAccessToken } from "@/utils/api";
 
-export function startAutoTokenRefresh() {
+export default function startAutoTokenRefresh() {
   const interval = 14 * 60 * 1000;
 
   const refresh = async () => {
@@ -14,6 +14,6 @@ export function startAutoTokenRefresh() {
 
   refresh();
 
-  setInterval(refresh, interval);
+  const intervalId = setInterval(refresh, interval);
+  return intervalId;
 }
-

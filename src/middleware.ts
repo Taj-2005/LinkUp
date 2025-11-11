@@ -14,19 +14,10 @@ const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const accessToken = req.cookies.get("accessToken")?.value;
+  const refreshToken = req.cookies.get("refreshToken")?.value;
 
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/static") ||
-    pathname === "/favicon.ico"
-  ) {
-    return NextResponse.next();
-  }
-
-  const token = req.cookies.get("accessToken")?.value;
-
-  if (PUBLIC_ROUTES.includes(pathname) && token) {
+  if (PUBLIC_ROUTES.includes(pathname) && (accessToken || refreshToken)) {
     const url = req.nextUrl.clone();
     url.pathname = "/livelinks";
     return NextResponse.redirect(url);
@@ -36,7 +27,7 @@ export function middleware(req: NextRequest) {
     pathname.startsWith(route)
   );
 
-  if (isProtected && !token) {
+  if (isProtected && !accessToken && !refreshToken) {
     const url = req.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);
