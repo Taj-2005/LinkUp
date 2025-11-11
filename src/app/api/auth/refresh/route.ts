@@ -47,14 +47,14 @@ export async function POST() {
     res.cookies.set("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       path: "/",
     });
 
     res.cookies.set("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "lax",
       path: "/",
     });
 
