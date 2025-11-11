@@ -17,7 +17,7 @@ export async function GET() {
 
     res.cookies.delete("accessToken");
     res.cookies.delete("refreshToken");
-
+    window.location.href = "/";
     return res;
   }
 }

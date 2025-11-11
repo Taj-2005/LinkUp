@@ -111,12 +111,16 @@ export async function getCurrentUser() {
 
     if (res.status === 401) {
       const refreshed = await refreshAccessToken().catch(() => null);
-      if (!refreshed) throw new Error("Not authenticated");
+      if (!refreshed) {
+        throw new Error("Not authenticated");
+      }
       res = await fetch("/api/me", { credentials: "include" });
     }
 
     const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch user");
+    if (!res.ok){
+      throw new Error(json.error || "Failed to fetch user");
+    }
 
     return json;
   } catch (error: unknown) {

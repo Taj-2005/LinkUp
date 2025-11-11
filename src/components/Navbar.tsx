@@ -77,10 +77,9 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   const handleSignout = async () => {
     await signout(); 
     setShowMore(false);
-    router.push("/");
+    window.location.href = "/";
   };
 
-  // ✅ Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
