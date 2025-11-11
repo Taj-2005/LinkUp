@@ -22,6 +22,12 @@ interface APIErrorResponse {
 
 function extractErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
+
+  if (typeof error === "object" && error !== null) {
+    const err = error as APIErrorResponse;
+    if (err.error || err.message) return err.error || err.message || "Request failed";
+  }
+
   return "Unknown error occurred";
 }
 
@@ -55,7 +61,14 @@ export async function signin(emailOrUsername: string, password: string) {
     });
 
     const json: SigninResponse = await res.json();
-    if (!res.ok) throw new Error(json as any);
+
+    if (!res.ok) {
+      const message =
+        typeof json === "object" && json !== null && "error" in json
+          ? (json.error as string)
+          : "Request failed";
+      throw new Error(message);
+    }
 
     return json.user;
   } catch (error: unknown) {

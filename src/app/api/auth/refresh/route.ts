@@ -4,7 +4,7 @@ import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/lib/tokens";
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   try {
     await dbConnect();
 

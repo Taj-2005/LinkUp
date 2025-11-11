@@ -57,8 +57,16 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (err: any) {
-    console.error("❌ SIGNIN ERROR:", err);
-    return NextResponse.json({ error: "Server error", details: err.message }, { status: 500 });
-  }
+} catch (err: unknown) {
+  console.error("❌ SIGNIN ERROR:", err);
+
+  const message =
+    err instanceof Error ? err.message : "Unexpected server error";
+
+  return NextResponse.json(
+    { error: "Server error", details: message },
+    { status: 500 }
+  );
+}
+  
 }
