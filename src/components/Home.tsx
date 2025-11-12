@@ -7,6 +7,7 @@ import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
 import Stories from "@/components/home/Stories";
 import { getCurrentUser } from "@/utils/api";
+import Loading from "@/app/loading";
 
 interface ProfileCardProps {
     user_avatar: string;
@@ -63,7 +64,7 @@ export default function Home(){
         </div>
       </div>
     ) : (
-      <div>loading...</div>
+      <Loading />
     )
   );
 }

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { FaRegBookmark, FaBookmark, FaTh } from "react-icons/fa";
+import {IUser} from "@/models/User"
 
 interface NavbarProps {
-    user: string;
+    user: IUser;
 }
 
-const ProfileNavbar = ({user} : NavbarProps) => {
+const ProfileNavbarSelf = ({user} : NavbarProps) => {
     const [selected , setSelected] = useState('links');
 
     return (
@@ -28,10 +29,23 @@ const ProfileNavbar = ({user} : NavbarProps) => {
                         />
                 }
                 </button>
+                <button onClick={() => setSelected('savedlinks')}>
+                    {selected === 'savedlinks' ? (
+                    <FaBookmark
+                        size={36}
+                        className='text-primary-light dark:text-white border-b-2 border-amber-50 pb-2'
+                    />
+                    ) : (
+                    <FaRegBookmark
+                        size={36}
+                        className='text-primary-light/70 dark:text-white/70 pb-2'
+                    />
+                    )}
+                </button>
             </div>
         </div>
     </div>
     )
 }
 
-export default ProfileNavbar
+export default ProfileNavbarSelf

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import {signup} from "@/utils/api"
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
 export default function SignUpPage() {
   const [darkMode, setDarkMode] = useState(true);
@@ -13,6 +15,8 @@ export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [isSexDropdownOpen, setIsSexDropdownOpen] = useState(false);
+  const [sex, setSex] = useState("male");
   const [location, setLocation] = useState("");
   const [bio, setBio] = useState("");
   const [email, setEmail] = useState("");
@@ -64,6 +68,7 @@ export default function SignUpPage() {
       password,
       location,
       bio,
+      sex
     };
 
     try {
@@ -307,6 +312,79 @@ export default function SignUpPage() {
                     } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
+
+                <div className="relative">
+                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                    Sex <span className="text-red-500">*</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsSexDropdownOpen(!isSexDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsSexDropdownOpen(false), 150)}
+                    className={`w-full px-4 py-3 flex items-center justify-between rounded-xl border ${theme.input} ${
+                      focusedField === "sex" ? `${theme.inputFocus} ring-4` : ""
+                    } transition-all duration-300 focus:outline-none hover:scale-[1.01] active:scale-[0.99]`}
+                  >
+                    <span className={`${theme.text}`}>
+                      {sex === "male" ? "Male" : sex === "female" ? "Female" : "Other"}
+                    </span>
+                    <motion.div
+                      animate={{ rotate: isSexDropdownOpen ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    </motion.div>
+                  </button>
+
+                  <AnimatePresence>
+                    {isSexDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className={`
+                          absolute z-50 w-full bottom-[110%] rounded-xl overflow-hidden
+                          backdrop-blur-lg
+                          border shadow-2xl
+                          ${darkMode
+                            ? "bg-[#1f1f1f]/90 border-gray-700 shadow-[0_4px_30px_rgba(0,0,0,0.6)]"
+                            : "bg-white/90 border-gray-200 shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
+                          }
+                        `}
+                      >
+                        {[
+                          { label: "Male", value: "male" },
+                          { label: "Female", value: "female" },
+                          { label: "Other", value: "other" },
+                        ].map((item) => (
+                          <motion.button
+                            key={item.value}
+                            onClick={() => {
+                              setSex(item.value);
+                              setIsSexDropdownOpen(false);
+                            }}
+                            whileHover={{
+                              backgroundColor: darkMode
+                                ? "rgba(255,255,255,0.08)"
+                                : "rgba(0,0,0,0.05)",
+                              scale: 1.02,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full text-left px-4 py-3 text-sm ${
+                              theme.text
+                            } transition-all duration-200`}
+                          >
+                            {item.label}
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+
               </div>
             )}
 

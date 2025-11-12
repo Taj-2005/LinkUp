@@ -5,20 +5,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
-import { signout } from "@/utils/api"; // ⬅️ make sure this exists
+import { signout, getCurrentUser } from "@/utils/api";
+import { useTheme } from "next-themes";
 
-const user = {
-  user_avatar:
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&fm=jpg&q=60&w=3000",
-  username: "tajuddinshaik_6",
-  name: "Tajuddin Shaik",
-  location: "Hyderabad, India",
-  bio: "Web Developer | Tech Enthusiast | Lifelong Learner",
-  linked_by: 1200,
-  linked_to: 300,
-  posts: 150,
-  isLinked: true,
-};
+
+interface User {
+  user_avatar?: string;
+  username: string;
+}
 
 interface NavItemProps {
   Icon: React.ElementType;
@@ -35,6 +29,24 @@ interface NavbarProps {
 }
 
 function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
+  const { resolvedTheme } = useTheme();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getCurrentUser();
+        setUser(res.user);
+      } catch (err) {
+        console.error("Not logged in", err);
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+
   return (
     <div
       className={`relative flex justify-start items-center p-6 gap-4 cursor-pointer transition-colors w-50 duration-200 rounded-lg m-2 ${
@@ -43,13 +55,21 @@ function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
       onClick={onClick}
     >
       {label === "LinkHub" ? (
-        <Image
-          src={user.user_avatar}
-          width={26}
-          height={26}
-          alt={`${user.username} avatar`}
-          className="rounded-full object-cover"
-        />
+        user && (
+          <Image
+            src={
+              user.user_avatar
+                ? user.user_avatar
+                : resolvedTheme === "dark"
+                ? "/dark-profile.png"
+                : "/light-profile.png"
+            }
+            width={26}
+            height={26}
+            alt={`${user.username} avatar`}
+            className="rounded-full object-cover"
+          />
+        )
       ) : (
         <Icon className="text-white" size={size} />
       )}
@@ -75,7 +95,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   };
 
   const handleSignout = async () => {
-    await signout(); 
+    await signout();
     setShowMore(false);
     window.location.href = "/";
   };

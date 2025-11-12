@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { dbConnect } from "@/lib/dbConnect";
+import { User } from "@/models/User";
 import { requireAuth } from "@/lib/auth";
 import { validateAndRefreshTokens } from "@/lib/authHelpers";
 
@@ -13,10 +14,11 @@ export async function GET() {
 
   try {
     const user = await requireAuth();
-    return NextResponse.json({ message: "Protected data", user });
+    const allUsers = await User.find();
+    const users = allUsers.filter((thisUser) => thisUser.username !== user.username);
+    return NextResponse.json(users);
   } catch {
     const refreshToken = cookieStore.get("refreshToken")?.value;
-
     if (!refreshToken) {
       const res = NextResponse.json(
         { error: "Not authenticated: refresh token missing" },
@@ -50,6 +52,9 @@ export async function GET() {
       path: "/",
     });
 
-    return NextResponse.json({ message: "Protected data (refreshed)", user: result.user });
+    const allUsers = await User.find();
+    const users = allUsers.filter((thisUser) => thisUser.username !== result.user.username);
+
+    return NextResponse.json(users);
   }
 }

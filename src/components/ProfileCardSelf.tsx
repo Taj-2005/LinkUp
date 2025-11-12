@@ -2,24 +2,26 @@
 
 import Image from "next/image";
 import { FiMapPin } from "react-icons/fi";
-import { IUserClient } from "@/types/user";
+import { IUser } from "@/models/User";
+import { useTheme } from "next-themes";
 
 interface ProfileCardProps {
-  user: IUserClient;
+  user: IUser;
 }
 
 
 export default function ProfileCard({ user }: ProfileCardProps) {
+  const {resolvedTheme} = useTheme()
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       {/* Avatar */}
-      <div className="flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark">
-      <Image
-        src={user.user_avatar ?? "/profile.png"}
-        alt={`${user.name} avatar`}
-        fill
-        className="object-cover"
-      />
+      <div className={`flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark ${!user.user_avatar && "border-none"}`}>
+          <Image
+            src={user.user_avatar ? user.user_avatar : `${resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png" }`}
+            alt={`${user.name} avatar`}
+            fill
+            className="object-cover"
+          /> 
       </div>
 
       {/* User Info */}
@@ -37,19 +39,19 @@ export default function ProfileCard({ user }: ProfileCardProps) {
         {/* Stats */}
         <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mb-6">
           <div>
-            <p className="text-2xl">{user.links}</p>
+            <p className="text-2xl">{user.links ? user.links.length : 0}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Links
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.linked_by}</p>
+            <p className="text-2xl">{user.linked_by.length}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Linked By
             </p>
           </div>
           <div>
-            <p className="text-2xl">{user.linked_to}</p>
+            <p className="text-2xl">{user.linked_to.length}</p>
             <p className="text-sm font-medium text-primary-light dark:text-gray-400">
               Linked To
             </p>
@@ -69,24 +71,9 @@ export default function ProfileCard({ user }: ProfileCardProps) {
 
         {/* Action Buttons */}
         <div className="mt-4 flex flex-wrap gap-4">
-          {user.username === "tajuddinshaik_6" ? (
             <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
               Edit Profile
             </button>
-          ) : user.isLinked ? (
-            <>
-              <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
-                Linked
-              </button>
-              <button className="bg-left-nav-light dark:bg-left-nav-dark border border-primary-light dark:border-primary-dark text-primary-light dark:text-gray-200 px-6 py-2 rounded-2xl font-semibold shadow hover:brightness-110 transition">
-                Start LinkUp
-              </button>
-            </>
-          ) : (
-            <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
-              LinkUp
-            </button>
-          )}
         </div>
       </div>
     </div>

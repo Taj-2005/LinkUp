@@ -2,26 +2,14 @@
 
 import { useEffect, useState } from "react";
 import ToggleSwitch from "@/components/ToggleSwitch";
-import ProfileCard from "@/components/ProfileCard";
-import Navbar from "@/components/profile/ProfileNavbar";
+import ProfileCardSelf from "@/components/ProfileCardSelf";
+import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
+import Loading from "@/app/loading";
 import { getCurrentUser } from "@/utils/api";
-
-
-interface ProfileCardProps {
-    user_avatar: string;
-    username: string;
-    email: string;
-    name: string;
-    location: string;
-    bio: string;
-    links?: [];
-    linked_by: [];
-    linked_to: [];
-    isLinked?: boolean;
-}
+import { IUser } from "@/models/User";
 
 export default function Profile() {
-  const [user, setUser] = useState< ProfileCardProps| null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +28,7 @@ export default function Profile() {
     fetchUser();
   }, []);
 
-  if (loading) return <div className="p-10 text-lg">Loading profile...</div>;
+  if (loading) return <Loading />
   if (!user) return <div className="p-10 text-lg">Not authenticated</div>;
 
   return (
@@ -48,8 +36,8 @@ export default function Profile() {
       <div className="w-full">
         <div className="flex flex-col gap-8 items-center">
           <ToggleSwitch />
-          <ProfileCard user={user} />
-          <Navbar user={user.username} />
+          <ProfileCardSelf user={user} />
+          <ProfileNavbarSelf user={user} />
         </div>
       </div>
     </div>

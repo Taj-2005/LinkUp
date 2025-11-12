@@ -6,6 +6,7 @@ import SearchBar from "@/components/search/SearchBar";
 import Ads from "@/components/Ads";
 import {useState, useEffect} from "react";
 import { getCurrentUser } from "@/utils/api";
+import Loading from "@/app/loading";
 
 interface ProfileCardProps {
     user_avatar: string;
@@ -63,7 +64,7 @@ export default function Home(){
         </div>
       </div>
     ) : (
-      <div>loading...</div>
+      <Loading />
     )
   );
 }
