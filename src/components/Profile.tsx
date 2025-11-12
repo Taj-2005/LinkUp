@@ -37,7 +37,7 @@ export default function Profile() {
         <div className="flex flex-col gap-8 items-center">
           <ToggleSwitch />
           <ProfileCardSelf user={user} />
-          <ProfileNavbarSelf user={user} />
+          <ProfileNavbarSelf/>
         </div>
       </div>
     </div>

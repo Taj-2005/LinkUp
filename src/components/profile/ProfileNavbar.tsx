@@ -1,11 +1,8 @@
 import React, { useState } from 'react'
-import { FaRegBookmark, FaBookmark, FaTh } from "react-icons/fa";
+import { FaTh } from "react-icons/fa";
 
-interface NavbarProps {
-    user: string;
-}
 
-const ProfileNavbar = ({user} : NavbarProps) => {
+const ProfileNavbar = () => {
     const [selected , setSelected] = useState('links');
 
     return (

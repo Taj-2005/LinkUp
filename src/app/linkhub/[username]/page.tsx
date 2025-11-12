@@ -30,8 +30,9 @@ export default function UserProfile() {
         const data = await getAllUsers();
         if (!mounted) return;
         setUsers(data);
-      } catch (err: any) {
-        toast.error(err?.message || "Failed to load users. Signing out.");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to load users. Signing out.";
+        toast.error(message);
         try {
           await signout();
         } catch {
@@ -61,7 +62,7 @@ export default function UserProfile() {
           <div className="flex flex-col gap-8 items-center">
             <ToggleSwitch />
             <ProfileCard user={user as IUser} />
-            <ProfileNavbar user={user.username} />
+            <ProfileNavbar />
           </div>
         </div>
       </div>

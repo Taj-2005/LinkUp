@@ -1,9 +1,9 @@
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/tokens";
-import { User } from "@/models/User";
+import { User, IUser } from "@/models/User";
 
 interface RefreshResult {
   success: boolean;
-  user?: any;
+  user?: IUser | null;
   newAccessToken?: string;
   newRefreshToken?: string;
   error?: string;

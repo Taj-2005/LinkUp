@@ -5,13 +5,14 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import {IUser} from "@/models/User"
 import { getAllUsers, signout } from "@/utils/api";
 import Loading from "@/app/loading";
 
 export default function Stories() {
   const { resolvedTheme } = useTheme();
   const router = useRouter()
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,8 +21,9 @@ export default function Stories() {
         const data = await getAllUsers();
         setUsers(data);
         console.log(data)
-      } catch (error: any) {
-        toast.error(error?.message || "Session expired. You’ve been signed out.");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Failed to load users. Signing out.";
+        toast.error(message || "Session expired. You’ve been signed out.");
         try {
           await signout();
         } catch {

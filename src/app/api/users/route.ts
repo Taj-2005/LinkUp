@@ -53,7 +53,7 @@ export async function GET() {
     });
 
     const allUsers = await User.find();
-    const users = allUsers.filter((thisUser) => thisUser.username !== result.user.username);
+    const users = allUsers.filter((thisUser) => thisUser.username !== result.user!.username);
 
     return NextResponse.json(users);
   }
