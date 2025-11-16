@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import RightNavbar from "@/components/RightNavbar";
 
 export default function Home() {

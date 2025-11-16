@@ -1,6 +1,6 @@
-import {authFetch} from "@/lib/authFetch"
+import { authFetch } from "@/lib/authFetch";
 
-interface SignupData {
+export interface SignupData {
   username: string;
   name: string;
   email: string;
@@ -10,17 +10,22 @@ interface SignupData {
   sex: string;
 }
 
-interface SigninResponse {
-  user: {
-    id: string;
-    email: string;
-    username: string;
-  };
+export interface UserResponse {
+  id: string;
+  email: string;
+  username: string;
 }
 
-interface APIErrorResponse {
+export interface APIErrorResponse {
   error?: string;
   message?: string;
+}
+
+export interface APIJson<T> {
+  user?: T;
+  ok?: boolean;
+  message?: string;
+  error?: string;
 }
 
 function extractErrorMessage(error: unknown): string {
@@ -28,14 +33,14 @@ function extractErrorMessage(error: unknown): string {
 
   if (typeof error === "object" && error !== null) {
     const err = error as APIErrorResponse;
-    if (err.error || err.message) return err.error || err.message || "Request failed";
+    if (err.error) return err.error;
+    if (err.message) return err.message;
   }
 
   return "Unknown error occurred";
 }
 
-
-export async function signup(data: SignupData) {
+export async function signup(data: SignupData): Promise<UserResponse> {
   try {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
@@ -44,30 +49,26 @@ export async function signup(data: SignupData) {
       body: JSON.stringify(data),
     });
 
-    let json: any = {};
-
-    try {
-      json = await res.json();
-    } catch {
-      throw new Error("Invalid server response");
-    }
+    const json: APIJson<UserResponse> = await res.json();
 
     if (!res.ok) {
       throw new Error(json.error || json.message || "Signup failed");
     }
 
-    return json.user;
+    if (!json.user) {
+      throw new Error("Invalid signup response");
+    }
 
+    return json.user;
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Signup failed";
-    throw new Error(message);
+    throw new Error(extractErrorMessage(err));
   }
 }
 
-
-
-export async function signin(emailOrUsername: string, password: string) {
+export async function signin(
+  emailOrUsername: string,
+  password: string
+): Promise<UserResponse> {
   try {
     const res = await fetch("/api/auth/signin", {
       method: "POST",
@@ -76,37 +77,31 @@ export async function signin(emailOrUsername: string, password: string) {
       body: JSON.stringify({ emailOrUsername, password }),
     });
 
-    let json: any = {};
-
-    try {
-      json = await res.json();
-    } catch {
-      throw new Error("Invalid server response");
-    }
+    const json: APIJson<UserResponse> = await res.json();
 
     if (!res.ok) {
-      throw new Error(json.error || "Login failed");
+      throw new Error(json.error || json.message || "Login failed");
+    }
+
+    if (!json.user) {
+      throw new Error("Invalid signin response");
     }
 
     return json.user;
-
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Signin failed";
-    throw new Error(message);
+    throw new Error(extractErrorMessage(err));
   }
 }
 
-
-
-export async function refreshAccessToken() {
+export async function refreshAccessToken(): Promise<APIJson<null>> {
   try {
     const res = await fetch("/api/auth/refresh", {
       method: "POST",
       credentials: "include",
     });
 
-    const json = await res.json();
+    const json: APIJson<null> = await res.json();
+
     if (!res.ok) throw new Error(json.error || "Failed to refresh");
 
     return json;
@@ -115,35 +110,24 @@ export async function refreshAccessToken() {
   }
 }
 
-
-export async function signout() {
+export async function signout(): Promise<APIJson<null>> {
   try {
     const res = await fetch("/api/auth/signout", {
       method: "POST",
       credentials: "include",
     });
 
-    let json: any = {};
-
-    try {
-      json = await res.json();
-    } catch {
-      throw new Error("Invalid server response");
-    }
+    const json: APIJson<null> = await res.json();
 
     if (!res.ok) {
       throw new Error(json.error || "Signout failed");
     }
 
     return json;
-
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Signout failed";
-    throw new Error(message);
+    throw new Error(extractErrorMessage(err));
   }
 }
-
 
 export function getCurrentUser() {
   return authFetch("/api/me");

@@ -5,7 +5,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
-import { signout, getCurrentUser } from "@/utils/api";
+import { getCurrentUser } from "@/utils/api";
 import { useTheme } from "next-themes";
 import SignoutButton from "@/components/SignoutButton";
 

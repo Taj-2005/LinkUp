@@ -74,7 +74,7 @@ export default function SignUpPage() {
     try {
       toast.loading("Creating account...");
 
-      const user = await signup(data);
+      await signup(data);
 
       toast.dismiss();
       toast.success("Account created 🎉");

@@ -1,6 +1,5 @@
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/tokens";
 import { User, IUser } from "@/models/User";
-import { error } from "console";
 
 interface RefreshResult {
   success: boolean;
