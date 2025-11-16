@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { FaRegBookmark, FaBookmark, FaTh } from "react-icons/fa";
-import {IUser} from "@/models/User"
 
 
 const ProfileNavbarSelf = () => {

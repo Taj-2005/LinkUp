@@ -1,5 +1,6 @@
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/tokens";
 import { User, IUser } from "@/models/User";
+import { error } from "console";
 
 interface RefreshResult {
   success: boolean;
@@ -69,9 +70,10 @@ export async function validateAndRefreshTokens(refreshToken: string): Promise<Re
       newAccessToken,
       newRefreshToken,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Session expired or invalid. Signed out.";
     console.error("\n--- REFRESH ERROR ---");
-    console.error("Error during refreshing:", err?.message || err);
+    console.error("Error during refreshing:", message || err);
     console.error("--- REFRESH FAIL ---\n");
 
     return { success: false, error: "Session expired or invalid. Signed out." };

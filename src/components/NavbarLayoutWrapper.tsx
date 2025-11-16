@@ -12,8 +12,6 @@ export default function NavbarLayoutWrapper({
   const pathname = usePathname();
   const hideOn = ["/", "/signin", "/signup"];
 
-  if (hideOn.includes(pathname)) return <>{children}</>;
-
   const [selectedItem, setSelectedItem] = useState("livelinks");
   useEffect(() => {
     if (pathname.startsWith("/livelinks")) setSelectedItem("livelinks");
@@ -23,7 +21,9 @@ export default function NavbarLayoutWrapper({
     else if (pathname.startsWith("/newlink")) setSelectedItem("newlink");
     else if (pathname.startsWith("/linkhub")) setSelectedItem("linkhub");
   }, [pathname]);
-
+  
+  if (hideOn.includes(pathname)) return <>{children}</>;
+  
   return (
     <div className="flex flex-row bg-primary-light dark:bg-primary-dark min-h-screen">
 

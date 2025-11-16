@@ -11,7 +11,6 @@ import { IUser } from "@/models/User";
 
 export default function Home() {
   const [user, setUser] = useState<IUser | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,8 +20,6 @@ export default function Home() {
       } catch (err) {
         console.error("Not logged in", err);
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     };
 

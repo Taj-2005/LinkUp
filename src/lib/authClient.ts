@@ -1,15 +1,23 @@
-let refreshPromise: Promise<any> | null = null;
+let refreshPromise: Promise<unknown> | null = null;
 
-export async function safeRefresh() {
+export async function safeRefresh(): Promise<unknown> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = fetch("/api/auth/refresh", {
     method: "POST",
     credentials: "include",
   })
-    .then(async (res) => {
+    .then(async (res): Promise<unknown> => {
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to refresh");
+
+      if (!res.ok) {
+        throw new Error(
+          typeof json === "object" && json && "error" in json
+            ? (json.error as string)
+            : "Failed to refresh"
+        );
+      }
+
       return json;
     })
     .finally(() => {

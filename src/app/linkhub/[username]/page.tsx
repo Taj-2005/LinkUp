@@ -7,7 +7,6 @@ import { toast } from "react-hot-toast";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import ProfileCard from "@/components/ProfileCard";
 import ProfileNavbar from "@/components/profile/ProfileNavbar";
-import Navbar from "@/components/Navbar";
 import { IUser } from "@/models/User";
 import { getAllUsers, signout } from "@/utils/api";
 
@@ -15,13 +14,8 @@ export default function UserProfile() {
   const params = useParams();
   const username = params.username as string;
 
-  const [selectedItem, setSelectedItem] = useState(`/linkhub/${username}`);
   const [users, setUsers] = useState<IUser[] | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setSelectedItem(`/linkhub/${username}`);
-  }, [username]);
 
   useEffect(() => {
     let mounted = true;
