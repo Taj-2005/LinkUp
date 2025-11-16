@@ -3,43 +3,41 @@
 import { HiUserCircle } from "react-icons/hi";
 
 import { useRouter } from "next/navigation";
+import {IUser} from "@/models/User"
 import Image from "next/image";
 
 interface UserProps {
-    username: string;
-    name: string;
-    isFollowing: boolean;
-    user_avatar: string;
+    user: IUser | null
 }
-export default function User({username, name, isFollowing, user_avatar} : UserProps) {
+export default function User({user} : UserProps) {
     const router = useRouter();
 
     const handleClick = () => {
-        router.push(`/linkhub/${username}`)
+        router.push(`/linkhub/${user?.username}`)
         return
     }
     return (
         <div className="flex justify-between px-8 py-2 hover:bg-right-nav-light dark:hover:bg-gray-700 hover:shadow-sm duration-500 rounded-2xl items-center" onClick={() => handleClick()}>
             <div className="flex gap-2">
                 {
-                user_avatar ?
+                user?.user_avatar ?
                     <Image
-                    src={user_avatar}
+                    src={user.user_avatar}
                     width={50}
                     height={50}
-                    alt={`${username} avatar`}
+                    alt={`${user?.username} avatar`}
                     className="rounded-full object-cover"
                     />
                     :
                     <HiUserCircle size={50} className="text-black dark:text-white"/>
                 }
                 <div className="flex flex-col">
-                    <div className="font-bold text-black dark:text-white">{username}</div>
-                    <div className="text-gray-500">{name}</div>
+                    <div className="font-bold text-black dark:text-white">{user?.username}</div>
+                    <div className="text-gray-500">{user?.name}</div>
                 </div>
             </div>
             <button className="border-2 font-bold border-black dark:border-white px-4 rounded-lg hover:bg-white hover:text-black transition-colors w-fit h-fit py-1">
-                {isFollowing ? "Following" : "Follow"}
+                LinkUp
             </button>
         </div>
     )

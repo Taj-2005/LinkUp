@@ -3,19 +3,17 @@
 import ToggleSwitch from "@/components/ToggleSwitch";
 import User from "@/components/messages/User";
 import SendText from "@/components/messages/SendText";
+import {IUser} from "@/models/User"
 
 interface ChatProps {
-  username: string;
-  name: string;
-  user_avatar: string;
-  isLinked: boolean;
+  user: IUser | null
 }
 
-export default function Chat({ username, name, user_avatar }: ChatProps) {
+export default function Chat({ user }: ChatProps) {
   return (
     <div className="flex flex-col h-full">
       <header className="flex items-center justify-between border-b border-primary-light/50 dark:border-primary-dark/50 p-4 sticky top-0 bg-right-nav-light dark:bg-right-nav-dark z-10 shadow-sm">
-        <User username={username} name={name} user_avatar={user_avatar}/>
+        <User user={user}/>
         <ToggleSwitch />
       </header>
 

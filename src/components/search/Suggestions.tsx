@@ -1,39 +1,89 @@
 "use client";
 
-import { useState } from "react";
-import users from "@/constants/User";
+import { useState, useMemo } from "react";
 import User from "@/components/search/User";
+import { IUser } from "@/models/User";
 
-export default function Suggestions(){
+interface SuggestionsProps {
+  users: IUser[];
+  currentUser: IUser | null;
+}
+
+export default function Suggestions({ users, currentUser }: SuggestionsProps) {
     const [showAll, setShowAll] = useState(false);
-    
-    const followingUsers = users.filter(user => !user.isLinked);
-    const displayedUsers = showAll ? followingUsers : followingUsers.slice(0, 5);
-    
-    return (
-        <div className="flex flex-col">
-            <div className="w-full p-10 flex justify-between">
-                <div className="text-gray-500 font-bold">Suggested for you</div>
-                <div 
-                    className="text-black dark:text-white hover:opacity-75 font-bold cursor-pointer"
-                    onClick={() => setShowAll(!showAll)}
-                >
-                    {showAll ? "Show less" : "See all"}
-                </div>
-            </div>
-            <div className="overflow-y-auto max-h-[70vh] hide-scrollbar">
-                {
-                    displayedUsers.map((user) => (
-                        <User 
-                            key={user.username} 
-                            username={user.username} 
-                            name={user.name} 
-                            isFollowing={user.isLinked}
-                            user_avatar={user.user_avatar}
-                        />
-                    ))
-                }
-            </div>
+
+    const sortedUsers = [...users].sort((a, b) => {
+    const userCity = (currentUser?.location || "").toLowerCase().trim();
+    const prefGender =
+        currentUser?.sex === "male"
+        ? "female"
+        : currentUser?.sex === "female"
+        ? "male"
+        : null;
+
+    const aCity = (a.location || "").toLowerCase().trim();
+    const bCity = (b.location || "").toLowerCase().trim();
+
+    const hasCityA = aCity.length > 0;
+    const hasCityB = bCity.length > 0;
+
+    const sameA =
+        hasCityA &&
+        userCity &&
+        (aCity.includes(userCity) || userCity.includes(aCity));
+
+    const sameB =
+        hasCityB &&
+        userCity &&
+        (bCity.includes(userCity) || userCity.includes(bCity));
+
+    const oppA = prefGender && a.sex === prefGender;
+    const oppB = prefGender && b.sex === prefGender;
+
+    // 5️⃣ Empty cities always last
+    if (!hasCityA && hasCityB) return 1;
+    if (!hasCityB && hasCityA) return -1;
+
+    // 1️⃣ Same city + opposite gender
+    if (sameA && oppA && !(sameB && oppB)) return -1;
+    if (sameB && oppB && !(sameA && oppA)) return 1;
+
+    // 2️⃣ Same city (any gender)
+    if (sameA && !sameB) return -1;
+    if (sameB && !sameA) return 1;
+
+    // 3️⃣ Opposite gender (any city)
+    if (oppA && !oppB) return -1;
+    if (oppB && !oppA) return 1;
+
+    // 4️⃣ Remaining
+    return 0;
+    });
+
+
+
+
+
+  const displayed = showAll ? sortedUsers : sortedUsers.slice(0, 5);
+
+  return (
+    <div className="flex flex-col">
+      <div className="w-full p-10 flex justify-between">
+        <div className="text-gray-500 font-bold">Suggested for you</div>
+
+        <div
+          className="text-black dark:text-white hover:opacity-75 font-bold cursor-pointer"
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? "Show less" : "See all"}
         </div>
-    )
+      </div>
+
+      <div className="overflow-y-auto max-h-[70vh] hide-scrollbar">
+        {displayed.map((u) => (
+          <User key={u._id} user={u} />
+        ))}
+      </div>
+    </div>
+  );
 }
