@@ -5,13 +5,13 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import {IUser} from "@/models/User"
+import { IUser } from "@/models/User";
 import { getAllUsers, signout } from "@/utils/api";
-import Loading from "@/app/loading";
+import {motion} from "framer-motion"
 
 export default function Stories() {
   const { resolvedTheme } = useTheme();
-  const router = useRouter()
+  const router = useRouter();
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,15 +20,17 @@ export default function Stories() {
       try {
         const data = await getAllUsers();
         setUsers(data);
-        console.log(data)
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Failed to load users. Signing out.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load users. Signing out.";
+
         toast.error(message || "Session expired. You’ve been signed out.");
+
         try {
           await signout();
-        } catch {
-          // ignore signout errors
-        }
+        } catch {}
       } finally {
         setLoading(false);
       }
@@ -37,24 +39,57 @@ export default function Stories() {
     fetchUsers();
   }, []);
 
-  if (loading) return <Loading />
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-row overflow-x-auto hide-scrollbar w-full p-12 gap-8"
+      >
+        {Array.from({ length: 12 }).map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: i * 0.05, duration: 0.3 }}
+            className="flex flex-col items-center flex-shrink-0 text-center"
+          >
+            <div className="relative w-[100px] h-[100px] rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700">
+                <div className="absolute inset-0 animate-shimmer opacity-60" />
+            </div>
+
+            <div className="relative skeleton-line w-[80px] h-4 mt-3 overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer opacity-60" />
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="flex flex-row overflow-x-auto hide-scrollbar w-full p-12 gap-8">
+    <div className="flex flex-row overflow-x-auto hide-scrollbar w-full px-4 py-2 gap-6">
       {users.slice(0, 20).map((user) => (
         <div
           key={user.username}
           onClick={() => router.push(`/linkhub/${user.username}`)}
-          className="flex flex-col items-center flex-shrink-0 text-center"
+          className="flex flex-col items-center flex-shrink-0 text-center cursor-pointer"
         >
-            <Image
-              src={user.user_avatar ? user.user_avatar : `${resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png" }`}
-              alt={user.username}
-              width={100}
-              height={100}
-              className="rounded-full flex-shrink-0 object-cover border-4 border-primary-dark dark:border-primary-light p-[0.5px]"
-              loading="lazy"
-            />
+          <Image
+            src={
+              user.user_avatar
+                ? user.user_avatar
+                : resolvedTheme === "dark"
+                ? "/dark-profile.png"
+                : "/light-profile.png"
+            }
+            alt={user.username}
+            width={100}
+            height={100}
+            className="rounded-full flex-shrink-0 object-cover border-4 border-primary-dark dark:border-primary-light p-[0.5px]"
+          />
+
           <span className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300 truncate w-[100px]">
             {user.username}
           </span>

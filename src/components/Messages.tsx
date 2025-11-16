@@ -24,7 +24,7 @@ export default function Messages() {
   });
 
   return (
-    <div className="w-[85%] m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark shadow-md border border-primary-light/30 dark:border-primary-dark/30">
+    <div className="w-full m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark shadow-md border border-primary-light/30 dark:border-primary-dark/30">
       <div className="w-[30%] border-r border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark p-4">
         <h2 className="text-xl font-semibold text-primary-dark dark:text-primary-light mb-6 select-none">
           My Links

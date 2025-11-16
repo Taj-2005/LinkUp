@@ -1,3 +1,5 @@
+import {authFetch} from "@/lib/authFetch"
+
 interface SignupData {
   username: string;
   name: string;
@@ -109,47 +111,10 @@ export async function signout() {
   }
 }
 
-export async function getCurrentUser() {
-  try {
-    let res = await fetch("/api/me", { credentials: "include" });
-    let json = await res.json();
-
-    // If access token expired, try refresh ONCE
-    if (res.status === 401 && json.error?.toLowerCase().includes("expired")) {
-      console.warn("Access token expired — attempting refresh...");
-      await refreshAccessToken();
-
-      // Retry the request once
-      res = await fetch("/api/me", { credentials: "include" });
-      json = await res.json();
-    }
-
-    if (!res.ok) {
-      throw new Error(json.error || "Failed to fetch user");
-    }
-
-    return json;
-  } catch (error: unknown) {
-    console.error("Error in getCurrentUser:", error);
-    await signout();
-    throw new Error(extractErrorMessage(error));
-  }
+export function getCurrentUser() {
+  return authFetch("/api/me");
 }
 
-
-export async function getAllUsers() {
-  try {
-    const res = await fetch("/api/users", { credentials: "include" });
-    const json = await res.json();
-
-    if (!res.ok) {
-      await signout();
-      throw new Error(json.error || "Failed to fetch users");
-    }
-
-    return json;
-  } catch (error: unknown) {
-    await signout();
-    throw new Error(extractErrorMessage(error));
-  }
+export function getAllUsers() {
+  return authFetch("/api/users");
 }

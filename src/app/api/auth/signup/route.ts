@@ -4,6 +4,8 @@ import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 import { signAccessToken, signRefreshToken } from "@/lib/tokens";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
 
 export async function POST(req: Request) {
@@ -35,14 +37,14 @@ export async function POST(req: Request) {
 
     res.cookies.set("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
+      secure: isProd,
       sameSite: "lax",
       path: "/",
     });
 
     res.cookies.set("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: isProd,
       sameSite: "lax",
       path: "/",
     });

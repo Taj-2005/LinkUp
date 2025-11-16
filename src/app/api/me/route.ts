@@ -36,7 +36,10 @@ export async function GET() {
       return res;
     }
 
-    const res = NextResponse.next();
+    const res = NextResponse.json(
+      { message: "Protected data (refreshed)", user: result.user },
+      { status: 200 }
+    );
     res.cookies.set("accessToken", result.newAccessToken!, {
       httpOnly: true,
       secure: true,
@@ -50,6 +53,6 @@ export async function GET() {
       path: "/",
     });
 
-    return NextResponse.json({ message: "Protected data (refreshed)", user: result.user });
+    return res
   }
 }

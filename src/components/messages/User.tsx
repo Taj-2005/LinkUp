@@ -1,36 +1,53 @@
 "use client";
 
-import { HiUserCircle } from "react-icons/hi";
-
 import Image from "next/image";
+import { useTheme } from "next-themes";
+import { IUser } from "@/models/User";
 
 interface UserProps {
-    username: string;
-    name: string;
-    user_avatar: string;
-    onClick?: () => void;
+  user: IUser | null;
 }
-export default function User({username, name, user_avatar, onClick} : UserProps) {
+
+export default function User({ user }: UserProps) {
+  const { resolvedTheme } = useTheme();
+
+  if (!user) {
     return (
-        <div onClick={onClick} className="flex justify-between px-4 py-2 w-full">
-            <div className="flex gap-2">
-                {
-                user_avatar ?
-                    <Image
-                    src={user_avatar}
-                    width={50}
-                    height={50}
-                    alt={`${username} avatar`}
-                    className="rounded-full object-cover"
-                    />
-                    :
-                    <HiUserCircle size={50} className="text-black dark:text-white"/>
-                }
-                <div className="flex flex-col">
-                    <div className="font-bold text-black dark:text-white">{username}</div>
-                    <div className="text-gray-500">{name}</div>
-                </div>
-            </div>
+      <div className="flex gap-3 pl-4 items-center">
+        <div className="w-[50px] h-[50px] skeleton-circle skeleton-wiggle"></div>
+
+        <div className="flex flex-col gap-2">
+          <div className="h-4 w-32 skeleton-text"></div>
+          <div className="h-3 w-20 skeleton-text"></div>
         </div>
-    )
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2 pl-4 items-center">
+      <Image
+        src={
+          user.user_avatar
+            ? user.user_avatar
+            : resolvedTheme === "dark"
+            ? "/dark-profile.png"
+            : "/light-profile.png"
+        }
+        width={50}
+        height={50}
+        alt="avatar"
+        className="rounded-full object-cover"
+      />
+
+      <div className="flex flex-col">
+        <div className="font-bold text-black dark:text-white">
+          {user.username}
+        </div>
+        <div className="text-gray-500 dark:text-gray-400">
+          {user.name}
+        </div>
+      </div>
+    </div>
+  );
 }

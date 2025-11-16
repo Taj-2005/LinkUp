@@ -15,7 +15,8 @@ export default function SignInPage() {
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter()
 
-  const handleSignin = async () => {
+  const handleSignin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       toast.loading("Signing in...");
       await signin(emailOrUsername, password);
@@ -94,7 +95,9 @@ export default function SignInPage() {
           <p className={`${theme.textSecondary} text-sm`}>Sign in to continue your journey</p>
         </div>
 
-        <div className="px-8 pb-8 space-y-5">
+        <form
+        onSubmit={handleSignin}
+        className="px-8 pb-8 space-y-5">
           <div>
             <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
               Email or Username
@@ -147,7 +150,7 @@ export default function SignInPage() {
           </div>
 
           <button
-            onClick={handleSignin}
+            type="submit"
             className={`w-full ${theme.button} ${theme.buttonText} py-3.5 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-6`}
           >
             <LogIn className="w-5 h-5" />
@@ -160,7 +163,7 @@ export default function SignInPage() {
               Sign up
             </a>
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );
