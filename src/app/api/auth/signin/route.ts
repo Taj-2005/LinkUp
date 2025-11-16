@@ -25,12 +25,21 @@ export async function POST(req: Request) {
 
     console.log("👤 User found:", !!user);
 
-    if (!user) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    if (!user)
+      return NextResponse.json(
+        { error: "User does not exist" },
+        { status: 404 }
+      );
+
 
     const valid = await bcrypt.compare(password, user.password);
     console.log("🔑 Password valid:", valid);
 
-    if (!valid) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    if (!valid)
+      return NextResponse.json(
+        { error: "Incorrect password" },
+        { status: 401 }
+      );
 
     const payload = { userId: user._id, username: user.username };
     const accessToken = signAccessToken(payload);

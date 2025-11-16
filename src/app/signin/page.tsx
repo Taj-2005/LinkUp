@@ -17,17 +17,34 @@ export default function SignInPage() {
 
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
       toast.loading("Signing in...");
-      await signin(emailOrUsername, password);
+
+      const user = await signin(emailOrUsername, password);
+
       toast.dismiss();
-      toast.success("Welcome! 🚀");
-      router.push("/");
-    } catch {
+      toast.success(`Welcome back, ${user.username}! 🚀`);
+      router.push("/livelinks");
+
+    } catch (err: unknown) {
       toast.dismiss();
-      toast.error("Login failed");
+
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
+
+      if (errorMessage.includes("User does not exist")) {
+        toast.error("❌ User not found. Check your email/username.");
+      } else if (errorMessage.includes("Incorrect password")) {
+        toast.error("🔐 Incorrect password.");
+      } else if (errorMessage.includes("Missing credentials")) {
+        toast.error("⚠ Please fill in both fields.");
+      } else {
+        toast.error("⚠ Something went wrong. Please try again.");
+      }
     }
   };
+
+
 
   const theme = darkMode
     ? {

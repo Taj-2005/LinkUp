@@ -5,7 +5,6 @@ import { User } from "@/models/User";
 import { signAccessToken, signRefreshToken } from "@/lib/tokens";
 
 const isProd = process.env.NODE_ENV === "production";
-
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
 
 export async function POST(req: Request) {
@@ -14,14 +13,34 @@ export async function POST(req: Request) {
     const { username, name, email, password, location, bio, sex } = await req.json();
 
     if (!username || !name || !email || !password || !sex) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    const existing = await User.findOne({ $or: [{ email }, { username }] });
-    if (existing) return NextResponse.json({ error: "User already exists" }, { status: 409 });
+    const existing = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 409 }
+      );
+    }
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-    const user = await User.create({ username, name, email, password: hashed, location, bio, sex });
+
+    const user = await User.create({
+      username,
+      name,
+      email,
+      password: hashed,
+      location,
+      bio,
+      sex,
+    });
 
     const payload = { userId: user._id, username: user.username };
     const accessToken = signAccessToken(payload);
@@ -32,7 +51,11 @@ export async function POST(req: Request) {
 
     const res = NextResponse.json({
       message: "Signup successful",
-      user: { id: user._id, username: user.username, email: user.email },
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
 
     res.cookies.set("accessToken", accessToken, {
@@ -50,8 +73,15 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (err: unknown) {
+    console.error("❌ SIGNUP ERROR:", err);
+
+    const message =
+      err instanceof Error ? err.message : "Unexpected server error";
+
+    return NextResponse.json(
+      { error: "Server error", details: message },
+      { status: 500 }
+    );
   }
 }

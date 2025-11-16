@@ -68,21 +68,40 @@ export default function SignUpPage() {
       password,
       location,
       bio,
-      sex
+      sex,
     };
 
     try {
       toast.loading("Creating account...");
-      await signup(data);
+
+      const user = await signup(data);
+
       toast.dismiss();
       toast.success("Account created 🎉");
-      router.push("/");
+
+      router.push("/livelinks");
+
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Signup failed";
       toast.dismiss();
-      toast.error(message);
+
+      const message =
+        err instanceof Error ? err.message : "Signup failed";
+
+      if (message.includes("User already exists")) {
+        toast.error("⚠ User already exists! Try logging in.");
+      } 
+      else if (message.includes("Missing required fields")) {
+        toast.error("⚠ Please fill all required fields.");
+      }
+      else if (message.includes("Server error")) {
+        toast.error("❌ Server error. Try again later.");
+      }
+      else {
+        toast.error(message);
+      }
     }
   };
+
 
   const theme = darkMode
     ? {

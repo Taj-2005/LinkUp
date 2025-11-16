@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export async function POST() {
   try {
     await dbConnect();
+
     const cookieStore = await cookies();
     const token = cookieStore.get("refreshToken")?.value;
 
@@ -20,12 +21,24 @@ export async function POST() {
       }
     }
 
-    const res = NextResponse.json({ ok: true, message: "Signed out successfully" });
-    res.cookies.delete("refreshToken");
+    const res = NextResponse.json({
+      ok: true,
+      message: "Signed out successfully",
+    });
+
     res.cookies.delete("accessToken");
+    res.cookies.delete("refreshToken");
+
     return res;
-  } catch (err) {
-    console.error("Signout error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (err: unknown) {
+    console.error("❌ SIGNOUT ERROR:", err);
+
+    const message =
+      err instanceof Error ? err.message : "Unexpected server error";
+
+    return NextResponse.json(
+      { error: "Server error", details: message },
+      { status: 500 }
+    );
   }
 }

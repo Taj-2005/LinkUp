@@ -7,6 +7,7 @@ import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { signout, getCurrentUser } from "@/utils/api";
 import { useTheme } from "next-themes";
+import SignoutButton from "@/components/SignoutButton";
 
 
 interface User {
@@ -94,11 +95,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
     router.push(`/${item.toLowerCase()}`);
   };
 
-  const handleSignout = async () => {
-    await signout();
-    setShowMore(false);
-    window.location.href = "/";
-  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -182,15 +178,9 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           onClick={() => handleNavClick("more")}
         />
 
-        {/* Popup menu */}
         {showMore && (
           <div className="absolute bottom-20 left-4 bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
-            <div
-              onClick={handleSignout}
-              className="text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
-            >
-              Sign Out
-            </div>
+            <SignoutButton onSignedOut={() => setShowMore(false)} />
           </div>
         )}
       </div>

@@ -44,15 +44,27 @@ export async function signup(data: SignupData) {
       body: JSON.stringify(data),
     });
 
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || json.message || "Signup failed");
+    let json: any = {};
 
-    window.location.href = "/livelinks";
-    return json;
-  } catch (error: unknown) {
-    throw new Error(extractErrorMessage(error));
+    try {
+      json = await res.json();
+    } catch {
+      throw new Error("Invalid server response");
+    }
+
+    if (!res.ok) {
+      throw new Error(json.error || json.message || "Signup failed");
+    }
+
+    return json.user;
+
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Signup failed";
+    throw new Error(message);
   }
 }
+
 
 
 export async function signin(emailOrUsername: string, password: string) {
@@ -64,21 +76,27 @@ export async function signin(emailOrUsername: string, password: string) {
       body: JSON.stringify({ emailOrUsername, password }),
     });
 
-    const json: SigninResponse = await res.json();
+    let json: any = {};
+
+    try {
+      json = await res.json();
+    } catch {
+      throw new Error("Invalid server response");
+    }
 
     if (!res.ok) {
-      const message =
-        typeof json === "object" && json !== null && "error" in json
-          ? (json.error as string)
-          : "Request failed";
-      throw new Error(message);
+      throw new Error(json.error || "Login failed");
     }
-    window.location.href = "/livelinks";
+
     return json.user;
-  } catch (error: unknown) {
-    throw new Error(extractErrorMessage(error) || "Signin failed");
+
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Signin failed";
+    throw new Error(message);
   }
 }
+
 
 
 export async function refreshAccessToken() {
@@ -100,16 +118,32 @@ export async function refreshAccessToken() {
 
 export async function signout() {
   try {
-    await fetch("/api/auth/signout", {
+    const res = await fetch("/api/auth/signout", {
       method: "POST",
       credentials: "include",
     });
 
-    window.location.href = "/";
-  } catch (err) {
-    console.error("Signout failed:", err);
+    let json: any = {};
+
+    try {
+      json = await res.json();
+    } catch {
+      throw new Error("Invalid server response");
+    }
+
+    if (!res.ok) {
+      throw new Error(json.error || "Signout failed");
+    }
+
+    return json;
+
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Signout failed";
+    throw new Error(message);
   }
 }
+
 
 export function getCurrentUser() {
   return authFetch("/api/me");
