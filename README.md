@@ -1,36 +1,225 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📱 LinkUp — Modern Social Connection Platform
 
-## Getting Started
+LinkUp is a full‑stack social networking application designed to help users discover, connect, and communicate seamlessly. Built with **Next.js 14 App Router**, **TypeScript**, **MongoDB**, and **Framer Motion**, the platform prioritizes UI smoothness, authentication security, and scalable architecture.
 
-First, run the development server:
+Future enhancements include **WebSockets for real‑time chat**, **Cloudinary for media uploads**, and additional personalization features.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 Features
+
+### 🔐 Authentication & Security
+
+* JWT‑based **Access + Refresh Tokens** (Rotation + Database Validation)
+* HttpOnly secure cookies for token storage
+* Auto‑refresh mechanism with safe_single_refresh lock
+* Protected API routes using server middleware
+
+### 👤 User System
+
+* Create users with avatar, bio, location, links, etc.
+* Gender‑based and location‑based user suggestions
+* Profile page with stats (links, linked_by, linked_to)
+* Dark & Light theme support (Next Themes)
+
+### 💬 Messaging System (Upcoming)
+
+* Real‑time chat with WebSockets
+* Seen/delivered indicators
+* Online/offline statuses
+
+### 🧭 Navigation & UI
+
+* Animated sidebar navigation
+* Separate sections:
+
+  * LiveLinks
+  * LinkFinder (Search)
+  * LinkUps (Chats)
+  * LinkUp Requests
+  * New Link
+  * LinkHub (Profiles)
+* Skeleton loading states (Shimmer)
+* Smooth animations using Framer Motion
+
+### 🔍 Search System
+
+* Auto‑sorted search results
+* Intelligent suggestions:
+
+  * Same city prioritized first
+  * Opposite gender next
+  * Remaining users last
+
+### 🖼️ Media Handling (Future)
+
+* Cloudinary integration
+* Update profile picture
+* Upload post images
+
+---
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+
+* **Next.js 14 App Router**
+* **TypeScript**
+* **TailwindCSS**
+* **Framer Motion**
+* **React Icons**
+* **Next Themes**
+
+### **Backend**
+
+* **Next.js Server Actions & Routes**
+* **MongoDB + Mongoose**
+* **JWT (jsonwebtoken)**
+* **Secure Cookie Management**
+
+### **Tools & Deployment**
+
+* **ESLint + Prettier**
+* **Vercel** / Node Hosting
+* **Cloudinary (Future)**
+* **WebSockets (Future)**
+
+---
+
+## 📁 Folder Structure Overview
+
+```
+linkup/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── signin/route.ts
+│   │   │   │   ├── signup/route.ts
+│   │   │   │   ├── refresh/route.ts
+│   │   │   │   └── signout/route.ts
+│   │   │   ├── me/route.ts
+│   │   │   └── users/route.ts
+│   │   ├── livelinks/page.tsx
+│   │   ├── linkfinder/page.tsx
+│   │   ├── linkups/page.tsx
+│   │   ├── linkhub/[username]/page.tsx
+│   │   └── layout.tsx
+│   │
+│   ├── components/
+│   │   ├── Navbar/...
+│   │   ├── home/...
+│   │   ├── search/...
+│   │   ├── messages/...
+│   │   └── profile/...
+│   │
+│   ├── lib/
+│   │   ├── dbConnect.ts
+│   │   ├── tokens.ts
+│   │   ├── auth.ts
+│   │   ├── authHelpers.ts
+│   │   ├── refreshLock.ts
+│   │   └── authClient.ts
+│   │
+│   ├── models/
+│   │   └── User.ts
+│   │
+│   ├── utils/
+│   │   └── api.ts
+│   │
+│   └── constants/
+│       └── User.ts (temporary dummy data)
+│
+├── public/
+│   ├── dark-profile.png
+│   ├── light-profile.png
+│   └── favicon.ico
+│
+├── .env.local
+├── package.json
+├── README.md
+└── tsconfig.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file:
 
-## Learn More
+```
+MONGODB_URI=your_mongodb_connection_string
+JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+NODE_ENV=development
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏁 Running the Project
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Install Dependencies
 
-## Deploy on Vercel
+```
+yarn install
+# or
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Start Development Server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+yarn dev
+# or
+npm run dev
+```
+
+Visit:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🔮 Upcoming Features
+
+### ⚡ Real‑time Messaging
+
+* WebSocket based chat
+* Online/offline presence
+* Message status
+
+### 🖼️ Cloudinary Media Upload
+
+* Profile picture upload
+* Story uploads
+* Image optimization
+
+### ❤️ Match System
+
+* Mutual linking detection
+* Smart recommendations
+
+---
+
+## 🧑‍💻 Author
+
+**Taj — Web Developer**
+Building modern full‑stack web applications with elegant UI and scalable architecture.
+
+---
+
+## ⭐ Contribution Guide (Future)
+
+* Fork the repo
+* Create a feature branch
+* Submit PR
+
+---
+
+## 📜 License
+
+This project is currently private and not open-source. Future licensing will be updated.
+
+---
