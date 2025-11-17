@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Moon, Sun, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {signup} from "@/utils/api"
@@ -8,8 +8,13 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import useDebounce from "@/hooks/useDebounce";
 
 export default function SignUpPage() {
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [shakeUsername, setShakeUsername] = useState(false);
+  const [shakeEmail, setShakeEmail] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [username, setUsername] = useState("");
@@ -24,6 +29,10 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const router = useRouter();
+
+  const debouncedUsername = useDebounce(username, 600);
+  const debouncedEmail = useDebounce(email, 600);
+
 
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "" };
@@ -101,6 +110,47 @@ export default function SignUpPage() {
       }
     }
   };
+  
+
+  const checkAvailability = async (value: string, type: "username" | "email") => {
+    try {
+      const res = await fetch("/api/auth/check-availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [type]: value }),
+      });
+
+      const data = await res.json();
+
+      if (data.exists) {
+        if (type === "username") {
+          setUsernameError("Username already taken");
+          setShakeUsername(true);
+          setTimeout(() => setShakeUsername(false), 400);
+        } else {
+          setEmailError("Email already exists");
+          setShakeEmail(true);
+          setTimeout(() => setShakeEmail(false), 400);
+        }
+      } else {
+        if (type === "username") setUsernameError("");
+        if (type === "email") setEmailError("");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!debouncedUsername) return;
+    checkAvailability(debouncedUsername, "username");
+  }, [debouncedUsername]);
+
+  useEffect(() => {
+    if (!debouncedEmail) return;
+    checkAvailability(debouncedEmail, "email");
+  }, [debouncedEmail]);
+
 
 
   const theme = darkMode
@@ -220,10 +270,17 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("username")}
                     onBlur={() => setFocusedField("")}
                     placeholder="johndoe"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "username" ? `${theme.inputFocus} ring-4` : ""
-                    } transition-all duration-200 focus:outline-none`}
+                    className={`w-full px-4 py-3 rounded-xl border ${theme.input}
+                      ${focusedField === "username" ? `${theme.inputFocus} ring-4` : ""}
+                      ${usernameError ? "border-red-500" : ""}
+                      ${shakeUsername ? "shake" : ""}
+                      transition-all duration-200
+                    `}
                   />
+
+                  {usernameError && (
+                    <p className="text-red-500 text-xs mt-1">{usernameError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -237,10 +294,17 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("email")}
                     onBlur={() => setFocusedField("")}
                     placeholder="john@example.com"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "email" ? `${theme.inputFocus} ring-4` : ""
-                    } transition-all duration-200 focus:outline-none`}
+                    className={`w-full px-4 py-3 rounded-xl border ${theme.input}
+                      ${focusedField === "email" ? `${theme.inputFocus} ring-4` : ""}
+                      ${emailError ? "border-red-500" : ""}
+                      ${shakeEmail ? "shake" : ""}
+                      transition-all duration-200
+                    `}
                   />
+
+                  {emailError && (
+                    <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                  )}
                 </div>
 
                 <div>

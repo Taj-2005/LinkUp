@@ -9,33 +9,42 @@ export default function AdsPlaceholderMobile() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-2xl font-bold text-indigo-700 dark:text-indigo-200 mb-8 text-center"
+        className="text-2xl font-bold text-primary-dark dark:text-primary-light mb-8 text-center"
       >
         Sponsored Ads
       </motion.h2>
 
       <div className="w-full max-w-sm space-y-6">
-        {[1].map((item) => (
-          <motion.div
-            key={item}
-            whileTap={{ scale: 0.97 }}
-            className="relative bg-white/90 dark:bg-zinc-800/90 border border-indigo-200 dark:border-zinc-700 rounded-2xl p-5 shadow-lg backdrop-blur-md overflow-hidden"
-          >
-            {/* Shimmer animation */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-100/20 dark:via-indigo-400/10 to-transparent animate-[shimmer_2s_infinite] pointer-events-none" />
+{[1].map((item) => (
+  <motion.div
+    key={item}
+    whileTap={{ scale: 0.97 }}
+    className="relative bg-left-nav-light/90 dark:bg-left-nav-dark/90 border border-primary-light/60 dark:border-primary-dark/60 rounded-2xl p-5 shadow-lg backdrop-blur-md overflow-hidden"
+  >
+    {/* Shimmer animation */}
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-light/25 to-transparent animate-[shimmer_2s_infinite] pointer-events-none" />
 
-            <div className="flex flex-col space-y-5">
-              <div className="w-14 h-14 rounded-full bg-indigo-300 dark:bg-indigo-500 animate-pulse" />
-              <div className="w-3/4 h-6 bg-indigo-200 dark:bg-indigo-400 rounded-md animate-pulse" />
-              <div className="w-full h-4 bg-indigo-100 dark:bg-indigo-300 rounded-md animate-pulse" />
-              <div className="w-5/6 h-4 bg-indigo-100 dark:bg-indigo-300 rounded-md animate-pulse" />
-              <div className="w-28 h-9 bg-indigo-400 dark:bg-indigo-600 rounded-lg mt-4 animate-pulse" />
-            </div>
-          </motion.div>
-        ))}
+    {/* Content placeholder */}
+    <div className="flex flex-col space-y-5">
+      {/* Icon Placeholder */}
+      <div className="w-14 h-14 rounded-full bg-primary-light/60 dark:bg-primary-dark/70 animate-pulse" />
+
+      {/* Title Placeholder */}
+      <div className="w-3/4 h-6 bg-primary-light/40 dark:bg-primary-dark/60 rounded-md animate-pulse" />
+
+      {/* Text Placeholder */}
+      <div className="w-full h-4 bg-primary-light/30 dark:bg-primary-dark/40 rounded-md animate-pulse" />
+      <div className="w-5/6 h-4 bg-primary-light/30 dark:bg-primary-dark/40 rounded-md animate-pulse" />
+
+      {/* CTA Placeholder */}
+      <div className="w-28 h-9 bg-primary-light/70 dark:bg-primary-dark/80 rounded-lg mt-4 animate-pulse" />
+    </div>
+  </motion.div>
+))}
+
       </div>
 
-      <p className="text-xs text-gray-600 dark:text-gray-400 mt-10">
+      <p className="text-xs text-primary-dark/70 dark:text-primary-light/60 mt-10">
         Ad placeholders — live content will appear shortly
       </p>
 

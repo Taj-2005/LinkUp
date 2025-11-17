@@ -5,9 +5,9 @@
 @theme {
   --color-primary-light: #606468;
   --color-primary-dark: #3E434C;
-  --color-left-nav-light: #ffffff;
+  --color-right-nav-light: #ffffff;
   --color-left-nav-dark: #181818;
-  --color-right-nav-light: #e1e1e1;
+  --color-left-nav-light: #e1e1e1;
   --color-right-nav-dark: #212121;
 }
 
@@ -129,4 +129,32 @@ body {
     rgba(255, 255, 255, 0) 100%
   );
   animation: shimmer 1.5s infinite forwards;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out;
 }
