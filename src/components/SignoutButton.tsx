@@ -18,7 +18,7 @@ export default function SignoutButton({ onSignedOut }: SignoutButtonProps) {
       toast.success("Signed out successfully");
 
       if (onSignedOut) onSignedOut();
-      window.location.href = "/signin";
+      window.location.href = "/";
     } catch (err: unknown) {
       toast.dismiss();
       const message = err instanceof Error ? err.message : "Signout failed";

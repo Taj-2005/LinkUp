@@ -5,9 +5,9 @@
 @theme {
   --color-primary-light: #606468;
   --color-primary-dark: #3E434C;
-  --color-left-nav-light: #e1e1e1;
+  --color-left-nav-light: #ffffff;
   --color-left-nav-dark: #181818;
-  --color-right-nav-light: #ffffff;
+  --color-right-nav-light: #e1e1e1;
   --color-right-nav-dark: #212121;
 }
 

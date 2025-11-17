@@ -1,7 +1,6 @@
 "use client";
 
-import { HiUserCircle } from "react-icons/hi";
-
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import {IUser} from "@/models/User"
 import Image from "next/image";
@@ -10,6 +9,7 @@ interface UserProps {
     user: IUser | null
 }
 export default function User({user} : UserProps) {
+    const { resolvedTheme } = useTheme();
     const router = useRouter();
 
     const handleClick = () => {
@@ -19,18 +19,13 @@ export default function User({user} : UserProps) {
     return (
         <div className="flex justify-between px-8 py-2 hover:bg-right-nav-light dark:hover:bg-gray-700 hover:shadow-sm duration-500 rounded-2xl items-center" onClick={() => handleClick()}>
             <div className="flex gap-2">
-                {
-                user?.user_avatar ?
-                    <Image
-                    src={user.user_avatar}
+                <Image
+                    src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
                     width={50}
                     height={50}
                     alt={`${user?.username} avatar`}
                     className="rounded-full object-cover"
-                    />
-                    :
-                    <HiUserCircle size={50} className="text-black dark:text-white"/>
-                }
+                />
                 <div className="flex flex-col">
                     <div className="font-bold text-black dark:text-white">{user?.username}</div>
                     <div className="text-gray-500">{user?.name}</div>

@@ -61,9 +61,7 @@ function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
             src={
               user.user_avatar
                 ? user.user_avatar
-                : resolvedTheme === "dark"
-                ? "/dark-profile.png"
-                : "/light-profile.png"
+                : "/dark-profile.png"
             }
             width={26}
             height={26}
@@ -107,7 +105,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   }, []);
 
   return (
-    <div className="relative w-[15%] min-h-screen flex flex-col justify-between">
+    <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4">
       <div className="flex flex-col">
         {/* Logo */}
         <div>
