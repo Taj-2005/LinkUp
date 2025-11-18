@@ -1,4 +1,3 @@
-// ./src/components/ProfileCardSelf.tsx
 "use client";
 
 import Image from "next/image";
@@ -11,6 +10,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { updateProfile, getCurrentUser } from "@/utils/api";
 import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
 
+// ✅ Import your ready CropModal
 import CropModal from "@/components/profile/CropModal";
 
 type UpdateProfilePayload = Partial<{
@@ -30,20 +30,25 @@ export default function ProfileCard() {
   const [displayUser, setDisplayUser] = useState<IUser | null>(null);
   const [fetchDone, setFetchDone] = useState(false);
 
+  // avatar states
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [tempAvatar, setTempAvatar] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
+  // 👉 external crop modal
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
+  // edit states
   const [editModal, setEditModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  // profile fields
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
   const [fullName, setFullName] = useState("");
 
+  // validation
   const [usernameError, setUsernameError] = useState("");
   const [shakeUsername, setShakeUsername] = useState(false);
   const [nameError, setNameError] = useState("");
@@ -51,6 +56,9 @@ export default function ProfileCard() {
 
   const debouncedUsername = useDebounce(username, 600);
 
+  /* =========================================================
+     FETCH INITIAL USER
+  ========================================================= */
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -70,6 +78,9 @@ export default function ProfileCard() {
     if (fetchDone) setDisplayUser(user);
   }, [fetchDone, user]);
 
+  /* =========================================================
+     VALIDATIONS
+  ========================================================= */
 
   const validateName = (value: string) => {
     const words = value.trim().split(/\s+/).filter(Boolean);
@@ -117,7 +128,9 @@ export default function ProfileCard() {
     checkUsername(debouncedUsername);
   }, [debouncedUsername, displayUser?.username]);
 
-
+  /* =========================================================
+     OPEN EDIT MODAL
+  ========================================================= */
   const openEditModal = () => {
     setUsername(displayUser?.username ?? "");
     setFullName(displayUser?.name ?? "");
@@ -127,13 +140,13 @@ export default function ProfileCard() {
     setAvatarPreview(null);
     setTempAvatar(null);
 
-    setUploadingAvatar(false);
-
     setEditMode(true);
     setEditModal(true);
   };
 
-
+  /* =========================================================
+     SAVE PROFILE
+  ========================================================= */
   const handleEditSave = async () => {
     if (!editMode) return;
     if (usernameError || nameError) return;
@@ -172,12 +185,13 @@ export default function ProfileCard() {
     setTempAvatar(null);
     setUsernameError("");
     setNameError("");
-    setUploadingAvatar(false);
-    setCropImageSrc(null);
   };
 
   const isSaveDisabled = !!usernameError || !!nameError || !username.trim();
 
+  /* =========================================================
+     CLOUDINARY UPLOAD (your existing implementation)
+  ========================================================= */
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -201,17 +215,22 @@ export default function ProfileCard() {
     return data.secure_url;
   };
 
+  /* =========================================================
+      FILE SELECT → open CropModal
+  ========================================================= */
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
-    setUploadingAvatar(true);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  /* =========================================================
+      DRAG & DROP → open CropModal
+  ========================================================= */
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
@@ -220,15 +239,15 @@ export default function ProfileCard() {
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
-    setUploadingAvatar(true);
   };
 
-
+  /* =========================================================
+      WHEN CROPPING DONE → Update preview + tempAvatar
+  ========================================================= */
   const handleCropDone = (url: string) => {
     setAvatarPreview(url);
     setTempAvatar(url);
     setCropImageSrc(null);
-    setUploadingAvatar(false);
   };
 
   if (!fetchDone || !displayUser) {
@@ -321,15 +340,22 @@ export default function ProfileCard() {
     );
   }
 
+  /* =========================================================
+      AVATAR DISPLAY FINAL
+  ========================================================= */
   const avatarSrc =
     avatarPreview ??
     tempAvatar ??
     displayUser.user_avatar ??
     (resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png");
 
+  /* =========================================================
+      RETURN JSX
+  ========================================================= */
 
   return (
     <>
+      {/* Main Profile */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
         <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4">
           <Image src={avatarSrc} alt="User Avatar" fill className="object-cover" />
@@ -366,6 +392,7 @@ export default function ProfileCard() {
 
       <ProfileNavbarSelf />
 
+      {/* EDIT PROFILE MODAL */}
       <AnimatePresence>
         {editModal && (
           <motion.div
@@ -382,8 +409,10 @@ export default function ProfileCard() {
             >
               <div className="rounded-3xl p-8 bg-white/10 dark:bg-black/20 border border-white/20">
 
+                {/* Title */}
                 <h2 className="text-3xl font-bold text-white mb-6">Edit Profile</h2>
 
+                {/* Header Avatar */}
                 <div className="flex items-center justify-between mb-8 bg-white/10 dark:bg-black/20 p-4 rounded-2xl border border-white/20 backdrop-blur-xl">
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/40">
@@ -417,6 +446,7 @@ export default function ProfileCard() {
                   />
                 </div>
 
+                {/* Drag & Drop */}
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
@@ -426,6 +456,7 @@ export default function ProfileCard() {
                   <p className="text-xs opacity-60">(Desktop only)</p>
                 </div>
 
+                {/* Username */}
                 <div className="mb-5">
                   <label className="text-sm text-white/90">Username</label>
                   <input
@@ -446,6 +477,7 @@ export default function ProfileCard() {
                   {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
                 </div>
 
+                {/* Full Name */}
                 <div className="mb-5">
                   <label className="text-sm text-white/90">Full Name</label>
                   <input
@@ -458,6 +490,7 @@ export default function ProfileCard() {
                   {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
                 </div>
 
+                {/* Location */}
                 <div className="mb-5">
                   <label className="text-sm text-white/90">Location</label>
                   <input
@@ -467,6 +500,7 @@ export default function ProfileCard() {
                   />
                 </div>
 
+                {/* Bio */}
                 <div className="mb-8">
                   <label className="text-sm text-white/90">Bio</label>
                   <textarea
@@ -477,6 +511,7 @@ export default function ProfileCard() {
                   />
                 </div>
 
+                {/* Buttons */}
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={handleCancel}
@@ -501,13 +536,11 @@ export default function ProfileCard() {
         )}
       </AnimatePresence>
 
+      {/* CROPPING MODAL */}
       {cropImageSrc && (
         <CropModal
           imageSrc={cropImageSrc}
-          onClose={() => {
-            setCropImageSrc(null);
-            setUploadingAvatar(false);
-          }}
+          onClose={() => setCropImageSrc(null)}
           uploadToCloudinary={uploadToCloudinary}
           onCropDone={handleCropDone}
         />

@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import Cropper, {
-  Area,
-  MediaSize,
-  Point,
-} from "react-easy-crop";
+import Cropper from "react-easy-crop";
 
 interface Props {
   imageSrc: string;
@@ -21,47 +17,55 @@ export default function CropModal({
   uploadToCloudinary,
 }: Props) {
   const cropContainerRef = useRef<HTMLDivElement | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null);
 
-  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [minZoom, setMinZoom] = useState(1);
 
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
-  const onCropComplete = useCallback(
-    (_: Area, area: Area) => {
-      setCroppedAreaPixels(area);
-    },
-    []
-  );
+  const onCropComplete = useCallback((_: any, area: any) => {
+    setCroppedAreaPixels(area);
+  }, []);
 
-  const onMediaLoaded = useCallback((mediaSize: MediaSize) => {
+  const onMediaLoaded = useCallback((mediaSize: { width: number; height: number }) => {
     const container = cropContainerRef.current;
     if (!container) return;
 
     const cw = container.clientWidth;
     const ch = container.clientHeight;
 
-    const scaleX = cw / mediaSize.width;
-    const scaleY = ch / mediaSize.height;
+    // largest square inside container
+    const square = Math.min(cw, ch);
 
-    const computed = Math.min(scaleX, scaleY);
-    const sanitized = Math.max(computed, 0.1);
+    setCropSize({ width: square, height: square });
 
-    setMinZoom(sanitized);
-    setZoom(sanitized);
+    // compute zoom needed to make image COVER the crop square
+    const scaleX = square / mediaSize.width;
+    const scaleY = square / mediaSize.height;
+
+    const computed = Math.max(scaleX, scaleY);
+
+    // do NOT auto upscale above 1
+    const initialZoom = Math.min(computed, 1);
+
+    setMinZoom(initialZoom);
+    setZoom(initialZoom);
   }, []);
 
-  const getCroppedImg = async (
-    imageSrc: string,
-    pixelCrop: Area
-  ): Promise<Blob> => {
+
+
+
+  // Convert crop → File Blob
+  const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<Blob> => {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
       img.crossOrigin = "anonymous";
 
       img.onload = () => resolve(img);
-      img.onerror = (e) => reject(e);
+      img.onerror = (e: Event | string) => reject(e);
 
       img.src = imageSrc;
     });
@@ -86,22 +90,34 @@ export default function CropModal({
     );
 
     return new Promise<Blob>((resolve) => {
-      canvas.toBlob((blob) => {
-        if (blob) resolve(blob);
-      }, "image/jpeg");
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+        },
+        "image/jpeg",
+        0.92
+      );
     });
   };
 
   const handleApply = async () => {
     if (!croppedAreaPixels) return;
 
-    const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
-    const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+    setLoading(true);     // 🔥 Start UX loader
 
-    const url = await uploadToCloudinary(file);
+    try {
+      const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
 
-    onCropDone(url);
+      const url = await uploadToCloudinary(file);
+      setLoading(false);
+      onCropDone(url);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-xl bg-black/40">
@@ -110,6 +126,7 @@ export default function CropModal({
 
         <div className="rounded-3xl p-6 bg-white/10 dark:bg-black/20 border border-white/20">
 
+          {/* Top Row */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Crop Avatar</h3>
 
@@ -121,40 +138,46 @@ export default function CropModal({
             </button>
           </div>
 
+          {/* Cropper */}
           <div
             ref={cropContainerRef}
             className="relative w-full h-[420px] bg-black/20 rounded-2xl overflow-hidden"
           >
-            <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
-              aspect={1}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              onMediaLoaded={onMediaLoaded}
-              minZoom={minZoom}
-              maxZoom={3}
-              showGrid={false}
-              restrictPosition={false}
-            />
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            cropSize={cropSize ?? undefined}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+            onMediaLoaded={onMediaLoaded}
+            minZoom={minZoom}
+            maxZoom={3}
+            showGrid={false}
+            restrictPosition={false}
+            objectFit="contain"
+          />
           </div>
 
+          {/* Zoom Slider */}
           <div className="mt-4 flex items-center gap-4">
             <label className="text-sm text-white/80">Zoom</label>
 
             <input
               type="range"
               min={minZoom}
-              max={3}
+              max={1}
               step={0.01}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
               className="w-full"
+              disabled
             />
           </div>
 
+          {/* Bottom Buttons */}
           <div className="mt-6 flex justify-end gap-4">
             <button
               onClick={onClose}
@@ -166,15 +189,23 @@ export default function CropModal({
 
             <button
               onClick={handleApply}
-              className="px-6 py-2 rounded-xl font-semibold shadow-lg 
+              disabled={loading}
+              className={`px-6 py-2 rounded-xl font-semibold shadow-lg 
                 bg-primary-light text-black
-                dark:bg-primary-dark dark:text-white"
+                dark:bg-primary-dark dark:text-white
+                ${loading ? "opacity-50 cursor-not-allowed" : ""}
+              `}
             >
-              Apply & Upload
+              {loading ? "Uploading..." : "Apply & Upload"}
             </button>
           </div>
         </div>
       </div>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-3xl z-[9999]">
+          <div className="w-10 h-10 border-4 border-white/40 border-t-white rounded-full animate-spin" />
+        </div>
+      )}
     </div>
   );
 }

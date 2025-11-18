@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
@@ -29,6 +30,7 @@ interface NavbarProps {
 }
 
 function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
+  const { resolvedTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -54,19 +56,13 @@ function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
       onClick={onClick}
     >
       {label === "LinkHub" ? (
-        user && (
           <Image
-            src={
-              user.user_avatar
-                ? user.user_avatar
-                : "/dark-profile.png"
-            }
+            src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
             width={26}
             height={26}
-            alt={`${user.username} avatar`}
+            alt={`${user?.username} avatar`}
             className="rounded-full object-cover"
           />
-        )
       ) : (
         <Icon className="text-white" size={size} />
       )}
