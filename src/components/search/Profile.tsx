@@ -11,15 +11,12 @@ interface UserProps {
 export default function User({ user }: UserProps) {
   const { resolvedTheme } = useTheme();
 
-  // 🔹 Skeleton Loader
   if (!user) {
     return (
       <div className="flex gap-3 pl-4 items-center animate-pulse">
 
-        {/* Avatar Skeleton */}
         <div className="skeleton-circle w-[50px] h-[50px]"></div>
 
-        {/* Text Skeleton */}
         <div className="flex flex-col gap-2">
           <div className="skeleton-line w-28 h-4"></div>
           <div className="skeleton-line w-20 h-3"></div>
@@ -29,7 +26,6 @@ export default function User({ user }: UserProps) {
     );
   }
 
-  // 🔹 Normal User info
   return (
     <div className="flex gap-2 pl-4 items-center">
       <Image

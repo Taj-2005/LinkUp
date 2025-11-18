@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
-import Stories from "@/components/home/Stories"; // <— inserted back here
+import Stories from "@/components/home/Stories";
 import { getCurrentUser } from "@/utils/api";
 import { IUser } from "@/models/User";
 

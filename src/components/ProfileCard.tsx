@@ -22,19 +22,15 @@ if (!user) {
           transition={{ duration: 0.5 }}
           className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8" 
         >
-        {/* Avatar Skeleton */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark bg-gray-300 dark:bg-gray-700"
         >
-          {/* Shimmer effect inside the avatar skeleton */}
           <div className="absolute inset-0 animate-shimmer opacity-60" />
         </motion.div>
-        {/* RIGHT SIDE */}
         <div className="flex-1 flex flex-col justify-between w-full">
-          {/* Username & Name */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -48,7 +44,6 @@ if (!user) {
               <div className="absolute inset-0 animate-shimmer opacity-60" />
             </div>
           </motion.div>
-          {/* Stats */}
           <div className="flex gap-8 text-center mb-6">
             {[1, 2, 3].map((i) => (
               <motion.div
@@ -67,9 +62,7 @@ if (!user) {
               </motion.div>
             ))}
           </div>
-          {/* Location + Bio */}
           <div className="flex flex-col gap-3 max-w-lg">
-            {/* Row with icon + text */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -94,7 +87,6 @@ if (!user) {
               </motion.div>
             ))}
           </div>
-          {/* Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -111,11 +103,9 @@ if (!user) {
     );
   }
 
-  // ⭐ USER DATA LOADED
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       
-      {/* Avatar */}
       <div
         className={`flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark`}
       >
@@ -133,10 +123,8 @@ if (!user) {
         />
       </div>
 
-      {/* Right side info */}
       <div className="flex-1 flex flex-col justify-between">
 
-        {/* Username */}
         <div className="mb-4">
           <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white tracking-tight">
             {user.username}
@@ -146,7 +134,6 @@ if (!user) {
           </p>
         </div>
 
-        {/* Stats */}
         <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mb-6">
           <div>
             <p className="text-2xl">{user.links ? user.links.length : 0}</p>
@@ -170,7 +157,6 @@ if (!user) {
           </div>
         </div>
 
-        {/* Location & Bio */}
         <div className="flex flex-col gap-3 max-w-lg">
           <div className="flex items-center gap-2 text-primary-light dark:text-white text-sm md:text-base">
             <FiMapPin className="text-xl" />
@@ -182,7 +168,6 @@ if (!user) {
           </p>
         </div>
 
-        {/* Button */}
         <div className="mt-4 flex flex-wrap gap-4">
           <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
             LinkUp

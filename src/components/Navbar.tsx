@@ -107,12 +107,10 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   return (
     <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4">
       <div className="flex flex-col">
-        {/* Logo */}
         <div>
           <Image src="/logo.png" alt="Logo" width={150} height={150} className="m-4" />
         </div>
 
-        {/* Nav Items */}
         <div className="flex flex-col justify-center items-start">
           <NavItem
             Icon={FiHome}
@@ -165,7 +163,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
         </div>
       </div>
 
-      {/* “More” with popup */}
       <div className="relative" ref={popupRef}>
         <NavItem
           Icon={FiMenu}

@@ -5,23 +5,24 @@ import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
 import { getAllUsers, getCurrentUser } from "@/utils/api";
 import { IUser } from "@/models/User";
+import useDebounce from "@/hooks/useDebounce";
 
 export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
-
+  
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [isSearching, setIsSearching] = useState(false);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [users, setUsers] = useState<IUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
+  
+  const debouncedQuery = useDebounce(searchQuery, 500);
 
-  /** Auto-focus only once */
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 150);
   }, []);
 
-  /** Load users + current user */
   useEffect(() => {
     const load = async () => {
       try {
@@ -39,14 +40,16 @@ export default function SearchBar() {
     load();
   }, []);
 
-  /** Handle searching */
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (!debouncedQuery.trim()) {
       setFilteredUsers(users);
+      setIsSearching(false);
       return;
     }
 
-    const q = searchQuery.toLowerCase();
+    setIsSearching(true);
+
+    const q = debouncedQuery.toLowerCase();
 
     const filtered = users.filter(
       (u) =>
@@ -54,13 +57,16 @@ export default function SearchBar() {
         u.name.toLowerCase().includes(q)
     );
 
-    setFilteredUsers(filtered);
-  }, [searchQuery, users]);
+    setTimeout(() => {
+      setFilteredUsers(filtered);
+      setIsSearching(false);
+    }, 200);
+
+  }, [debouncedQuery, users]);
 
   return (
     <div className="w-full mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl">
 
-      {/* Search Input */}
       <div
         className="
           sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark 
@@ -85,17 +91,19 @@ export default function SearchBar() {
         />
       </div>
 
-      {/* Show suggestions ONLY when:
-          - not focused
-          - AND no search text */}
       {!isFocused && searchQuery.trim() === "" && (
         <Suggestions users={users} currentUser={currentUser} />
       )}
 
-      {/* SEARCH RESULTS */}
       {(isFocused || searchQuery.trim() !== "") && (
         <div className="max-h-[80vh] overflow-y-auto hide-scrollbar p-4 space-y-4">
-          {filteredUsers.length > 0 ? (
+          {isSearching ? (
+            <div className="flex justify-center py-10">
+              <div className="wiggle text-gray-600 dark:text-gray-400 text-lg font-semibold">
+                Searching...
+              </div>
+            </div>
+          ) : filteredUsers.length > 0 ? (
             filteredUsers.map((u) => (
               <User key={u._id} user={u} />
             ))

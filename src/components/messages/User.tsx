@@ -6,7 +6,7 @@ import { IUser } from "@/models/User";
 
 interface UserProps {
   user: IUser | null;
-  onClick?: () => void;       // ⭐ allow clicking
+  onClick?: () => void;
 }
 
 export default function User({ user, onClick }: UserProps) {
@@ -27,7 +27,7 @@ export default function User({ user, onClick }: UserProps) {
   return (
     <div
       className="w-full flex gap-2 pl-4 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition"
-      onClick={onClick}    // ⭐ clicking now sends user to Messages
+      onClick={onClick}
     >
       <Image
         src={

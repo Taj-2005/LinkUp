@@ -18,7 +18,6 @@ export default function Chat({ user }: ChatProps) {
       </header>
 
       <div className="flex-1 overflow-y-auto p-4 bg-left-nav-light dark:bg-left-nav-dark no-scrollbar scrollbar-thumb-rounded-lg scrollbar-thin scrollbar-thumb-primary-light/40 dark:scrollbar-thumb-primary-dark/60 shadow-inner">
-        {/* Message bubbles will load here */}
         <p className="text-center text-primary-light dark:text-primary-light/80 mt-10 select-none opacity-70">
           Conversation content coming soon...
         </p>

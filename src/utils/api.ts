@@ -130,9 +130,24 @@ export async function signout(): Promise<APIJson<null>> {
 }
 
 export function getCurrentUser() {
-  return authFetch("/api/me");
+  return authFetch("/api/protected/me");
 }
 
 export function getAllUsers() {
-  return authFetch("/api/users");
+  return authFetch("/api/protected/users");
+}
+
+export async function updateProfile(data: any) {
+  const res = await fetch("/api/protected/update-profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error("Failed to update user: " + text);
+  }
+
+  return res.json();
 }

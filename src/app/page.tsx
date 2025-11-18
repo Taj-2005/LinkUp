@@ -77,7 +77,6 @@ export default function LandingPage() {
 
   return (
     <div className={`min-h-screen ${bgColor} ${textPrimary} transition-colors duration-300`}>
-      {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? `${navBg} shadow-lg` : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -114,7 +113,6 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-fade-in">
@@ -138,7 +136,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
             {stats.map((stat, i) => (
               <div key={i} className={`${cardBg} rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all hover:scale-105`}>
@@ -148,7 +145,6 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* Preview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             <div className={`${cardBg} rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all hover:scale-105 group`}>
               <div className={`w-16 h-16 ${buttonPrimary} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
@@ -183,7 +179,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -210,7 +205,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <div className={`${cardBg} rounded-3xl p-12 md:p-16 text-center shadow-2xl`}>
@@ -229,7 +223,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className={`${navBg} py-12 px-6 mt-20`}>
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
