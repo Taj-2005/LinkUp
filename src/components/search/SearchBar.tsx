@@ -32,8 +32,7 @@ export default function SearchBar() {
         setCurrentUser(me.user);
         setUsers(all);
         setFilteredUsers(all);
-      } catch (err) {
-        console.error("Search load error:", err);
+      } catch{
       }
     };
 

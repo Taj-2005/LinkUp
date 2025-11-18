@@ -13,13 +13,13 @@ export default function User({ user }: UserProps) {
 
   if (!user) {
     return (
-      <div className="flex gap-3 pl-4 items-center animate-pulse">
+      <div className="flex gap-2 pl-4 items-center">
 
-        <div className="skeleton-circle w-[50px] h-[50px]"></div>
+        <div className="w-[50px] h-[50px] rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
 
         <div className="flex flex-col gap-2">
-          <div className="skeleton-line w-28 h-4"></div>
-          <div className="skeleton-line w-20 h-3"></div>
+          <div className="w-28 h-4 rounded-md bg-gray-300 dark:bg-gray-700 animate-pulse" />
+          <div className="w-20 h-3 rounded-md bg-gray-300 dark:bg-gray-700 animate-pulse" />
         </div>
 
       </div>

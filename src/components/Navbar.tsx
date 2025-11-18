@@ -6,14 +6,8 @@ import { useTheme } from "next-themes";
 import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "@/utils/api";
+import {useUserStore} from "@/store/useUserStore"
 import SignoutButton from "@/components/SignoutButton";
-
-
-interface User {
-  user_avatar?: string;
-  username: string;
-}
 
 interface NavItemProps {
   Icon: React.ElementType;
@@ -31,21 +25,7 @@ interface NavbarProps {
 
 function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
   const { resolvedTheme } = useTheme();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        setUser(res.user);
-      } catch (err) {
-        console.error("Not logged in", err);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const user = useUserStore((state) => state.user);
 
 
   return (

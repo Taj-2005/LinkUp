@@ -7,9 +7,10 @@ import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
-import { updateProfile, getCurrentUser } from "@/utils/api";
+import { updateProfile } from "@/utils/api";
 import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
 import CropModal from "@/components/profile/CropModal";
+import { useUserStore } from "@/store/useUserStore";
 
 type UpdateProfilePayload = Partial<{
   username: string;
@@ -24,9 +25,11 @@ export default function ProfileCard() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [user, setUser] = useState<IUser | null>(null);
+  const userFromStore = useUserStore((s) => s.user);
+  const setUserInStore = useUserStore((s) => s.setUser);
+  const loading = useUserStore((s) => s.loading);
+
   const [displayUser, setDisplayUser] = useState<IUser | null>(null);
-  const [fetchDone, setFetchDone] = useState(false);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [tempAvatar, setTempAvatar] = useState<string | null>(null);
@@ -38,8 +41,7 @@ export default function ProfileCard() {
   const [editMode, setEditMode] = useState(false);
 
   const [avatarOptionsModal, setAvatarOptionsModal] = useState(false);
-  
-  // New state to track if we're ONLY changing photo (from avatar click)
+
   const [isPhotoOnlyMode, setIsPhotoOnlyMode] = useState(false);
 
   const [username, setUsername] = useState("");
@@ -55,22 +57,8 @@ export default function ProfileCard() {
   const debouncedUsername = useDebounce(username, 600);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        setUser(res.user ?? null);
-      } catch {
-        setUser(null);
-      } finally {
-        setFetchDone(true);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (fetchDone) setDisplayUser(user);
-  }, [fetchDone, user]);
+    if (!editModal) setDisplayUser(userFromStore);
+  }, [userFromStore, editModal]);
 
   const validateName = (value: string) => {
     const words = value.trim().split(/\s+/).filter(Boolean);
@@ -101,7 +89,8 @@ export default function ProfileCard() {
         setShakeUsername(true);
         setTimeout(() => setShakeUsername(false), 400);
       } else setUsernameError("");
-    } catch {}
+    } catch {
+    }
   };
 
   useEffect(() => {
@@ -124,7 +113,7 @@ export default function ProfileCard() {
 
     setEditMode(true);
     setEditModal(true);
-    setIsPhotoOnlyMode(false); // Full edit mode
+    setIsPhotoOnlyMode(false);
   };
 
   const handleEditSave = async () => {
@@ -143,6 +132,9 @@ export default function ProfileCard() {
     try {
       if (Object.keys(changed).length > 0) {
         const result = await updateProfile(changed);
+
+        setUserInStore(result.user);
+
         setDisplayUser(result.user);
       }
 
@@ -151,10 +143,7 @@ export default function ProfileCard() {
       setTempAvatar(null);
       setAvatarPreview(null);
       setIsPhotoOnlyMode(false);
-
-      window.location.reload();
-    } catch (err) {
-      console.error("Profile update failed:", err);
+    } catch{
     }
   };
 
@@ -196,7 +185,10 @@ export default function ProfileCard() {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setUploadingAvatar(true);
-    if (!file) return;
+    if (!file) {
+      setUploadingAvatar(false);
+      return;
+    }
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
@@ -209,7 +201,10 @@ export default function ProfileCard() {
     setUploadingAvatar(true);
 
     const file = e.dataTransfer.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setUploadingAvatar(false);
+      return;
+    }
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
@@ -221,16 +216,19 @@ export default function ProfileCard() {
     setUploadingAvatar(false);
     setCropImageSrc(null);
 
-    // If in photo-only mode, upload directly and close everything
     if (isPhotoOnlyMode) {
-      await updateProfile({ user_avatar: url });
-      setIsPhotoOnlyMode(false);
-      window.location.reload();
+      try {
+        const result = await updateProfile({ user_avatar: url });
+        setUserInStore(result.user);
+        setDisplayUser(result.user);
+      } catch {
+      } finally {
+        setIsPhotoOnlyMode(false);
+      }
     }
-    // Otherwise, just update the preview in the edit form
   };
 
-  if (!fetchDone || !displayUser) {
+  if (loading || !displayUser) {
     return (
       <div className="w-full flex items-center justify-center">
         <motion.div
@@ -329,16 +327,21 @@ export default function ProfileCard() {
   return (
     <>
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-
         <div
           onClick={() => setAvatarOptionsModal(true)}
           className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer"
         >
-          <Image 
-            src={ avatarSrc ? avatarSrc : resolvedTheme === "dark" ? "/dark-profile.png": "/light-profile.png"} 
-            alt="User Avatar" 
-            fill 
-            className="object-cover" 
+          <Image
+            src={
+              avatarSrc
+                ? avatarSrc
+                : resolvedTheme === "dark"
+                ? "/dark-profile.png"
+                : "/light-profile.png"
+            }
+            alt="User Avatar"
+            fill
+            className="object-cover"
           />
         </div>
 
@@ -373,23 +376,21 @@ export default function ProfileCard() {
 
       <ProfileNavbarSelf />
 
-      {/* Edit Profile Modal - Only show when NOT in crop mode */}
       <AnimatePresence>
         {editModal && !cropImageSrc && (
           <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 flex items-center justify-center backdrop-blur-xl bg-black/40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 flex items-center justify-center backdrop-blur-xl bg-black/40"
           >
             <motion.div
               initial={{ scale: 0.6 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.6 }}
               className="w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl"
-              >
+            >
               <div className="rounded-3xl p-8 bg-white/10 dark:bg-black/20 border border-white/20">
-
                 <h2 className="text-3xl font-bold text-white mb-6">Edit Profile</h2>
 
                 <div className="flex items-center justify-between mb-8 bg-white/10 dark:bg-black/20 p-4 rounded-2xl border border-white/20 backdrop-blur-xl">
@@ -411,11 +412,11 @@ export default function ProfileCard() {
 
                   <button
                     onClick={() => {
-                      setIsPhotoOnlyMode(false); // In edit profile mode, not photo-only
+                      setIsPhotoOnlyMode(false);
                       fileInputRef.current?.click();
                     }}
                     className="px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
-                    >
+                  >
                     Change photo
                   </button>
 
@@ -425,14 +426,14 @@ export default function ProfileCard() {
                     className="hidden"
                     accept="image/*"
                     onChange={handleFileSelect}
-                    />
+                  />
                 </div>
 
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
                   className="hidden md:flex flex-col items-center justify-center border border-dashed border-white/20 rounded-2xl p-6 mb-8 bg-white/5 text-white/70"
-                  >
+                >
                   <p>Drag & drop a photo here</p>
                   <p className="text-xs opacity-60">(Desktop only)</p>
                 </div>
@@ -452,8 +453,8 @@ export default function ProfileCard() {
                     }}
                     className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
                       usernameError ? "border-red-500" : "border-white/30"
-                      } ${shakeUsername ? "shake" : ""}`}
-                      />
+                    } ${shakeUsername ? "shake" : ""}`}
+                  />
                   {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
                 </div>
 
@@ -464,8 +465,8 @@ export default function ProfileCard() {
                     onChange={(e) => validateName(e.target.value)}
                     className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
                       nameError ? "border-red-500" : "border-white/30"
-                      } ${shakeName ? "shake" : ""}`}
-                      />
+                    } ${shakeName ? "shake" : ""}`}
+                  />
                   {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
                 </div>
 
@@ -475,7 +476,7 @@ export default function ProfileCard() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className="w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                    />
+                  />
                 </div>
 
                 <div className="mb-8">
@@ -485,14 +486,14 @@ export default function ProfileCard() {
                     rows={4}
                     onChange={(e) => setBio(e.target.value)}
                     className="w-full px-4 py-3 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                    />
+                  />
                 </div>
 
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={handleCancel}
                     className="px-5 py-2 rounded-xl text-black dark:text-white bg-white/20 border border-white/20"
-                    >
+                  >
                     Cancel
                   </button>
 
@@ -501,8 +502,8 @@ export default function ProfileCard() {
                     disabled={isSaveDisabled}
                     className={`px-6 py-2 rounded-xl font-semibold bg-primary-light text-black dark:bg-primary-dark dark:text-white ${
                       isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      >
+                    }`}
+                  >
                     Save
                   </button>
                 </div>
@@ -512,7 +513,6 @@ export default function ProfileCard() {
         )}
       </AnimatePresence>
 
-      {/* Avatar Options Modal */}
       <AnimatePresence>
         {avatarOptionsModal && (
           <motion.div
@@ -527,15 +527,13 @@ export default function ProfileCard() {
               exit={{ scale: 0.6 }}
               className="bg-white/10 dark:bg-black/20 border border-white/20 p-6 rounded-2xl w-80 backdrop-blur-xl"
             >
-              <h3 className="text-xl font-bold text-white mb-4 text-center">
-                Profile Photo
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-4 text-center">Profile Photo</h3>
 
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => {
                     setAvatarOptionsModal(false);
-                    setIsPhotoOnlyMode(true); // Photo-only mode when clicking from avatar
+                    setIsPhotoOnlyMode(true);
                     fileInputRef.current?.click();
                   }}
                   className="w-full py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
@@ -545,24 +543,28 @@ export default function ProfileCard() {
 
                 <button
                   onClick={async () => {
-                    await updateProfile({ user_avatar: "" });
+                    try {
+                      await updateProfile({ user_avatar: "" });
 
-                    setDisplayUser((prev) => {
-                      if (!prev) return prev;
+                      const current = userFromStore;
 
-                      const plain = typeof prev.toObject === "function" ? prev.toObject() : prev;
+                      if (current) {
+                        const plainUser = JSON.parse(JSON.stringify(current)) as IUser;
 
-                      return {
-                        ...plain,
-                        user_avatar: "",
-                      };
-                    });
+                        const updatedUser = {
+                          ...plainUser,
+                          user_avatar: "",
+                        } as unknown as IUser;
 
-                    setAvatarPreview(null);
-                    setTempAvatar(null);
+                        setUserInStore(updatedUser);
+                        setDisplayUser(updatedUser);
+                      }
 
-                    setAvatarOptionsModal(false);
-                    window.location.reload();
+                      setAvatarPreview(null);
+                      setTempAvatar(null);
+                      setAvatarOptionsModal(false);
+                    } catch{
+                    }
                   }}
                   className="w-full py-2 rounded-xl bg-red-500 text-white font-semibold"
                 >
@@ -581,13 +583,13 @@ export default function ProfileCard() {
         )}
       </AnimatePresence>
 
-      {/* Crop Modal - Shows independently */}
       {cropImageSrc && (
         <CropModal
           imageSrc={cropImageSrc}
           onClose={() => {
             setCropImageSrc(null);
             setIsPhotoOnlyMode(false);
+            setUploadingAvatar(false);
           }}
           uploadToCloudinary={uploadToCloudinary}
           onCropDone={handleCropDone}

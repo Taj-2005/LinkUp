@@ -23,8 +23,7 @@ export async function POST(req: Request) {
       const user = await User.findOne({ email });
       return NextResponse.json({ exists: !!user });
     }
-  } catch (err) {
-    console.error("Check availability error:", err);
+  } catch  {
     return NextResponse.json(
       { error: "Server error" },
       { status: 500 }

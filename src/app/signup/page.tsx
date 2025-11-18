@@ -136,8 +136,7 @@ export default function SignUpPage() {
         if (type === "username") setUsernameError("");
         if (type === "email") setEmailError("");
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
     }
   };
 

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Eye, EyeOff, Moon, Sun, LogIn } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import {signin} from "@/utils/api"
 
 export default function SignInPage() {
@@ -13,7 +12,6 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
-  const router = useRouter()
 
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +23,7 @@ export default function SignInPage() {
 
       toast.dismiss();
       toast.success(`Welcome back, ${user.username}! 🚀`);
-      router.push("/livelinks");
-
+      window.location.href = "/livelinks"
     } catch (err: unknown) {
       toast.dismiss();
 

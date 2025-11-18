@@ -31,7 +31,6 @@ export async function POST() {
 
     return res;
   } catch (err: unknown) {
-    console.error("❌ SIGNOUT ERROR:", err);
 
     const message =
       err instanceof Error ? err.message : "Unexpected server error";

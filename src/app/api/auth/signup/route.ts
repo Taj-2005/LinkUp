@@ -74,7 +74,6 @@ export async function POST(req: Request) {
 
     return res;
   } catch (err: unknown) {
-    console.error("❌ SIGNUP ERROR:", err);
 
     const message =
       err instanceof Error ? err.message : "Unexpected server error";

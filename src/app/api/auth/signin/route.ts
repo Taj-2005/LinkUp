@@ -8,13 +8,10 @@ const isProd = process.env.NODE_ENV === "production";
 
 export async function POST(req: Request) {
   try {
-    console.log("🟢 [SIGNIN] Hit endpoint");
 
     await dbConnect();
-    console.log("✅ Connected to DB");
 
     const { emailOrUsername, password } = await req.json();
-    console.log("📩 Body:", { emailOrUsername });
 
     if (!emailOrUsername || !password)
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
@@ -23,7 +20,6 @@ export async function POST(req: Request) {
       $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
     });
 
-    console.log("👤 User found:", !!user);
 
     if (!user)
       return NextResponse.json(
@@ -33,7 +29,6 @@ export async function POST(req: Request) {
 
 
     const valid = await bcrypt.compare(password, user.password);
-    console.log("🔑 Password valid:", valid);
 
     if (!valid)
       return NextResponse.json(
@@ -48,7 +43,6 @@ export async function POST(req: Request) {
     user.refreshToken = refreshToken;
     await user.save();
 
-    console.log("✅ Tokens generated");
 
     const res = NextResponse.json({
       user: { id: user._id, email: user.email, username: user.username },
@@ -69,7 +63,6 @@ export async function POST(req: Request) {
 
     return res;
 } catch (err: unknown) {
-  console.error("❌ SIGNIN ERROR:", err);
 
   const message =
     err instanceof Error ? err.message : "Unexpected server error";

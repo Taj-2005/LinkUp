@@ -1,35 +1,19 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
-
 import ToggleSwitch from "@/components/ToggleSwitch";
 import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
 import Stories from "@/components/home/Stories";
-import { getCurrentUser } from "@/utils/api";
-import { IUser } from "@/models/User";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function Home() {
-  const [user, setUser] = useState<IUser | null>(null);
+  const user = useUserStore((state) => state.user);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        setUser(res.user ?? null);
-      } catch (err) {
-        console.error("Not logged in", err);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-  }, []);
   return (
     <div className="w-full flex flex-row bg-primary-light dark:bg-primary-dark min-h-screen">
       <div className="w-full m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
-
+        
         <div className="w-[70%] max-w-4xl bg-left-nav-light dark:bg-right-nav-dark">
           <Stories />
         </div>

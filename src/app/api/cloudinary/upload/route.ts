@@ -25,7 +25,6 @@ export async function POST(req: Request) {
       public_id: uploadResult.public_id,
     });
   } catch (err: unknown) {
-    console.error("Cloudinary upload error:", err);
     const message = err instanceof Error ? err.message : "Cloudinary upload error";
     return NextResponse.json(
       { error: message ?? "Upload failed" },

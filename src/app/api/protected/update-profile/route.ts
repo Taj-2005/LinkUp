@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-import { withAuth } from "@/lib/withAuth";
+import { dbConnect } from "@/lib/dbConnect";
+import { requireAuth } from "@/lib/auth";
 import { User } from "@/models/User";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function PATCH(req: Request) {
-  const response = await withAuth(async (authUser) => {
+  await dbConnect();
+
+  try {
+    const authUser = await requireAuth();
     const userId = authUser._id;
+
     const body = await req.json();
 
     const user = await User.findById(userId);
@@ -15,7 +17,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const allowed: Array<keyof typeof body> = [
+    const updatableFields: Array<keyof typeof body> = [
       "username",
       "name",
       "bio",
@@ -23,24 +25,25 @@ export async function PATCH(req: Request) {
       "user_avatar",
     ];
 
-    for (const field of allowed) {
+    updatableFields.forEach((field) => {
       if (field in body) {
         user[field] = body[field];
       }
-    }
+    });
 
     await user.save();
 
     const updatedUser = await User.findById(userId).select("-password -__v");
 
+    return NextResponse.json({
+      success: true,
+      user: updatedUser,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Update profile error";
     return NextResponse.json(
-      {
-        success: true,
-        user: updatedUser,
-      },
-      { status: 200 }
+      { error: "Failed to update profile", detail: message ?? String(err) },
+      { status: 500 }
     );
-  });
-
-  return response;
+  }
 }

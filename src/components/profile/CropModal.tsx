@@ -109,8 +109,7 @@ export default function CropModal({
       const url = await uploadToCloudinary(file);
       setLoading(false);
       onCropDone(url);
-    } catch (err) {
-      console.error(err);
+    } catch{
       setLoading(false);
     }
   };

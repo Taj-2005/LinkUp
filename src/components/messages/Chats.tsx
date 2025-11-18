@@ -18,8 +18,7 @@ export default function Chats({ setUser }: ChatsProps) {
       try {
         const data = await getAllUsers();
         setUsers(data);
-      } catch (err) {
-        console.error("Chat users load failed:", err);
+      } catch{
       } finally {
         setLoading(false);
       }
