@@ -12,7 +12,7 @@ export default function NavbarLayoutWrapper({
   const pathname = usePathname();
   const hideOn = ["/", "/signin", "/signup"];
 
-  const [selectedItem, setSelectedItem] = useState("livelinks");
+  const [selectedItem, setSelectedItem] = useState("");
   useEffect(() => {
     if (pathname.startsWith("/livelinks")) setSelectedItem("livelinks");
     else if (pathname.startsWith("/linkfinder")) setSelectedItem("linkfinder");

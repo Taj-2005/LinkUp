@@ -9,7 +9,6 @@ import { useState, useEffect, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import { updateProfile, getCurrentUser } from "@/utils/api";
 import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
-
 import CropModal from "@/components/profile/CropModal";
 
 type UpdateProfilePayload = Partial<{
@@ -38,6 +37,8 @@ export default function ProfileCard() {
   const [editModal, setEditModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  const [avatarOptionsModal, setAvatarOptionsModal] = useState(false);
+
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
@@ -61,7 +62,6 @@ export default function ProfileCard() {
         setFetchDone(true);
       }
     };
-
     fetchUser();
   }, []);
 
@@ -69,11 +69,8 @@ export default function ProfileCard() {
     if (fetchDone) setDisplayUser(user);
   }, [fetchDone, user]);
 
-
-
   const validateName = (value: string) => {
     const words = value.trim().split(/\s+/).filter(Boolean);
-
     if (words.length > 2) {
       setNameError("Only first name and last name allowed");
       setShakeName(true);
@@ -81,14 +78,12 @@ export default function ProfileCard() {
       setFullName(words.slice(0, 2).join(" "));
       return;
     }
-
     setNameError("");
     setFullName(value);
   };
 
   const checkUsername = async (value: string) => {
     if (!value.trim()) return;
-
     try {
       const res = await fetch("/api/auth/check-availability", {
         method: "POST",
@@ -108,15 +103,12 @@ export default function ProfileCard() {
 
   useEffect(() => {
     if (!debouncedUsername.trim()) return;
-
     if (debouncedUsername === displayUser?.username) {
       setUsernameError("");
       return;
     }
-
     checkUsername(debouncedUsername);
   }, [debouncedUsername, displayUser?.username]);
-
 
   const openEditModal = () => {
     setUsername(displayUser?.username ?? "");
@@ -131,7 +123,6 @@ export default function ProfileCard() {
     setEditModal(true);
   };
 
-
   const handleEditSave = async () => {
     if (!editMode) return;
     if (usernameError || nameError) return;
@@ -142,7 +133,6 @@ export default function ProfileCard() {
     if (fullName !== displayUser?.name) changed.name = fullName;
     if (bio !== displayUser?.bio) changed.bio = bio;
     if (location !== displayUser?.location) changed.location = location;
-
     if (tempAvatar && tempAvatar !== displayUser?.user_avatar)
       changed.user_avatar = tempAvatar;
 
@@ -174,7 +164,6 @@ export default function ProfileCard() {
 
   const isSaveDisabled = !!usernameError || !!nameError || !username.trim();
 
-
   const fileToDataURL = (file: File) =>
     new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
@@ -198,7 +187,6 @@ export default function ProfileCard() {
     return data.secure_url;
   };
 
-
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setUploadingAvatar(true);
@@ -209,7 +197,6 @@ export default function ProfileCard() {
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
-
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -227,6 +214,10 @@ export default function ProfileCard() {
     setTempAvatar(url);
     setUploadingAvatar(false);
     setCropImageSrc(null);
+
+    updateProfile({ user_avatar: url }).then(() => {
+      window.location.reload();
+    });
   };
 
   if (!fetchDone || !displayUser) {
@@ -319,19 +310,26 @@ export default function ProfileCard() {
     );
   }
 
-
   const avatarSrc =
     avatarPreview ??
     tempAvatar ??
     displayUser.user_avatar ??
     (resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png");
 
-
   return (
     <>
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-        <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4">
-          <Image src={avatarSrc} alt="User Avatar" fill className="object-cover" />
+
+        <div
+          onClick={() => setAvatarOptionsModal(true)}
+          className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer"
+        >
+          <Image 
+            src={ avatarSrc ? avatarSrc : resolvedTheme === "dark" ? "/dark-profile.png": "/light-profile.png"} 
+            alt="User Avatar" 
+            fill 
+            className="object-cover" 
+          />
         </div>
 
         <div className="flex-1">
@@ -368,17 +366,17 @@ export default function ProfileCard() {
       <AnimatePresence>
         {editModal && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 flex items-center justify-center backdrop-blur-xl bg-black/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-40 flex items-center justify-center backdrop-blur-xl bg-black/40"
           >
             <motion.div
               initial={{ scale: 0.6 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.6 }}
               className="w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl"
-            >
+              >
               <div className="rounded-3xl p-8 bg-white/10 dark:bg-black/20 border border-white/20">
 
                 <h2 className="text-3xl font-bold text-white mb-6">Edit Profile</h2>
@@ -403,7 +401,7 @@ export default function ProfileCard() {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
-                  >
+                    >
                     Change photo
                   </button>
 
@@ -413,14 +411,14 @@ export default function ProfileCard() {
                     className="hidden"
                     accept="image/*"
                     onChange={handleFileSelect}
-                  />
+                    />
                 </div>
 
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
                   className="hidden md:flex flex-col items-center justify-center border border-dashed border-white/20 rounded-2xl p-6 mb-8 bg-white/5 text-white/70"
-                >
+                  >
                   <p>Drag & drop a photo here</p>
                   <p className="text-xs opacity-60">(Desktop only)</p>
                 </div>
@@ -440,8 +438,8 @@ export default function ProfileCard() {
                     }}
                     className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
                       usernameError ? "border-red-500" : "border-white/30"
-                    } ${shakeUsername ? "shake" : ""}`}
-                  />
+                      } ${shakeUsername ? "shake" : ""}`}
+                      />
                   {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
                 </div>
 
@@ -452,8 +450,8 @@ export default function ProfileCard() {
                     onChange={(e) => validateName(e.target.value)}
                     className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
                       nameError ? "border-red-500" : "border-white/30"
-                    } ${shakeName ? "shake" : ""}`}
-                  />
+                      } ${shakeName ? "shake" : ""}`}
+                      />
                   {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
                 </div>
 
@@ -463,7 +461,7 @@ export default function ProfileCard() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className="w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                  />
+                    />
                 </div>
 
                 <div className="mb-8">
@@ -473,14 +471,14 @@ export default function ProfileCard() {
                     rows={4}
                     onChange={(e) => setBio(e.target.value)}
                     className="w-full px-4 py-3 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                  />
+                    />
                 </div>
 
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={handleCancel}
                     className="px-5 py-2 rounded-xl text-black dark:text-white bg-white/20 border border-white/20"
-                  >
+                    >
                     Cancel
                   </button>
 
@@ -489,11 +487,80 @@ export default function ProfileCard() {
                     disabled={isSaveDisabled}
                     className={`px-6 py-2 rounded-xl font-semibold bg-primary-light text-black dark:bg-primary-dark dark:text-white ${
                       isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
+                      }`}
+                      >
                     Save
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {avatarOptionsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.6 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.6 }}
+              className="bg-white/10 dark:bg-black/20 border border-white/20 p-6 rounded-2xl w-80 backdrop-blur-xl"
+            >
+              <h3 className="text-xl font-bold text-white mb-4 text-center">
+                Profile Photo
+              </h3>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setAvatarOptionsModal(false);
+                    fileInputRef.current?.click();
+                  }}
+                  className="w-full py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
+                >
+                  Change Photo
+                </button>
+
+                <button
+                  onClick={async () => {
+                    await updateProfile({ user_avatar: "" });
+
+                    setDisplayUser((prev) => {
+                      if (!prev) return prev;
+
+                      const plain = typeof prev.toObject === "function" ? prev.toObject() : prev;
+
+                      return {
+                        ...plain,
+                        user_avatar: "",
+                      };
+                    });
+
+                    
+
+                    setAvatarPreview(null);
+                    setTempAvatar(null);
+
+                    setAvatarOptionsModal(false);
+                    window.location.reload();
+                  }}
+                  className="w-full py-2 rounded-xl bg-red-500 text-white font-semibold"
+                >
+                  Remove Photo
+                </button>
+
+                <button
+                  onClick={() => setAvatarOptionsModal(false)}
+                  className="w-full py-2 rounded-xl bg-white/20 border border-white/20 text-white"
+                >
+                  Cancel
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -508,6 +575,14 @@ export default function ProfileCard() {
           onCropDone={handleCropDone}
         />
       )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleFileSelect}
+      />
     </>
   );
 }
