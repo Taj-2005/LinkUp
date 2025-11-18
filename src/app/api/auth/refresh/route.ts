@@ -31,15 +31,13 @@ export async function POST() {
   if (!user)
     return NextResponse.json({ error: "User not found" }, { status: 401 });
 
-  // 🚨 MAIN FIX — handle token mismatch properly
   if (user.refreshToken !== token) {
     return NextResponse.json(
       { alreadyRefreshed: true },
-      { status: 409 } // <-- IMPORTANT
+      { status: 409 }
     );
   }
 
-  // Issue new tokens
   const newAccessToken = signAccessToken({
     userId: user._id,
     username: user.username,

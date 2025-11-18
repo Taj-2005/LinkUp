@@ -38,6 +38,9 @@ export default function ProfileCard() {
   const [editMode, setEditMode] = useState(false);
 
   const [avatarOptionsModal, setAvatarOptionsModal] = useState(false);
+  
+  // New state to track if we're ONLY changing photo (from avatar click)
+  const [isPhotoOnlyMode, setIsPhotoOnlyMode] = useState(false);
 
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -121,6 +124,7 @@ export default function ProfileCard() {
 
     setEditMode(true);
     setEditModal(true);
+    setIsPhotoOnlyMode(false); // Full edit mode
   };
 
   const handleEditSave = async () => {
@@ -146,6 +150,7 @@ export default function ProfileCard() {
       setEditMode(false);
       setTempAvatar(null);
       setAvatarPreview(null);
+      setIsPhotoOnlyMode(false);
 
       window.location.reload();
     } catch (err) {
@@ -160,6 +165,7 @@ export default function ProfileCard() {
     setTempAvatar(null);
     setUsernameError("");
     setNameError("");
+    setIsPhotoOnlyMode(false);
   };
 
   const isSaveDisabled = !!usernameError || !!nameError || !username.trim();
@@ -209,15 +215,19 @@ export default function ProfileCard() {
     setCropImageSrc(dataUrl);
   };
 
-  const handleCropDone = (url: string) => {
+  const handleCropDone = async (url: string) => {
     setAvatarPreview(url);
     setTempAvatar(url);
     setUploadingAvatar(false);
     setCropImageSrc(null);
 
-    updateProfile({ user_avatar: url }).then(() => {
+    // If in photo-only mode, upload directly and close everything
+    if (isPhotoOnlyMode) {
+      await updateProfile({ user_avatar: url });
+      setIsPhotoOnlyMode(false);
       window.location.reload();
-    });
+    }
+    // Otherwise, just update the preview in the edit form
   };
 
   if (!fetchDone || !displayUser) {
@@ -363,8 +373,9 @@ export default function ProfileCard() {
 
       <ProfileNavbarSelf />
 
+      {/* Edit Profile Modal - Only show when NOT in crop mode */}
       <AnimatePresence>
-        {editModal && (
+        {editModal && !cropImageSrc && (
           <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -399,7 +410,10 @@ export default function ProfileCard() {
                   </div>
 
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      setIsPhotoOnlyMode(false); // In edit profile mode, not photo-only
+                      fileInputRef.current?.click();
+                    }}
                     className="px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
                     >
                     Change photo
@@ -498,6 +512,7 @@ export default function ProfileCard() {
         )}
       </AnimatePresence>
 
+      {/* Avatar Options Modal */}
       <AnimatePresence>
         {avatarOptionsModal && (
           <motion.div
@@ -520,6 +535,7 @@ export default function ProfileCard() {
                 <button
                   onClick={() => {
                     setAvatarOptionsModal(false);
+                    setIsPhotoOnlyMode(true); // Photo-only mode when clicking from avatar
                     fileInputRef.current?.click();
                   }}
                   className="w-full py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
@@ -541,8 +557,6 @@ export default function ProfileCard() {
                         user_avatar: "",
                       };
                     });
-
-                    
 
                     setAvatarPreview(null);
                     setTempAvatar(null);
@@ -567,10 +581,14 @@ export default function ProfileCard() {
         )}
       </AnimatePresence>
 
+      {/* Crop Modal - Shows independently */}
       {cropImageSrc && (
         <CropModal
           imageSrc={cropImageSrc}
-          onClose={() => setCropImageSrc(null)}
+          onClose={() => {
+            setCropImageSrc(null);
+            setIsPhotoOnlyMode(false);
+          }}
           uploadToCloudinary={uploadToCloudinary}
           onCropDone={handleCropDone}
         />

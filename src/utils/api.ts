@@ -1,5 +1,3 @@
-import { authFetch } from "@/lib/authFetch";
-
 export interface SignupData {
   username: string;
   name: string;
@@ -137,25 +135,47 @@ export async function signout(): Promise<APIJson<null>> {
   }
 }
 
-export function getCurrentUser() {
-  return authFetch("/api/protected/me");
+export async function getCurrentUser() {
+  const res = await fetch("/api/protected/me", {
+    credentials: "include",
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.error || "Failed to fetch current user");
+  }
+
+  return json;
 }
 
-export function getAllUsers() {
-  return authFetch("/api/protected/users");
+export async function getAllUsers() {
+  const res = await fetch("/api/protected/users", {
+    credentials: "include",
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.error || "Failed to fetch users");
+  }
+
+  return json;
 }
 
 export async function updateProfile(data: UpdateProfilePayload) {
   const res = await fetch("/api/protected/update-profile", {
     method: "PATCH",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
+  const json = await res.json();
+
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error("Failed to update user: " + text);
+    throw new Error(json.error || json.detail || "Failed to update profile");
   }
 
-  return res.json();
+  return json;
 }

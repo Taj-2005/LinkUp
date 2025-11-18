@@ -38,18 +38,15 @@ export default function CropModal({
     const cw = container.clientWidth;
     const ch = container.clientHeight;
 
-    // largest square inside container
     const square = Math.min(cw, ch);
 
     setCropSize({ width: square, height: square });
 
-    // compute zoom needed to make image COVER the crop square
     const scaleX = square / mediaSize.width;
     const scaleY = square / mediaSize.height;
 
     const computed = Math.max(scaleX, scaleY);
 
-    // do NOT auto upscale above 1
     const initialZoom = Math.min(computed, 1);
 
     setMinZoom(initialZoom);
@@ -59,7 +56,6 @@ export default function CropModal({
 
 
 
-  // Convert crop → File Blob
   const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
@@ -104,7 +100,7 @@ export default function CropModal({
   const handleApply = async () => {
     if (!croppedAreaPixels) return;
 
-    setLoading(true);     // 🔥 Start UX loader
+    setLoading(true);
 
     try {
       const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
@@ -127,7 +123,6 @@ export default function CropModal({
 
         <div className="rounded-3xl p-6 bg-white/10 dark:bg-black/20 border border-white/20">
 
-          {/* Top Row */}
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-white">Crop Avatar</h3>
 
@@ -139,7 +134,6 @@ export default function CropModal({
             </button>
           </div>
 
-          {/* Cropper */}
           <div
             ref={cropContainerRef}
             className="relative w-full h-[420px] bg-black/20 rounded-2xl overflow-hidden"
@@ -162,7 +156,6 @@ export default function CropModal({
           />
           </div>
 
-          {/* Zoom Slider */}
           <div className="mt-4 flex items-center gap-4">
             <label className="text-sm text-white/80">Zoom</label>
 
@@ -178,7 +171,6 @@ export default function CropModal({
             />
           </div>
 
-          {/* Bottom Buttons */}
           <div className="mt-6 flex justify-end gap-4">
             <button
               onClick={onClose}

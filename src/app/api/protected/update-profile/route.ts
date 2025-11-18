@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
-import { dbConnect } from "@/lib/dbConnect";
-import { requireAuth } from "@/lib/auth";
+import { withAuth } from "@/lib/withAuth";
 import { User } from "@/models/User";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 export async function PATCH(req: Request) {
-  await dbConnect();
-
-  try {
-    const authUser = await requireAuth();
+  const response = await withAuth(async (authUser) => {
     const userId = authUser._id;
-
     const body = await req.json();
 
     const user = await User.findById(userId);
@@ -17,8 +15,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Only update allowed fields
-    const updatableFields: Array<keyof typeof body> = [
+    const allowed: Array<keyof typeof body> = [
       "username",
       "name",
       "bio",
@@ -26,26 +23,24 @@ export async function PATCH(req: Request) {
       "user_avatar",
     ];
 
-    updatableFields.forEach((field) => {
+    for (const field of allowed) {
       if (field in body) {
         user[field] = body[field];
       }
-    });
+    }
 
     await user.save();
 
     const updatedUser = await User.findById(userId).select("-password -__v");
 
-    return NextResponse.json({
-      success: true,
-      user: updatedUser,
-    });
-  } catch (err: unknown) {
-    console.error("Update profile API error:", err);
-    const message = err instanceof Error ? err.message : "Update profile error";
     return NextResponse.json(
-      { error: "Failed to update profile", detail: message ?? String(err) },
-      { status: 500 }
+      {
+        success: true,
+        user: updatedUser,
+      },
+      { status: 200 }
     );
-  }
+  });
+
+  return response;
 }
