@@ -3,9 +3,10 @@ import { cookies } from "next/headers";
 import { dbConnect } from "@/lib/dbConnect";
 import { requireAuth } from "@/lib/requireAuth";
 import { validateAndRefreshTokens } from "@/lib/authHelpers";
+import { IUser } from "@/models/User";
 
 export async function withAuth(
-  handler: (user: any) => Promise<NextResponse | object>
+  handler: (user: IUser) => Promise<NextResponse | object>
 ) {
   await dbConnect();
   const cookieStore = await cookies();
