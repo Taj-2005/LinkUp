@@ -7,40 +7,33 @@ import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
-import { updateProfile } from "@/utils/api";
-import { getCurrentUser } from "@/utils/api";
+import { updateProfile, getCurrentUser } from "@/utils/api";
 import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
+
+import CropModal from "@/components/profile/CropModal";
+
+type UpdateProfilePayload = Partial<{
+  username: string;
+  name: string;
+  bio: string;
+  location: string;
+  user_avatar: string;
+}>;
 
 export default function ProfileCard() {
   const { resolvedTheme } = useTheme();
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [user, setUser] = useState<IUser | null>(null);
+  const [displayUser, setDisplayUser] = useState<IUser | null>(null);
   const [fetchDone, setFetchDone] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        setUser(res.user ?? null);
-      } catch (err) {
-        console.error("Not logged in", err);
-        setUser(null);
-      } finally {
-        setFetchDone(true);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const [displayUser, setDisplayUser] = useState<IUser | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [tempAvatar, setTempAvatar] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  useEffect(() => {
-    if (fetchDone) setDisplayUser(user);
-  }, [user, fetchDone]);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
   const [editModal, setEditModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -52,11 +45,30 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [usernameError, setUsernameError] = useState("");
   const [shakeUsername, setShakeUsername] = useState(false);
-
   const [nameError, setNameError] = useState("");
   const [shakeName, setShakeName] = useState(false);
 
   const debouncedUsername = useDebounce(username, 600);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getCurrentUser();
+        setUser(res.user ?? null);
+      } catch {
+        setUser(null);
+      } finally {
+        setFetchDone(true);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (fetchDone) setDisplayUser(user);
+  }, [fetchDone, user]);
+
 
   const validateName = (value: string) => {
     const words = value.trim().split(/\s+/).filter(Boolean);
@@ -65,9 +77,7 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
       setNameError("Only first name and last name allowed");
       setShakeName(true);
       setTimeout(() => setShakeName(false), 400);
-
-      const trimmed = words.slice(0, 2).join(" ");
-      setFullName(trimmed);
+      setFullName(words.slice(0, 2).join(" "));
       return;
     }
 
@@ -91,12 +101,8 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
         setUsernameError("Username already taken");
         setShakeUsername(true);
         setTimeout(() => setShakeUsername(false), 400);
-      } else {
-        setUsernameError("");
-      }
-    } catch (err) {
-      console.error("Username check failed", err);
-    }
+      } else setUsernameError("");
+    } catch {}
   };
 
   useEffect(() => {
@@ -110,301 +116,225 @@ const fileInputRef = useRef<HTMLInputElement | null>(null);
     checkUsername(debouncedUsername);
   }, [debouncedUsername, displayUser?.username]);
 
+
   const openEditModal = () => {
     setUsername(displayUser?.username ?? "");
+    setFullName(displayUser?.name ?? "");
     setBio(displayUser?.bio ?? "");
     setLocation(displayUser?.location ?? "");
-    setFullName(displayUser?.name ?? "");
 
-    setUsernameError("");
-    setNameError("");
+    setAvatarPreview(null);
+    setTempAvatar(null);
 
     setEditMode(true);
     setEditModal(true);
   };
 
-    const handleEditSave = async () => {
-      if (!editMode) return;
 
-      if (usernameError || nameError) return;
+  const handleEditSave = async () => {
+    if (!editMode) return;
+    if (usernameError || nameError) return;
 
-      const changedData: any = {};
+    const changed: UpdateProfilePayload = {};
 
-      if (username !== displayUser?.username) changedData.username = username;
-      if (fullName !== displayUser?.name) changedData.name = fullName;
-      if (bio !== displayUser?.bio) changedData.bio = bio;
-      if (location !== displayUser?.location) changedData.location = location;
+    if (username !== displayUser?.username) changed.username = username;
+    if (fullName !== displayUser?.name) changed.name = fullName;
+    if (bio !== displayUser?.bio) changed.bio = bio;
+    if (location !== displayUser?.location) changed.location = location;
 
-      try {
-        if (Object.keys(changedData).length > 0) {
-          const result = await updateProfile(changedData);
+    if (tempAvatar && tempAvatar !== displayUser?.user_avatar)
+      changed.user_avatar = tempAvatar;
 
-          setDisplayUser(result.user);
-
-          setUsername(result.user.username ?? "");
-          setFullName(result.user.name ?? "");
-          setBio(result.user.bio ?? "");
-          setLocation(result.user.location ?? "");
-        }
-
-        setEditModal(false);
-        setEditMode(false);
-      } catch (err) {
-        console.error("Profile update failed:", err);
+    try {
+      if (Object.keys(changed).length > 0) {
+        const result = await updateProfile(changed);
+        setDisplayUser(result.user);
       }
-    };
 
-    const handleCancel = () => {
-      setUsername(displayUser?.username ?? "");
-      setFullName(displayUser?.name ?? "");
-      setBio(displayUser?.bio ?? "");
-      setLocation(displayUser?.location ?? "");
-
-      setUsernameError("");
-      setNameError("");
-
-      setEditMode(false);
       setEditModal(false);
-    };
-
-    const isSaveDisabled =
-      !!usernameError || !username.trim() || !!nameError;
-
-    const fileToDataURL = (file: File): Promise<string> =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-
-    const uploadToCloudinary = async (file: File) => {
-      const dataUrl = await fileToDataURL(file);
-
-      const res = await fetch("/api/cloudinary/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ file: dataUrl }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error("Cloudinary upload failed: " + text);
-      }
-
-      const data = await res.json();
-      return data.secure_url as string;
-    };
-
-
-const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  const previewUrl = URL.createObjectURL(file);
-  setAvatarPreview(previewUrl);
-
-  try {
-    setUploadingAvatar(true);
-
-    const uploadedUrl = await uploadToCloudinary(file);
-
-    const result = await updateProfile({ user_avatar: uploadedUrl });
-
-    if (result?.user) {
-      setDisplayUser((_) => result.user);
-      setUsername(result.user.username ?? "");
-      setFullName(result.user.name ?? "");
-      setBio(result.user.bio ?? "");
-      setLocation(result.user.location ?? "");
+      setEditMode(false);
+      setTempAvatar(null);
       setAvatarPreview(null);
-    } else {
-      setDisplayUser((prev) =>
-        prev ? { ...(prev.toObject?.() ?? prev), user_avatar: uploadedUrl } : prev
-      );
+
+      window.location.reload();
+    } catch (err) {
+      console.error("Profile update failed:", err);
     }
-  } catch (err) {
-    console.error("Avatar upload or DB update failed:", err);
-  } finally {
-    setUploadingAvatar(false);
-  }
-};
+  };
+
+  const handleCancel = () => {
+    setEditModal(false);
+    setEditMode(false);
+    setAvatarPreview(null);
+    setTempAvatar(null);
+    setUsernameError("");
+    setNameError("");
+  };
+
+  const isSaveDisabled = !!usernameError || !!nameError || !username.trim();
+
+  const fileToDataURL = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const uploadToCloudinary = async (file: File) => {
+    const dataUrl = await fileToDataURL(file);
+
+    const res = await fetch("/api/cloudinary/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file: dataUrl }),
+    });
+
+    if (!res.ok) throw new Error("Cloudinary upload failed");
+
+    const data = await res.json();
+    return data.secure_url;
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const dataUrl = await fileToDataURL(file);
+    setCropImageSrc(dataUrl);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const dataUrl = await fileToDataURL(file);
+    setCropImageSrc(dataUrl);
+  };
 
 
-const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-  e.preventDefault();
-  const file = e.dataTransfer.files?.[0];
-  if (!file) return;
-
-  const previewUrl = URL.createObjectURL(file);
-  setAvatarPreview(previewUrl);
-
-  try {
-    setUploadingAvatar(true);
-    const uploadedUrl = await uploadToCloudinary(file);
-
-    const result = await updateProfile({ user_avatar: uploadedUrl });
-
-    if (result?.user) {
-      setDisplayUser((_) => result.user);
-      setUsername(result.user.username ?? "");
-      setFullName(result.user.name ?? "");
-      setBio(result.user.bio ?? "");
-      setLocation(result.user.location ?? "");
-      setAvatarPreview(null);
-    } else {
-      setDisplayUser((prev) =>
-        prev ? { ...(prev.toObject?.() ?? prev), user_avatar: uploadedUrl } : prev
-      );
-    }
-  } catch (err) {
-    console.error("Avatar upload or DB update failed:", err);
-  } finally {
-    setUploadingAvatar(false);
-  }
-};
-
-
-
+  const handleCropDone = (url: string) => {
+    setAvatarPreview(url);
+    setTempAvatar(url);
+    setCropImageSrc(null);
+  };
 
   if (!fetchDone || !displayUser) {
-      return (
-        <div className="w-full flex items-center justify-center">
+    return (
+      <div className="w-full flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8"
+        >
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8"
+            className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark bg-gray-300 dark:bg-gray-700"
           >
+            <div className="absolute inset-0 animate-shimmer opacity-60" />
+          </motion.div>
+          <div className="flex-1 flex flex-col justify-between w-full">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark bg-gray-300 dark:bg-gray-700"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-4 space-y-3"
             >
-              <div className="absolute inset-0 animate-shimmer opacity-60" />
-            </motion.div>
-            <div className="flex-1 flex flex-col justify-between w-full">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mb-4 space-y-3"
-              >
-                <div className="relative h-7 w-48 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                  <div className="absolute inset-0 animate-shimmer opacity-60" />
-                </div>
-                <div className="relative h-5 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                  <div className="absolute inset-0 animate-shimmer opacity-60" />
-                </div>
-              </motion.div>
-              <div className="flex gap-8 text-center mb-6">
-                {[1, 2, 3].map((i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
-                    className="space-y-2"
-                  >
-                    <div className="relative h-7 w-10 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                      <div className="absolute inset-0 animate-shimmer opacity-60" />
-                    </div>
-                    <div className="relative h-4 w-14 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                      <div className="absolute inset-0 animate-shimmer opacity-60" />
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="relative h-7 w-48 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer opacity-60" />
               </div>
-              <div className="flex flex-col gap-3 max-w-lg">
+              <div className="relative h-5 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer opacity-60" />
+              </div>
+            </motion.div>
+            <div className="flex gap-8 text-center mb-6">
+              {[1, 2, 3].map((i) => (
                 <motion.div
+                  key={i}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="flex items-center gap-2"
+                  transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
+                  className="space-y-2"
                 >
-                  <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded-md" />
-                  <div className="relative h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                  <div className="relative h-7 w-10 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                    <div className="absolute inset-0 animate-shimmer opacity-60" />
+                  </div>
+                  <div className="relative h-4 w-14 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
                     <div className="absolute inset-0 animate-shimmer opacity-60" />
                   </div>
                 </motion.div>
-                {[100, 80, 60].map((w, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
-                    className="relative h-4 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden"
-                    style={{ width: `${w}%` }}
-                  >
-                    <div className="absolute inset-0 animate-shimmer opacity-60" />
-                  </motion.div>
-                ))}
-              </div>
+              ))}
+            </div>
+            <div className="flex flex-col gap-3 max-w-lg">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.45 }}
-                className="mt-4"
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex items-center gap-2"
               >
-                <div className="relative h-10 w-36 bg-gray-300 dark:bg-gray-700 rounded-2xl overflow-hidden">
+                <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded-md" />
+                <div className="relative h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
                   <div className="absolute inset-0 animate-shimmer opacity-60" />
                 </div>
               </motion.div>
+              {[100, 80, 60].map((w, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
+                  className="relative h-4 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden"
+                  style={{ width: `${w}%` }}
+                >
+                  <div className="absolute inset-0 animate-shimmer opacity-60" />
+                </motion.div>
+              ))}
             </div>
-          </motion.div>
-        </div>
-      );
-    }
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              className="mt-4"
+            >
+              <div className="relative h-10 w-36 bg-gray-300 dark:bg-gray-700 rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 animate-shimmer opacity-60" />
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const avatarSrc =
+    avatarPreview ??
+    tempAvatar ??
+    displayUser.user_avatar ??
+    (resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png");
+
 
   return (
     <>
       <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-
-        <div
-          className={`flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark ${
-            !displayUser?.user_avatar ? "border-none" : ""
-          }`}
-        >
-          <Image
-            src={
-              displayUser?.user_avatar
-                ? displayUser.user_avatar
-                : resolvedTheme === "dark"
-                ? "/dark-profile.png"
-                : "/light-profile.png"
-            }
-            alt="User Avatar"
-            fill
-            className="object-cover"
-          />
+        <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4">
+          <Image src={avatarSrc} alt="User Avatar" fill className="object-cover" />
         </div>
 
         <div className="flex-1">
           <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white">
-            {displayUser?.username}
+            {displayUser.username}
           </h1>
+
           <p className="text-primary-light dark:text-primary-light/80 text-lg font-semibold mt-1">
-            {displayUser?.name}
+            {displayUser.name}
           </p>
-
-          <div className="flex gap-8 text-center mt-4">
-            <div>
-              <p className="text-2xl">{displayUser.links?.length ?? 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Links</p>
-            </div>
-
-            <div>
-              <p className="text-2xl">{displayUser.linked_by?.length ?? 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Linked By</p>
-            </div>
-
-            <div>
-              <p className="text-2xl">{displayUser.linked_to?.length ?? 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Linked To</p>
-            </div>
-          </div>
 
           <div className="mt-5 max-w-lg">
             <div className="flex items-center gap-2 text-primary-light dark:text-white text-sm">
@@ -419,12 +349,13 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
 
           <button
             onClick={openEditModal}
-            className="mt-4 bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition"
+            className="mt-4 bg-primary-light dark:bg-primary-dark px-6 py-2 rounded-2xl text-black dark:text-white"
           >
             Edit Profile
           </button>
         </div>
       </div>
+
       <ProfileNavbarSelf />
 
       <AnimatePresence>
@@ -433,13 +364,13 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-black/40"
+            className="fixed inset-0 z-40 flex items-center justify-center backdrop-blur-xl bg-black/40"
           >
             <motion.div
-              initial={{ scale: 0.6, opacity: 0, rotateX: -25 }}
-              animate={{ scale: 1, opacity: 1, rotateX: 0 }}
-              exit={{ scale: 0.6, opacity: 0, rotateX: -25 }}
-              className="w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 dark:from-white/10 dark:to-white/5 shadow-xl backdrop-blur-2xl"
+              initial={{ scale: 0.6 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.6 }}
+              className="w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl"
             >
               <div className="rounded-3xl p-8 bg-white/10 dark:bg-black/20 border border-white/20">
 
@@ -447,35 +378,24 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
 
                 <div className="flex items-center justify-between mb-8 bg-white/10 dark:bg-black/20 p-4 rounded-2xl border border-white/20 backdrop-blur-xl">
                   <div className="flex items-center gap-4">
-                    
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/40">
-                    <Image
-                      src={ avatarPreview || displayUser?.user_avatar || "/default-avatar.png" }
-                      alt="Avatar"
-                      width={64}
-                      height={64}
-                      className="object-cover"
-                    />
-                    {uploadingAvatar && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                        <svg className="w-6 h-6 animate-spin text-white" viewBox="0 0 24 24">...</svg>
-                      </div>
-                    )}
-                  </div>
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/40">
+                      <Image src={avatarSrc} fill alt="Avatar" className="object-cover" />
+                      {uploadingAvatar && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <div className="w-6 h-6 border-2 border-white border-t-transparent animate-spin rounded-full" />
+                        </div>
+                      )}
+                    </div>
 
                     <div>
-                      <p className="text-white font-semibold text-lg">
-                        {displayUser?.username}
-                      </p>
-                      <p className="text-white/70 text-sm">
-                        {displayUser?.name}
-                      </p>
+                      <p className="text-white font-semibold text-lg">{displayUser.username}</p>
+                      <p className="text-white/70 text-sm">{displayUser.name}</p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-5 py-2 rounded-xl bg-primary-light text-black font-semibold shadow-md hover:brightness-110 transition"
+                    className="px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
                   >
                     Change photo
                   </button>
@@ -492,10 +412,10 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
                 <div
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
-                  className="hidden md:flex flex-col items-center justify-center border border-dashed border-white/30 rounded-2xl p-6 mb-8 bg-white/5 text-white/70 hover:bg-white/10 transition cursor-pointer"
+                  className="hidden md:flex flex-col items-center justify-center border border-dashed border-white/20 rounded-2xl p-6 mb-8 bg-white/5 text-white/70"
                 >
-                  <p className="text-center">Drag & drop a photo here</p>
-                  <p className="text-xs opacity-60 mt-1">(Desktop only)</p>
+                  <p>Drag & drop a photo here</p>
+                  <p className="text-xs opacity-60">(Desktop only)</p>
                 </div>
 
                 <div className="mb-5">
@@ -509,18 +429,13 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
                         setShakeUsername(true);
                         setTimeout(() => setShakeUsername(false), 400);
                       } else setUsernameError("");
-
                       setUsername(val);
                     }}
-                    className={`
-                      w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border backdrop-blur-xl text-white
-                      ${usernameError ? "border-red-500" : "border-white/30"}
-                      ${shakeUsername ? "shake" : ""}
-                    `}
+                    className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
+                      usernameError ? "border-red-500" : "border-white/30"
+                    } ${shakeUsername ? "shake" : ""}`}
                   />
-                  {usernameError && (
-                    <p className="text-red-400 text-sm">{usernameError}</p>
-                  )}
+                  {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
                 </div>
 
                 <div className="mb-5">
@@ -528,11 +443,9 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
                   <input
                     value={fullName}
                     onChange={(e) => validateName(e.target.value)}
-                    className={`
-                      w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border backdrop-blur-xl text-white
-                      ${nameError ? "border-red-500" : "border-white/30"}
-                      ${shakeName ? "shake" : ""}
-                    `}
+                    className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
+                      nameError ? "border-red-500" : "border-white/30"
+                    } ${shakeName ? "shake" : ""}`}
                   />
                   {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
                 </div>
@@ -559,7 +472,7 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
                 <div className="flex justify-end gap-4">
                   <button
                     onClick={handleCancel}
-                    className="px-5 py-2 rounded-xl text-white bg-white/20 border border-white/20"
+                    className="px-5 py-2 rounded-xl text-black dark:text-white bg-white/20 border border-white/20"
                   >
                     Cancel
                   </button>
@@ -567,7 +480,7 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
                   <button
                     onClick={handleEditSave}
                     disabled={isSaveDisabled}
-                    className={`px-6 py-2 rounded-xl font-semibold bg-primary-light text-black shadow-lg ${
+                    className={`px-6 py-2 rounded-xl font-semibold bg-primary-light text-black dark:bg-primary-dark dark:text-white ${
                       isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
@@ -580,6 +493,14 @@ const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
         )}
       </AnimatePresence>
 
+      {cropImageSrc && (
+        <CropModal
+          imageSrc={cropImageSrc}
+          onClose={() => setCropImageSrc(null)}
+          uploadToCloudinary={uploadToCloudinary}
+          onCropDone={handleCropDone}
+        />
+      )}
     </>
   );
 }

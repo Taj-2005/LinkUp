@@ -1,9 +1,11 @@
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 import { type Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
-import {Toaster} from "react-hot-toast"
+import { Toaster } from "react-hot-toast"
 import ThemeProviderWrapper from "@/components/ThemeProviderWrapper";
-import NavbarLayoutWrapper from "@/components/NavbarLayoutWrapper"
+import NavbarLayoutWrapper from "@/components/NavbarLayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +38,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
       >
         <Toaster position="top-right"/>
-          <ThemeProviderWrapper>
-            <NavbarLayoutWrapper>
-              {children}
-            </NavbarLayoutWrapper>
-          </ThemeProviderWrapper>
+
+        <ThemeProviderWrapper>
+          <NavbarLayoutWrapper>
+            {children}
+          </NavbarLayoutWrapper>
+        </ThemeProviderWrapper>
+
+        <SpeedInsights />
       </body>
     </html>
   );

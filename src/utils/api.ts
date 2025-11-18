@@ -28,6 +28,14 @@ export interface APIJson<T> {
   error?: string;
 }
 
+type UpdateProfilePayload = Partial<{
+  username: string;
+  name: string;
+  bio: string;
+  location: string;
+  user_avatar: string;
+}>;
+
 function extractErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
 
@@ -137,7 +145,7 @@ export function getAllUsers() {
   return authFetch("/api/protected/users");
 }
 
-export async function updateProfile(data: any) {
+export async function updateProfile(data: UpdateProfilePayload) {
   const res = await fetch("/api/protected/update-profile", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

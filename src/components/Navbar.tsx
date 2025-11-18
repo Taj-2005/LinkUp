@@ -30,7 +30,6 @@ interface NavbarProps {
 }
 
 function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
-  const { resolvedTheme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {

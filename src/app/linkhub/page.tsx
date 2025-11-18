@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import { useEffect, useState } from "react";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import ProfileCardSelf from "@/components/ProfileCardSelf";
-import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
-import { getCurrentUser } from "@/utils/api";
-import { IUser } from "@/models/User";
-import Link from "next/link";
 
 export default function Home() {
   return (
