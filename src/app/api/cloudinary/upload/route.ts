@@ -24,10 +24,11 @@ export async function POST(req: Request) {
       secure_url: uploadResult.secure_url,
       public_id: uploadResult.public_id,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Cloudinary upload error:", err);
+    let message = err instanceof Error ? err.message : "Cloudinary upload error";
     return NextResponse.json(
-      { error: err.message ?? "Upload failed" },
+      { error: message ?? "Upload failed" },
       { status: 500 }
     );
   }

@@ -6,7 +6,6 @@ import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/utils/api";
-import { useTheme } from "next-themes";
 import SignoutButton from "@/components/SignoutButton";
 
 

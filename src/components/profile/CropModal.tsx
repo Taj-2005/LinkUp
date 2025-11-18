@@ -1,7 +1,11 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import Cropper from "react-easy-crop";
+import Cropper, {
+  Area,
+  MediaSize,
+  Point,
+} from "react-easy-crop";
 
 interface Props {
   imageSrc: string;
@@ -18,17 +22,20 @@ export default function CropModal({
 }: Props) {
   const cropContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [minZoom, setMinZoom] = useState(1);
 
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  const onCropComplete = useCallback((_: any, area: any) => {
-    setCroppedAreaPixels(area);
-  }, []);
+  const onCropComplete = useCallback(
+    (_: Area, area: Area) => {
+      setCroppedAreaPixels(area);
+    },
+    []
+  );
 
-  const onMediaLoaded = useCallback((mediaSize: { width: number; height: number }) => {
+  const onMediaLoaded = useCallback((mediaSize: MediaSize) => {
     const container = cropContainerRef.current;
     if (!container) return;
 
@@ -45,14 +52,16 @@ export default function CropModal({
     setZoom(sanitized);
   }, []);
 
-  // Convert crop → File Blob
-  const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<Blob> => {
+  const getCroppedImg = async (
+    imageSrc: string,
+    pixelCrop: Area
+  ): Promise<Blob> => {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
       img.crossOrigin = "anonymous";
 
       img.onload = () => resolve(img);
-      img.onerror = (e: Event | string) => reject(e);
+      img.onerror = (e) => reject(e);
 
       img.src = imageSrc;
     });
@@ -77,13 +86,9 @@ export default function CropModal({
     );
 
     return new Promise<Blob>((resolve) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob);
-        },
-        "image/jpeg",
-        0.92
-      );
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+      }, "image/jpeg");
     });
   };
 

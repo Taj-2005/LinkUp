@@ -1,3 +1,4 @@
+// ./src/components/ProfileCardSelf.tsx
 "use client";
 
 import Image from "next/image";
@@ -126,6 +127,8 @@ export default function ProfileCard() {
     setAvatarPreview(null);
     setTempAvatar(null);
 
+    setUploadingAvatar(false);
+
     setEditMode(true);
     setEditModal(true);
   };
@@ -169,6 +172,8 @@ export default function ProfileCard() {
     setTempAvatar(null);
     setUsernameError("");
     setNameError("");
+    setUploadingAvatar(false);
+    setCropImageSrc(null);
   };
 
   const isSaveDisabled = !!usernameError || !!nameError || !username.trim();
@@ -202,6 +207,7 @@ export default function ProfileCard() {
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
+    setUploadingAvatar(true);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -214,6 +220,7 @@ export default function ProfileCard() {
 
     const dataUrl = await fileToDataURL(file);
     setCropImageSrc(dataUrl);
+    setUploadingAvatar(true);
   };
 
 
@@ -221,6 +228,7 @@ export default function ProfileCard() {
     setAvatarPreview(url);
     setTempAvatar(url);
     setCropImageSrc(null);
+    setUploadingAvatar(false);
   };
 
   if (!fetchDone || !displayUser) {
@@ -496,7 +504,10 @@ export default function ProfileCard() {
       {cropImageSrc && (
         <CropModal
           imageSrc={cropImageSrc}
-          onClose={() => setCropImageSrc(null)}
+          onClose={() => {
+            setCropImageSrc(null);
+            setUploadingAvatar(false);
+          }}
           uploadToCloudinary={uploadToCloudinary}
           onCropDone={handleCropDone}
         />

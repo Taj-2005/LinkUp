@@ -40,10 +40,11 @@ export async function PATCH(req: Request) {
       success: true,
       user: updatedUser,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Update profile API error:", err);
+    let message = err instanceof Error ? err.message : "Update profile error";
     return NextResponse.json(
-      { error: "Failed to update profile", detail: err?.message ?? String(err) },
+      { error: "Failed to update profile", detail: message ?? String(err) },
       { status: 500 }
     );
   }
