@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     });
   } catch (err: unknown) {
     console.error("Cloudinary upload error:", err);
-    let message = err instanceof Error ? err.message : "Cloudinary upload error";
+    const message = err instanceof Error ? err.message : "Cloudinary upload error";
     return NextResponse.json(
       { error: message ?? "Upload failed" },
       { status: 500 }
