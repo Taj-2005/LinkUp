@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 
 interface Props {
   imageSrc: string;
@@ -24,9 +25,9 @@ export default function CropModal({
   const [zoom, setZoom] = useState(1);
   const [minZoom, setMinZoom] = useState(1);
 
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  const onCropComplete = useCallback((_: any, area: any) => {
+  const onCropComplete = useCallback((_: Area, area: Area) => {
     setCroppedAreaPixels(area);
   }, []);
 
@@ -59,7 +60,7 @@ export default function CropModal({
 
 
   // Convert crop → File Blob
-  const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<Blob> => {
+  const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
       img.crossOrigin = "anonymous";
