@@ -1,10 +1,17 @@
 import { lockRefresh } from "@/lib/refreshLock";
+import { signout } from "@/utils/api";
 
 function isErrorObj(val: unknown): val is { error: string } {
   return typeof val === "object" && val !== null && "error" in val;
 }
 
+let isRedirecting = false;
+
 export async function authFetch(url: string, options: RequestInit = {}) {
+  if (isRedirecting) {
+    return Promise.reject(new Error("Redirecting to signin"));
+  }
+
   const opts: RequestInit = {
     ...options,
     credentials: "include" as RequestCredentials,
@@ -41,8 +48,12 @@ export async function authFetch(url: string, options: RequestInit = {}) {
 
       return data;
     } catch {
-      window.location.href = "/signin";
-      return;
+      if (!isRedirecting) {
+        isRedirecting = true;
+        await signout()
+        window.location.href = "/";
+      }
+      return Promise.reject(new Error("Authentication failed"));
     }
   }
 

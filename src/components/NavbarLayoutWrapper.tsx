@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import useSWR from "swr";
 import {IUser} from "@/models/User";
@@ -10,28 +10,41 @@ import { useEffect, useState } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
-
 export default function NavbarLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { setUser, setUsers } = useUserStore();
   const [selectedItem, setSelectedItem] = useState("");
 
+  const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
+
   const { data: currentUser } = useSWR<{ user: IUser }>(
-    "current-user",
+    shouldFetchAuth ? "current-user" : null,
     getCurrentUser,
     {
       revalidateOnFocus: false,
       revalidateIfStale: false,
       shouldRetryOnError: false,
+      onError: (err) => {
+        if (err.message.includes("Authentication failed") || err.message.includes("Redirecting")) {
+          router.push("/signin");
+        }
+      }
     }
   );
 
   const { data: allUsers } = useSWR<IUser[]>(
-    "all-users",
+    shouldFetchAuth ? "all-users" : null,
     getAllUsers,
     {
       refreshInterval: 15000,
       revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      onError: (err) => {
+        if (err.message.includes("Authentication failed") || err.message.includes("Redirecting")) {
+          router.push("/signin");
+        }
+      }
     }
   );
 
