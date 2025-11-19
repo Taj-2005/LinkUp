@@ -3,20 +3,18 @@
 import { useRef, useEffect, useState } from "react";
 import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
-import { getAllUsers, getCurrentUser } from "@/utils/api";
-import { IUser } from "@/models/User";
 import useDebounce from "@/hooks/useDebounce";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
-  
+
+  const { user: currentUser, users } = useUserStore();
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<IUser[]>([]);
-  
+  const [filteredUsers, setFilteredUsers] = useState(users); 
+
   const debouncedQuery = useDebounce(searchQuery, 500);
 
   useEffect(() => {
@@ -24,20 +22,8 @@ export default function SearchBar() {
   }, []);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const me = await getCurrentUser();
-        const all = await getAllUsers();
-
-        setCurrentUser(me.user);
-        setUsers(all);
-        setFilteredUsers(all);
-      } catch{
-      }
-    };
-
-    load();
-  }, []);
+    setFilteredUsers(users);
+  }, [users]);
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
@@ -60,7 +46,6 @@ export default function SearchBar() {
       setFilteredUsers(filtered);
       setIsSearching(false);
     }, 200);
-
   }, [debouncedQuery, users]);
 
   return (
@@ -107,7 +92,12 @@ export default function SearchBar() {
               <User key={u._id} user={u} />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center space-y-2 p-10 text-center text-gray-500 dark:text-gray-400">
+            <div
+              className="
+                flex flex-col items-center justify-center space-y-2 
+                p-10 text-center text-gray-500 dark:text-gray-400
+              "
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-12 w-12 opacity-50"

@@ -4,13 +4,16 @@ import { IUser } from "@/models/User";
 interface UserStore {
   user: IUser | null;
   setUser: (user: IUser | null) => void;
-  loading: boolean;
-  setLoading: (val: boolean) => void;
+
+  users: IUser[];
+  setUsers: (users: IUser[]) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
-  loading: true,
+  users: [],                               
+
   setUser: (user) => set({ user }),
-  setLoading: (val) => set({ loading: val }),
+  setUsers: (users) => set({ users }),
+
 }));

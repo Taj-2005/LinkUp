@@ -27,7 +27,6 @@ export default function ProfileCard() {
 
   const userFromStore = useUserStore((s) => s.user);
   const setUserInStore = useUserStore((s) => s.setUser);
-  const loading = useUserStore((s) => s.loading);
 
   const [displayUser, setDisplayUser] = useState<IUser | null>(null);
 
@@ -228,7 +227,7 @@ export default function ProfileCard() {
     }
   };
 
-  if (loading || !displayUser) {
+  if (!displayUser) {
     return (
       <div className="w-full flex items-center justify-center">
         <motion.div

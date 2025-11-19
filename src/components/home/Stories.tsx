@@ -1,44 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import { toast } from "react-hot-toast";
+import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { IUser } from "@/models/User";
-import { getAllUsers, signout } from "@/utils/api";
 import { motion } from "framer-motion";
 
 export default function Stories() {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {users} = useUserStore();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const data = await getAllUsers();
-        setUsers(data);
-      } catch (error: unknown) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Failed to load users. Signing out.";
-
-        toast.error(message || "Session expired. You’ve been signed out.");
-        try {
-          await signout();
-        } catch {}
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  if (loading) {
+  if (!users || users.length === 0) {
     return (
       <div className="w-full h-full overflow-hidden">
         <motion.div
