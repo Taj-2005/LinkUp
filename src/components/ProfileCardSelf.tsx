@@ -353,7 +353,24 @@ export default function ProfileCard() {
             {displayUser.name}
           </p>
 
-          <div className="mt-5 max-w-lg">
+          <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mt-6 mb-6">
+            <div>
+              <p className="text-2xl">{displayUser.links ? displayUser.links.length : 0}</p>
+              <p className="text-sm text-primary-light dark:text-gray-400">Links</p>
+            </div>
+
+            <div>
+              <p className="text-2xl">{displayUser.linked_by?.length ?? 0}</p>
+              <p className="text-sm text-primary-light dark:text-gray-400">Linked By</p>
+            </div>
+
+            <div>
+              <p className="text-2xl">{displayUser.linked_to?.length ?? 0}</p>
+              <p className="text-sm text-primary-light dark:text-gray-400">Linked To</p>
+            </div>
+          </div>
+
+          <div className="mt-1 max-w-lg">
             <div className="flex items-center gap-2 text-primary-light dark:text-white text-sm">
               <FiMapPin className="text-xl" />
               {displayUser.location}
@@ -364,13 +381,16 @@ export default function ProfileCard() {
             </p>
           </div>
 
-          <button
-            onClick={openEditModal}
-            className="mt-4 bg-primary-light dark:bg-primary-dark px-6 py-2 rounded-2xl text-black dark:text-white"
-          >
-            Edit Profile
-          </button>
+          <div className="mt-4 flex flex-wrap gap-4">
+            <button
+              onClick={openEditModal}
+              className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition"
+            >
+              Edit Profile
+            </button>
+          </div>
         </div>
+
       </div>
 
       <ProfileNavbarSelf />
