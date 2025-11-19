@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
+
 export default function NavbarLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { setUser, setUsers } = useUserStore();
