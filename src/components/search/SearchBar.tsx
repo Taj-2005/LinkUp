@@ -82,9 +82,36 @@ export default function SearchBar() {
       {(isFocused || searchQuery.trim() !== "") && (
         <div className="max-h-[80vh] overflow-y-auto hide-scrollbar p-4 space-y-4">
           {isSearching ? (
-            <div className="flex justify-center py-10">
-              <div className="wiggle text-gray-600 dark:text-gray-400 text-lg font-semibold">
-                Searching...
+            <div className="flex flex-col justify-center items-center py-12 gap-3 select-none">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full bg-primary-light/20 dark:bg-primary-light/10 blur-xl animate-pulseSlow"></div>
+
+                <div className="animate-float relative z-10 text-primary-dark dark:text-primary-light">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12 opacity-80"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <p className="text-primary-dark dark:text-primary-light text-lg font-semibold tracking-wide">
+                Searching…
+              </p>
+
+              <div className="flex gap-1">
+                <span className="h-2 w-2 rounded-full bg-primary-dark dark:bg-primary-light/80 animate-dot1"></span>
+                <span className="h-2 w-2 rounded-full bg-primary-dark/80 dark:bg-primary-light/60 animate-dot2"></span>
+                <span className="h-2 w-2 rounded-full bg-primary-dark/60 dark:bg-primary-light/40 animate-dot3"></span>
               </div>
             </div>
           ) : filteredUsers.length > 0 ? (
@@ -92,30 +119,41 @@ export default function SearchBar() {
               <User key={u._id} user={u} />
             ))
           ) : (
-            <div
-              className="
-                flex flex-col items-center justify-center space-y-2 
-                p-10 text-center text-gray-500 dark:text-gray-400
-              "
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 opacity-50"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
-                />
-              </svg>
-              <p className="text-lg font-medium">No users found</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                Try a different search term.
+            <div className="flex flex-col items-center justify-center py-16 select-none text-center">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 rounded-full bg-primary-light/20 dark:bg-primary-light/10 blur-xl animate-pulseSlow"></div>
+
+                <div className="animate-float relative z-10 text-primary-dark dark:text-primary-light">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-16 w-16 opacity-80"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <p className="text-xl font-semibold text-primary-dark dark:text-primary-light">
+                No Users Found
               </p>
+
+              <p className="text-sm text-primary-light/70 dark:text-primary-light/50 mt-1 mb-3">
+                Try searching for something else
+              </p>
+
+              <div className="flex gap-1 mt-2">
+                <span className="h-2 w-2 rounded-full bg-primary-dark dark:bg-primary-light/70 animate-dot1"></span>
+                <span className="h-2 w-2 rounded-full bg-primary-dark/80 dark:bg-primary-light/60 animate-dot2"></span>
+                <span className="h-2 w-2 rounded-full bg-primary-dark/60 dark:bg-primary-light/40 animate-dot3"></span>
+              </div>
             </div>
           )}
         </div>
