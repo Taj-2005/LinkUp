@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { mutate } from "swr";
 import { FiMapPin } from "react-icons/fi";
 import { IUser } from "@/models/User";
 import { useTheme } from "next-themes";
@@ -135,6 +136,7 @@ export default function ProfileCard() {
         setUserInStore(result.user);
 
         setDisplayUser(result.user);
+        mutate("current-user");
       }
 
       setEditModal(false);
@@ -220,6 +222,7 @@ export default function ProfileCard() {
         const result = await updateProfile({ user_avatar: url });
         setUserInStore(result.user);
         setDisplayUser(result.user);
+        mutate("current-user");
       } catch {
       } finally {
         setIsPhotoOnlyMode(false);
@@ -566,6 +569,7 @@ export default function ProfileCard() {
                       await updateProfile({ user_avatar: "" });
 
                       const current = userFromStore;
+                      mutate("current-user");
 
                       if (current) {
                         const plainUser = JSON.parse(JSON.stringify(current)) as IUser;

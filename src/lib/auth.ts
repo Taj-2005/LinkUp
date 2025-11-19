@@ -1,25 +1,21 @@
-import { cookies } from "next/headers";
 import { verifyAccessToken } from "@/lib/tokens";
-import { User, IUser } from "@/models/User";
-import { dbConnect } from "@/lib/dbConnect";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
-export async function requireAuth(): Promise<IUser> {
-  await dbConnect();
+export interface AuthPayload {
+  userId: string;
+  username: string;
+}
 
-  const cookieStore = await cookies();
+export function requireAuth(cookieStore: ReadonlyRequestCookies): AuthPayload {
   const token = cookieStore.get("accessToken")?.value;
 
   if (!token) {
-    throw new Error("Not authenticated: token missing");
+    throw new Error("Unauthorized");
   }
 
   try {
-    const payload = verifyAccessToken(token) as { userId: string; username: string };
-    const user = await User.findById(payload.userId).select("-password -__v");
-
-    if (!user) throw new Error("User not found");
-    return user;
+    return verifyAccessToken(token) as AuthPayload;
   } catch {
-    throw new Error("Invalid or expired access token");
+    throw new Error("Unauthorized");
   }
 }

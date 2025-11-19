@@ -75,7 +75,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   }, []);
 
   return (
-    <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4">
+    <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
       <div className="flex flex-col">
         <div>
           <Image src="/logo.png" alt="Logo" width={150} height={150} className="m-4" />

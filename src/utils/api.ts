@@ -1,4 +1,9 @@
 import { authFetch } from "@/lib/authFetch";
+import { IUser } from "@/models/User";
+
+export interface MeResponse {
+  user: IUser;
+}
 
 export interface SignupData {
   username: string;
@@ -138,12 +143,14 @@ export async function signout(): Promise<APIJson<null>> {
   }
 }
 
-export function getCurrentUser() {
-  return authFetch("/api/protected/me");
+
+export function getCurrentUser(): Promise<{ user: IUser }> {
+  return authFetch("/api/protected/me") as Promise<{ user: IUser }>;
 }
 
-export function getAllUsers() {
-  return authFetch("/api/protected/users");
+
+export function getAllUsers(): Promise<IUser[]> {
+  return authFetch("/api/protected/users") as Promise<IUser[]>;
 }
 
 export async function updateProfile(data: UpdateProfilePayload) {

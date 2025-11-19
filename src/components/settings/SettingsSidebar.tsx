@@ -10,7 +10,10 @@ import {
   FiMapPin,
   FiMessageCircle,
   FiTag,
+  FiLogOut,
 } from "react-icons/fi";
+import { signout } from "@/utils/api";
+import { toast } from "react-hot-toast";
 
 const items = [
   { icon: FiUser, label: "Edit Profile", active: true },
@@ -24,10 +27,26 @@ const items = [
 ];
 
 export default function SettingsSidebar() {
+  const handleSignout = async () => {
+    try {
+      toast.loading("Signing out...");
+
+      await signout();
+
+      toast.dismiss();
+      toast.success("Signed out successfully");
+
+      window.location.href = "/";
+    } catch (err: unknown) {
+      toast.dismiss();
+      const message = err instanceof Error ? err.message : "Signout failed";
+      toast.error(message);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 px-4 py-5">
 
-      {/* TOP ACCOUNTS BOX */}
       <motion.div
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
@@ -48,7 +67,6 @@ export default function SettingsSidebar() {
         </p>
       </motion.div>
 
-      {/* NAV ITEMS */}
       <div className="flex flex-col gap-2">
         {items.map((item, i) => {
           const Icon = item.icon;
@@ -90,6 +108,25 @@ export default function SettingsSidebar() {
             </motion.div>
           );
         })}
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.25, delay: items.length * 0.05 }}
+          whileHover={{ scale: 1.02 }}
+          onClick={handleSignout}
+          className="
+            flex items-center justify-between 
+            px-4 py-3 rounded-lg cursor-pointer select-none
+            transition-all shadow-sm
+            bg-red-500 text-white 
+            dark:bg-red-500 dark:text-white
+          "
+        >
+          <div className="flex items-center gap-3">
+            <FiLogOut size={20} />
+            <span className="font-medium">Sign Out</span>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

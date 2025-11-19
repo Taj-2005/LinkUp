@@ -27,7 +27,6 @@ export default function SettingsPanel() {
 
   const debouncedUsername = useDebounce(username, 600);
 
-  // --- Avatar Handling ---
   const [avatarOptionsModal, setAvatarOptionsModal] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -82,7 +81,6 @@ export default function SettingsPanel() {
     } catch {}
   };
 
-  // --- Username Availability Check ---
   const checkUsername = async (value: string) => {
     try {
       const res = await fetch("/api/auth/check-availability", {
@@ -102,7 +100,6 @@ export default function SettingsPanel() {
     } catch {}
   };
 
-  // Run on debounce
   if (debouncedUsername && debouncedUsername !== user?.username) {
     checkUsername(debouncedUsername);
   }

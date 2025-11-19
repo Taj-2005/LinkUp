@@ -1,8 +1,8 @@
 let refreshPromise: Promise<unknown> | null = null;
 
-export function lockRefresh(refreshFn: () => Promise<unknown>) {
+export function lockRefresh(fn: () => Promise<unknown>) {
   if (!refreshPromise) {
-    refreshPromise = refreshFn().finally(() => {
+    refreshPromise = fn().finally(() => {
       refreshPromise = null;
     });
   }

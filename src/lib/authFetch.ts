@@ -1,41 +1,54 @@
 import { lockRefresh } from "@/lib/refreshLock";
 
+function isErrorObj(val: unknown): val is { error: string } {
+  return typeof val === "object" && val !== null && "error" in val;
+}
+
 export async function authFetch(url: string, options: RequestInit = {}) {
   const opts: RequestInit = {
     ...options,
-    credentials: "include",
-    headers: {
-      ...(options.headers || {}),
+    credentials: "include" as RequestCredentials,
+    headers: new Headers({
       "Content-Type": "application/json",
-    },
+      ...(options.headers || {}),
+    }),
   };
 
   let res = await fetch(url, opts);
-  let json = null;
-  try { json = await res.json(); } catch {}
+  let data: unknown = null;
 
-  const expired = res.status === 401 || res.status === 403 || res.status === 409;
+  try {
+    data = await res.clone().json();
+  } catch {}
 
-  if (expired) {
+  if (res.status === 401) {
     try {
       await lockRefresh(async () => {
-        const r = await fetch("/api/auth/refresh", {
+        const refresh = await fetch("/api/auth/refresh", {
           method: "POST",
-          credentials: "include",
+          credentials: "include" as RequestCredentials,
         });
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || "Failed to refresh");
+
+        if (!refresh.ok) throw new Error("Refresh failed");
       });
 
       res = await fetch(url, opts);
-      json = await res.json();
-    } catch (err) {
-      window.location.href = "/";
-      throw err;
+      data = await res.clone().json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(isErrorObj(data) ? data.error : "Request failed");
+      }
+
+      return data;
+    } catch {
+      window.location.href = "/signin";
+      return;
     }
   }
 
-  if (!res.ok) throw new Error(json?.error || "Request failed");
+  if (!res.ok) {
+    throw new Error(isErrorObj(data) ? data.error : "Request failed");
+  }
 
-  return json;
+  return data;
 }

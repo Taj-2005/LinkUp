@@ -2,9 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { useEffect, useState, useRef } from "react";
-import { getCurrentUser, getAllUsers } from "@/utils/api";
+import useSWR from "swr";
+import {IUser} from "@/models/User";
 import { useUserStore } from "@/store/useUserStore";
+import { getCurrentUser, getAllUsers } from "@/utils/api";
+import { useEffect, useState } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
@@ -13,59 +15,53 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   const { setUser, setUsers } = useUserStore();
   const [selectedItem, setSelectedItem] = useState("");
 
-  const didRunRef = useRef(false);
-
-  useEffect(() => {
-    if (didRunRef.current) return;
-    didRunRef.current = true;
-
-    if (PUBLIC_ROUTES.includes(pathname)) {
-      setUser(null);
-      return;
+  const { data: currentUser } = useSWR<{ user: IUser }>(
+    "current-user",
+    getCurrentUser,
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      shouldRetryOnError: false,
     }
+  );
 
-    const controller = new AbortController();
-
-    const fetchUser = async () => {
-      try {
-        const res = await getCurrentUser();
-        setUser(res?.user ?? null);
-      } catch {
-        setUser(null);
-      }
-    };
-
-    fetchUser();
-
-    return () => controller.abort();
-  }, [pathname, setUser]);
+  const { data: allUsers } = useSWR<IUser[]>(
+    "all-users",
+    getAllUsers,
+    {
+      refreshInterval: 15000,
+      revalidateOnFocus: false,
+    }
+  );
 
   useEffect(() => {
-    if (PUBLIC_ROUTES.includes(pathname)) return;
-
-    const loadUsers = async () => {
-      try {
-        const all = await getAllUsers();
-        setUsers(all ?? []);
-      } catch {}
-    };
-
-    loadUsers();
-  }, [pathname, setUsers]);
+    if (currentUser?.user) {
+      setUser(currentUser.user);
+    }
+  }, [currentUser, setUser]);
 
   useEffect(() => {
-    if (pathname.startsWith("/livelinks")) setSelectedItem("livelinks");
-    else if (pathname.startsWith("/linkfinder")) setSelectedItem("linkfinder");
-    else if (pathname.startsWith("/linkups")) setSelectedItem("linkups");
-    else if (pathname.startsWith("/linkupreqs")) setSelectedItem("linkupreqs");
-    else if (pathname.startsWith("/newlink")) setSelectedItem("newlink");
-    else if (pathname.startsWith("/linkhub")) setSelectedItem("linkhub");
+    if (allUsers) {
+      setUsers(allUsers);
+    }
+  }, [allUsers, setUsers]);
+
+  useEffect(() => {
+    const current = pathname.replace("/", "").toLowerCase();
+
+    if (current === "livelinks") setSelectedItem("livelinks");
+    else if (current === "linkfinder") setSelectedItem("linkfinder");
+    else if (current === "linkups") setSelectedItem("linkups");
+    else if (current === "linkupreqs") setSelectedItem("linkupreqs");
+    else if (current === "newlink") setSelectedItem("newlink");
+    else if (current === "linkhub") setSelectedItem("linkhub");
+    else if (current === "settings") setSelectedItem("settings");
   }, [pathname]);
 
-  if (PUBLIC_ROUTES.includes(pathname)) return <>{children}</>;
+  if (PUBLIC_ROUTES.includes(pathname)) return children;
 
   return (
-    <div className="flex flex-row bg-primary-light dark:bg-primary-dark min-h-screen">
+    <div className="flex flex-row min-h-screen bg-primary-light dark:bg-primary-dark">
       <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
       <div className="flex-1">{children}</div>
     </div>
