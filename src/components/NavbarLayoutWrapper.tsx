@@ -21,21 +21,17 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
 
     const publicRoutes = ["/", "/signin", "/signup"];
     if (publicRoutes.includes(pathname)) {
-      setLoading(false);
-      return;
-    }
-
-    if (document.cookie === "") {
       setUser(null);
       setLoading(false);
       return;
     }
 
+    const controller = new AbortController();
     const fetchUser = async () => {
       try {
         const res = await getCurrentUser();
         setUser(res?.user ?? null);
-      } catch {
+      } catch{
         setUser(null);
       } finally {
         setLoading(false);
@@ -43,8 +39,9 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     };
 
     fetchUser();
-  }, [pathname, setUser, setLoading]);
 
+    return () => controller.abort();
+  }, [pathname, setUser, setLoading]);
 
   useEffect(() => {
     if (pathname.startsWith("/livelinks")) setSelectedItem("livelinks");
