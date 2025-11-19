@@ -23,6 +23,7 @@ export async function PATCH(req: Request) {
       "bio",
       "location",
       "user_avatar",
+      "sex",
     ];
 
     updatableFields.forEach((field) => {

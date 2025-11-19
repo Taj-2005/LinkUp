@@ -8,6 +8,7 @@ const PROTECTED_ROUTES = [
   "/linkupreqs",
   "/linkups",
   "/newlink",
+  "/settings",
 ];
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
@@ -47,5 +48,6 @@ export const config = {
     "/linkupreqs/:path*",
     "/linkups/:path*",
     "/newlink/:path*",
+    "/settings/:path*",
   ],
 };

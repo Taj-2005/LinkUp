@@ -34,6 +34,7 @@ type UpdateProfilePayload = Partial<{
   bio: string;
   location: string;
   user_avatar: string;
+  sex: "male" | "female" | "other";
 }>;
 
 function extractErrorMessage(error: unknown): string {

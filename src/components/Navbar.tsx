@@ -57,10 +57,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   const popupRef = useRef<HTMLDivElement | null>(null);
 
   const handleNavClick = (item: string) => {
-    if (item === "more") {
-      setShowMore((prev) => !prev);
-      return;
-    }
 
     setSelectedItem(item);
     setShowMore(false);
@@ -143,8 +139,8 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           size={26}
           label="More"
           text="text-1xl"
-          isActive={selectedItem === "more" || showMore}
-          onClick={() => handleNavClick("more")}
+          isActive={selectedItem === "settings"}
+          onClick={() => handleNavClick("settings")}
         />
 
         {showMore && (
