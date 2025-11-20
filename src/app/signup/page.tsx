@@ -86,9 +86,9 @@ export default function SignUpPage() {
       await signup(data);
 
       toast.dismiss();
-      toast.success("Account created 🎉");
+      toast.success("Account created! 🎉 Please verify your email.");
 
-      router.push("/livelinks");
+      router.push("/verification-pending");
 
     } catch (err: unknown) {
       toast.dismiss();

@@ -167,3 +167,17 @@ export async function updateProfile(data: UpdateProfilePayload) {
 
   return res.json();
 }
+
+export async function getUser(identifier: string) {
+  const res = await fetch("/api/auth/get-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier }),
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) throw new Error(json.error || "Failed to get user");
+
+  return json.user;
+}

@@ -8,7 +8,6 @@ const isProd = process.env.NODE_ENV === "production";
 
 export async function POST(req: Request) {
   try {
-
     await dbConnect();
 
     const { emailOrUsername, password } = await req.json();
@@ -20,13 +19,18 @@ export async function POST(req: Request) {
       $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
     });
 
-
     if (!user)
       return NextResponse.json(
         { error: "User does not exist" },
         { status: 404 }
       );
 
+    if (!user.isVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before signing in", needsVerification: true },
+        { status: 403 }
+      );
+    }
 
     const valid = await bcrypt.compare(password, user.password);
 
@@ -42,7 +46,6 @@ export async function POST(req: Request) {
 
     user.refreshToken = refreshToken;
     await user.save();
-
 
     const res = NextResponse.json({
       user: { id: user._id, email: user.email, username: user.username },
@@ -62,15 +65,11 @@ export async function POST(req: Request) {
     });
 
     return res;
-} catch (err: unknown) {
-
-  const message =
-    err instanceof Error ? err.message : "Unexpected server error";
-
-  return NextResponse.json(
-    { error: "Server error", details: message },
-    { status: 500 }
-  );
-}
-  
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unexpected server error";
+    return NextResponse.json(
+      { error: "Server error", details: message },
+      { status: 500 }
+    );
+  }
 }

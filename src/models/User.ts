@@ -13,6 +13,9 @@ export interface IUser extends Document {
     linked_by: string[];
     links: string[];
     sex?: "male" | "female" | "other";
+    isVerified: boolean;
+    verificationToken?: string;
+    verificationTokenExpiry?: Date;
     createdAt: Date;
     updatedAt: Date;
     refreshToken?: string;
@@ -70,6 +73,18 @@ const UserSchema: Schema = new Schema<IUser>({
         enum: ["male", "female", "other"],
         required: false,
         default: "other"
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: {
+        type: String,
+        required: false
+    },
+    verificationTokenExpiry: {
+        type: Date,
+        required: false
     },
     createdAt: {
         type: Date,

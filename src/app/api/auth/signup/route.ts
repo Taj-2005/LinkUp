@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
-import { signAccessToken, signRefreshToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/email";
 
-const isProd = process.env.NODE_ENV === "production";
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
 
 export async function POST(req: Request) {
@@ -31,6 +31,9 @@ export async function POST(req: Request) {
     }
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const user = await User.create({
       username,
@@ -40,44 +43,30 @@ export async function POST(req: Request) {
       location,
       bio,
       sex,
+      isVerified: false,
+      verificationToken,
+      verificationTokenExpiry,
     });
 
-    const payload = { userId: user._id, username: user.username };
-    const accessToken = signAccessToken(payload);
-    const refreshToken = signRefreshToken(payload);
-
-    user.refreshToken = refreshToken;
-    await user.save();
+    try {
+      await sendVerificationEmail(email, verificationToken, username);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+    }
 
     const res = NextResponse.json({
-      message: "Signup successful",
+      message: "Signup successful. Please check your email to verify your account.",
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
+        isVerified: user.isVerified,
       },
-    });
-
-    res.cookies.set("accessToken", accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      path: "/",
-    });
-
-    res.cookies.set("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      path: "/",
     });
 
     return res;
   } catch (err: unknown) {
-
-    const message =
-      err instanceof Error ? err.message : "Unexpected server error";
-
+    const message = err instanceof Error ? err.message : "Unexpected server error";
     return NextResponse.json(
       { error: "Server error", details: message },
       { status: 500 }

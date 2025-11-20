@@ -7,6 +7,9 @@ interface UserStore {
 
   users: IUser[];
   setUsers: (users: IUser[]) => void;
+
+  pendingEmail: string | null;
+  setPendingEmail: (email: string | null) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -16,4 +19,6 @@ export const useUserStore = create<UserStore>((set) => ({
   setUser: (user) => set({ user }),
   setUsers: (users) => set({ users }),
 
+  pendingEmail: null,
+  setPendingEmail: (email) => set({ pendingEmail: email }),
 }));

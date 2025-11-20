@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyAccessToken } from "@/lib/tokens";
 
 const PROTECTED_ROUTES = [
   "/livelinks",
@@ -11,17 +12,26 @@ const PROTECTED_ROUTES = [
   "/settings",
 ];
 
-const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
+const PUBLIC_ROUTES = ["/", "/signin", "/signup", "/verify-email", "/verification-pending"];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const accessToken = req.cookies.get("accessToken")?.value;
   const refreshToken = req.cookies.get("refreshToken")?.value;
 
-  if (PUBLIC_ROUTES.includes(pathname) && (accessToken || refreshToken)) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/livelinks";
-    return NextResponse.redirect(url);
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    if ((accessToken || refreshToken) && pathname !== "/verify-email" && pathname !== "/verification-pending") {
+      if (accessToken) {
+        try {
+          verifyAccessToken(accessToken);
+          const url = req.nextUrl.clone();
+          url.pathname = "/livelinks";
+          return NextResponse.redirect(url);
+        } catch {
+        }
+      }
+    }
+    return NextResponse.next();
   }
 
   const isProtected = PROTECTED_ROUTES.some((route) =>
@@ -42,6 +52,8 @@ export const config = {
     "/",
     "/signin",
     "/signup",
+    "/verify-email",
+    "/verification-pending",
     "/livelinks/:path*",
     "/linkfinder/:path*",
     "/linkhub/:path*",
@@ -51,3 +63,4 @@ export const config = {
     "/settings/:path*",
   ],
 };
+

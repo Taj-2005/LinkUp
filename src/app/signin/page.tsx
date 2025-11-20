@@ -5,8 +5,12 @@ import { Eye, EyeOff, Moon, Sun, LogIn } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import {signin} from "@/utils/api"
+import { useRouter } from "next/navigation";
+import {getUser} from "@/utils/api"
+import { useUserStore } from "@/store/useUserStore";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [darkMode, setDarkMode] = useState(true);
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,23 +27,38 @@ export default function SignInPage() {
 
       toast.dismiss();
       toast.success(`Welcome back, ${user.username}! 🚀`);
-      window.location.href = "/livelinks"
-    } catch (err: unknown) {
-      toast.dismiss();
+      router.push("/livelinks")
+      } catch (err: unknown) {
+        toast.dismiss();
 
-      const errorMessage = err instanceof Error ? err.message : "Login failed";
+        const errorMessage = err instanceof Error ? err.message : "Login failed";
 
-      if (errorMessage.includes("User does not exist")) {
-        toast.error("❌ User not found. Check your email/username.");
-      } else if (errorMessage.includes("Incorrect password")) {
-        toast.error("🔐 Incorrect password.");
-      } else if (errorMessage.includes("Missing credentials")) {
-        toast.error("⚠ Please fill in both fields.");
-      } else {
-        toast.error("⚠ Something went wrong. Please try again.");
+        if (errorMessage.includes("User does not exist")) {
+          toast.error("❌ User not found.");
+        } 
+        else if (errorMessage.includes("Incorrect password")) {
+          toast.error("🔐 Incorrect password.");
+        }
+        else if (errorMessage.includes("verify your email")) {
+          toast.error("📩 Please verify your email.");
+
+          const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+          if (!isEmail(emailOrUsername)) {
+            const user = await getUser(emailOrUsername);
+            useUserStore.getState().setPendingEmail(user.email);
+            useUserStore.getState().setUser(user);
+            router.push("/verification-pending");
+            return;
+          }
+
+          router.push("/verification-pending");
+          return;
+        }
+        else {
+          toast.error("⚠ Something went wrong.");
+        }
       }
     }
-  };
 
 
 
