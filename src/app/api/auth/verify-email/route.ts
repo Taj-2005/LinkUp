@@ -5,14 +5,11 @@ import { User } from "@/models/User";
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    
+
     const { token } = await req.json();
 
     if (!token) {
-      return NextResponse.json(
-        { error: "Verification token is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing token" }, { status: 400 });
     }
 
     const user = await User.findOne({
@@ -22,22 +19,24 @@ export async function POST(req: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid or expired verification token" },
+        { error: "Invalid or expired token" },
         { status: 400 }
       );
     }
 
     user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpiry = undefined;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
     await user.save();
 
     return NextResponse.json({
-      message: "Email verified successfully!",
-      success: true,
+      ok: true,
+      message: "Email verified successfully",
+      email: user.email,
     });
+
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unexpected server error";
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
       { error: "Server error", details: message },
       { status: 500 }

@@ -1,187 +1,75 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useUserStore } from "@/store/useUserStore";
-import useSWR from "swr";
-import  {getUser} from "@/utils/api";
-import { useEffect, useState } from "react";
-import { FiCheckCircle, FiRefreshCcw } from "react-icons/fi";
-import Image from "next/image";
+import { Suspense } from "react";
+import { motion } from "framer-motion";
+import VerificationPendingContent from "./VerificationPendingContent";
 
-export default function VerificationPending() {
-  const userEmail = useUserStore((s) => s.pendingEmail);
-  const router = useRouter();
-  const zustandUser = useUserStore((s) => s.user);
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
-  const [resending, setResending] = useState(false);
-  const [resent, setResent] = useState(false);
-  const [darkMode] = useState(true);
-
-  const { data: fetchedUser } = useSWR(
-    userEmail ? ["user-by-email", userEmail] : null,
-    () => getUser(userEmail!)
-  );
-
-  useEffect(() => {
-    const user = zustandUser || fetchedUser;
-
-    if (user && user.isVerified) {
-      router.push("/livelinks");
-    }
-  }, [zustandUser, fetchedUser, router]);
-
-  const handleResend = async () => {
-    if (!userEmail) return;
-
-    setResending(true);
-    try {
-      const res = await fetch("/api/auth/resend-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail }),
-      });
-
-      if (res.ok) {
-        setResent(true);
-        setTimeout(() => setResent(false), 5000);
-      } else {
-        console.error(await res.json());
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setResending(false);
-    }
-  };
-
-
-
-  const theme = darkMode
-    ? {
-        bg: "bg-[#3E434C]",
-        cardBg: "bg-[#212121] backdrop-blur-xl",
-        border: "border-[#181818]",
-        text: "text-slate-100",
-        textSecondary: "text-slate-400",
-        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-        link: "text-gray-400 hover:text-white",
-      }
-    : {
-        bg: "bg-[#606468]",
-        cardBg: "bg-[#ffffff] backdrop-blur-xl",
-        border: "border-[#e1e1e1]",
-        text: "text-slate-900",
-        textSecondary: "text-slate-600",
-        button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-        link: "text-gray-600 hover:text-black",
-      };
-
+export default function VerificationPendingPage() {
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-20 left-10 w-72 h-72 ${darkMode ? 'bg-violet-500/10' : 'bg-violet-300/30'} rounded-full blur-3xl`} />
-        <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
-      </div>
+    <Suspense fallback={<AnimatedFallback />}>
+      <VerificationPendingContent />
+    </Suspense>
+  );
+}
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10 p-8`}>
-        <div className="text-center mb-6 flex flex-col justify-center items-center">
-          <div className="inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-4">
-            <Image
-              src={darkMode ? "/logo.png" : "/dark-logo.png"}
-              alt="Logo"
-              width={150}
-              height={150}
-              className="m-4"
-            />
-          </div>
+function AnimatedFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#0d0d0f] relative overflow-hidden">
+      
+      <motion.div
+        className="absolute top-20 left-10 w-64 h-64 rounded-full blur-[120px]"
+        style={{ background: "rgba(139, 92, 246, 0.15)" }}
+        animate={{ opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 6, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-72 h-72 rounded-full blur-[120px]"
+        style={{ background: "rgba(99, 102, 241, 0.12)" }}
+        animate={{ opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 7, repeat: Infinity }}
+      />
 
+      <motion.div
+        className="relative bg-[#141414] border border-white/5 shadow-2xl backdrop-blur-xl rounded-3xl max-w-sm w-full p-10 flex flex-col items-center"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+      >
+        <motion.div
+          className="relative w-28 h-28 mb-8 flex items-center justify-center"
+          animate={{ rotate: [0, 360] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+        >
+          <div className="absolute inset-0 rounded-full border-[6px] border-transparent border-t-violet-500 border-l-indigo-400"></div>
 
-          <h1 className={`text-3xl font-bold ${theme.text} mb-2`}>
-            Check Your Email
-          </h1>
-          <p className={`${theme.textSecondary} text-sm mb-6`}>
-            We&apos;ve sent a verification link to your email address
-          </p>
-        </div>
+          <motion.div
+            className="w-6 h-6 rounded-full bg-violet-400 shadow-lg shadow-violet-500/50"
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
 
-        <div className={`${darkMode ? 'bg-[#181818]' : 'bg-gray-50'} rounded-xl p-6 mb-6`}>
-          <div className="flex items-start gap-3 mb-4">
-            <FiCheckCircle className={`w-5 h-5 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'} flex-shrink-0 mt-0.5`} />
-            <div>
-              <h3 className={`font-semibold ${theme.text} mb-1`}>
-                Step 1: Check your inbox
-              </h3>
-              <p className={`text-sm ${theme.textSecondary}`}>
-                Look for an email from us with the subject &quot;Verify Your Email Address&quot;
-              </p>
-            </div>
-          </div>
+        <motion.h2
+          className="text-xl font-semibold text-white tracking-wide"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+        >
+          Just a moment...
+        </motion.h2>
 
-          <div className="flex items-start gap-3 mb-4">
-            <FiCheckCircle className={`w-5 h-5 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'} flex-shrink-0 mt-0.5`} />
-            <div>
-              <h3 className={`font-semibold ${theme.text} mb-1`}>
-                Step 2: Click the verification link
-              </h3>
-              <p className={`text-sm ${theme.textSecondary}`}>
-                The link will expire in 24 hours for security reasons
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <FiCheckCircle className={`w-5 h-5 ${darkMode ? 'text-emerald-400' : 'text-emerald-600'} flex-shrink-0 mt-0.5`} />
-            <div>
-              <h3 className={`font-semibold ${theme.text} mb-1`}>
-                Step 3: Start using LiveLinks
-              </h3>
-              <p className={`text-sm ${theme.textSecondary}`}>
-                Once verified, you&apos;ll have full access to all features
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <button
-            onClick={handleResend}
-            disabled={resending || resent}
-            className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
-          >
-            {resending ? (
-              <>
-                <FiRefreshCcw className="w-5 h-5 animate-spin" />
-                Sending...
-              </>
-            ) : resent ? (
-              <>
-                <FiCheckCircle className="w-5 h-5" />
-                Email Resent!
-              </>
-            ) : (
-              <>
-                <FiRefreshCcw className="w-5 h-5" />
-                Resend Verification Email
-              </>
-            )}
-          </button>
-
-          <p className={`text-center text-sm ${theme.textSecondary}`}>
-            Didn&apos;t receive the email? Check your spam folder or{" "}
-            <a href="/signin" className={`font-semibold ${theme.link} transition-colors`}>
-              try signing in
-            </a>
-          </p>
-        </div>
-
-        <div className={`mt-6 p-4 ${darkMode ? 'bg-amber-500/10' : 'bg-amber-50'} rounded-lg border ${darkMode ? 'border-amber-500/20' : 'border-amber-200'}`}>
-          <p className={`text-sm ${darkMode ? 'text-amber-200' : 'text-amber-800'}`}>
-            <strong>Note:</strong> You won&apos;t be able to access protected features until your email is verified.
-          </p>
-        </div>
-      </div>
+        <motion.p
+          className="text-sm text-slate-400 mt-2 text-center max-w-xs"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+        >
+          Preparing verification details.
+        </motion.p>
+      </motion.div>
     </div>
   );
 }

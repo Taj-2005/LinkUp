@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import {signin} from "@/utils/api"
 import { useRouter } from "next/navigation";
 import {getUser} from "@/utils/api"
-import { useUserStore } from "@/store/useUserStore";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -16,6 +15,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
+
 
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,38 +27,47 @@ export default function SignInPage() {
 
       toast.dismiss();
       toast.success(`Welcome back, ${user.username}! 🚀`);
-      router.push("/livelinks")
-      } catch (err: unknown) {
-        toast.dismiss();
 
-        const errorMessage = err instanceof Error ? err.message : "Login failed";
+      router.push("/livelinks");
 
-        if (errorMessage.includes("User does not exist")) {
-          toast.error("❌ User not found.");
-        } 
-        else if (errorMessage.includes("Incorrect password")) {
-          toast.error("🔐 Incorrect password.");
-        }
-        else if (errorMessage.includes("verify your email")) {
-          toast.error("📩 Please verify your email.");
+    } catch (err: unknown) {
+      toast.dismiss();
 
-          const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
-          if (!isEmail(emailOrUsername)) {
-            const user = await getUser(emailOrUsername);
-            useUserStore.getState().setPendingEmail(user.email);
-            useUserStore.getState().setUser(user);
-            router.push("/verification-pending");
-            return;
-          }
+      const errorMsg = err instanceof Error ? err.message : "Login failed";
 
-          router.push("/verification-pending");
-          return;
-        }
-        else {
-          toast.error("⚠ Something went wrong.");
-        }
+      if (errorMsg.includes("User does not exist")) {
+        return toast.error("❌ User not found.");
       }
+
+      if (errorMsg.includes("Incorrect password")) {
+        return toast.error("🔐 Incorrect password.");
+      }
+
+      if (errorMsg.includes("verify your email")) {
+        toast.error("📩 Please verify your email.");
+
+        const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+        let finalEmail = emailOrUsername;
+
+        if (!isEmail(emailOrUsername)) {
+          const userData = await getUser(emailOrUsername);
+          finalEmail = userData.email;
+        }
+
+        await fetch("/api/auth/resend-verification", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: finalEmail }),
+        });
+
+        router.push(`/verification-pending?email=${encodeURIComponent(finalEmail)}`);
+        return;
+      }
+
+      return toast.error("⚠ Something went wrong.");
     }
+  };
+
 
 
 

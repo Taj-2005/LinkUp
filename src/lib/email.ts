@@ -15,166 +15,162 @@ export async function sendVerificationEmail(
   token: string,
   username: string
 ) {
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email Address",
     html: `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <title>Email Verification</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
 
-            <style>
-            /* RESET */
-            body {
-                margin: 0;
-                padding: 0;
-                font-family: "Inter", "Arial", sans-serif;
-                background: #0f0f10;
-                color: #e5e5e5;
-            }
-            a {
-                text-decoration: none;
-            }
+<!-- DARK MODE FIX -->
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark" />
 
-            /* Container */
-            .wrapper {
-                max-width: 600px;
-                margin: 30px auto;
-                background: #121214;
-                border-radius: 18px;
-                overflow: hidden;
-                box-shadow: 0 0 40px rgba(120, 75, 255, 0.25);
-                border: 1px solid rgba(255, 255, 255, 0.05);
-            }
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background: #0f0f10;
+  font-family: Arial, sans-serif;
+  color: #ffffff !important;
+}
 
-            /* Header */
-            .header {
-                background: linear-gradient(135deg, #7f5bff, #a855f7, #6366f1);
-                padding: 40px 20px;
-                text-align: center;
-                color: white;
-            }
+.wrapper {
+  max-width: 600px;
+  margin: 30px auto;
+  background: #121214;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
 
-            .logo {
-                width: 120px;
-                margin-bottom: 10px;
-            }
+.header {
+  background: linear-gradient(135deg, #7f5bff, #a855f7, #6366f1);
+  padding: 40px 20px;
+  text-align: center;
+  color: #ffffff !important;
+}
 
-            .header-title {
-                font-size: 28px;
-                font-weight: 700;
-                margin: 10px 0 4px;
-            }
+.logo {
+  width: 120px;
+  margin-bottom: 10px;
+}
 
-            .subtitle {
-                font-size: 14px;
-                opacity: 0.85;
-                margin-top: 2px;
-            }
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 10px;
+}
 
-            /* Content */
-            .content {
-                padding: 35px 25px;
-                line-height: 1.7;
-                font-size: 15px;
-            }
+.subtitle {
+  font-size: 15px;
+  opacity: 0.95;
+}
 
-            .content h2 {
-                margin-top: 0;
-                color: #ffffff;
-            }
+.content {
+  padding: 30px 25px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e7e7e7 !important;
+}
 
-            /* Button */
-            .verify-btn {
-                display: inline-block;
-                padding: 15px 28px;
-                background: linear-gradient(135deg, #8b5cf6, #6366f1);
-                color: white !important;
-                font-weight: 600;
-                border-radius: 10px;
-                margin: 25px 0;
-                font-size: 16px;
-                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            }
+h2 {
+  margin-top: 0;
+  color: #ffffff !important;
+}
 
-            /* Link text */
-            .link {
-                word-break: break-all;
-                color: #a78bfa;
-                font-weight: 500;
-            }
+.verify-btn {
+  display: inline-block;
+  padding: 15px 28px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #ffffff !important;
+  font-weight: 600;
+  border-radius: 10px;
+  margin: 25px 0;
+  font-size: 16px;
+  text-decoration: none;
+}
 
-            .note {
-                font-size: 13px;
-                opacity: 0.7;
-                margin-top: 10px;
-            }
+.link {
+  color: #a78bfa !important;
+  word-break: break-all;
+}
 
-            /* Footer */
-            .footer {
-                text-align: center;
-                padding: 22px;
-                font-size: 12px;
-                background: #0d0d0e;
-                color: #777;
-            }
+.note {
+  font-size: 13px;
+  opacity: 0.8;
+  color: #cccccc !important;
+}
 
-            .footer a {
-                color: #a78bfa;
-            }
-            </style>
-        </head>
+.footer {
+  text-align: center;
+  padding: 22px;
+  font-size: 12px;
+  background: #0d0d0e;
+  color: #777 !important;
+}
 
-        <body>
-            <div class="wrapper">
-            <!-- HEADER -->
-            <div class="header">
-                <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png" alt="LinkUp Logo" class="logo" />
-                <div class="header-title">Verify Your Email</div>
-                <div class="subtitle">Welcome to LinkUp — Your Social Hub.</div>
-            </div>
+.footer a {
+  color: #a78bfa !important;
+}
+</style>
+</head>
 
-            <!-- CONTENT -->
-            <div class="content">
-                <h2>Hi ${username} 👋</h2>
+<body>
+  <div class="wrapper">
 
-                <p>
-                Thanks for joining <strong>LinkUp</strong> — where people connect, share, explore, and grow.
-                You're just one step away from activating your account.
-                </p>
+    <!-- HEADER -->
+    <div class="header">
+      <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png"
+           alt="LinkUp Logo" class="logo" />
+      <div class="header-title">Verify Your Email</div>
+      <div class="subtitle">Welcome to LinkUp — We're Glad You're Here.</div>
+    </div>
 
-                <p>
-                Tap the button below to verify your email and start using
-                <strong>LiveLinks</strong>, <strong>LinkHub</strong>, and the entire LinkUp experience 🚀
-                </p>
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>Hi ${username} 👋</h2>
 
-                <center>
-                <a href="${verificationUrl}" class="verify-btn">Verify Email Address</a>
-                </center>
+      <p>
+        Thanks for signing up for <strong>LinkUp</strong>!  
+        We're building the next generation social platform where you can  
+        connect, explore, and grow with people worldwide.
+      </p>
 
-                <p>If the button doesn't work, copy and paste this link:</p>
+      <p>
+        You're almost done — verify your email to activate your account  
+        and unlock <strong>LinkHub</strong>, <strong>LiveLinks</strong>,  
+        and all the LinkUp features 🚀
+      </p>
 
-                <p class="link">${verificationUrl}</p>
+      <center>
+        <a href="${verificationUrl}" class="verify-btn">Verify Email Address</a>
+      </center>
 
-                <p class="note">
-                This link is valid for 24 hours. If you didn't create this account, please ignore this email.
-                </p>
-            </div>
+      <p>If the button doesn’t work, use the link below:</p>
+      <p class="link">${verificationUrl}</p>
 
-            <!-- FOOTER -->
-            <div class="footer">
-                © 2025 LinkUp · All rights reserved.<br />
-                <a href="https://link-up-web.vercel.app">Visit LinkUp</a>
-            </div>
-            </div>
-        </body>
-        </html>
-    `,
+      <p class="note">
+        This link is valid for 24 hours. If you did not create this account,  
+        simply ignore this email.
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      © 2025 LinkUp · All rights reserved.<br />
+      <a href="https://link-up-web.vercel.app">Visit LinkUp</a>
+    </div>
+
+  </div>
+</body>
+</html>
+`,
   };
 
   await transporter.sendMail(mailOptions);

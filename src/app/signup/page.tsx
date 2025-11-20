@@ -63,6 +63,7 @@ export default function SignUpPage() {
     handleSignup();
   };
 
+
   const handleSignup = async () => {
     if (!username || !firstName || !email || !password) {
       return toast.error("Fill all required fields");
@@ -88,13 +89,12 @@ export default function SignUpPage() {
       toast.dismiss();
       toast.success("Account created! 🎉 Please verify your email.");
 
-      router.push("/verification-pending");
+      router.push(`/verification-pending?email=${encodeURIComponent(email)}`);
 
     } catch (err: unknown) {
       toast.dismiss();
 
-      const message =
-        err instanceof Error ? err.message : "Signup failed";
+      const message = err instanceof Error ? err.message : "Signup failed";
 
       if (message.includes("User already exists")) {
         toast.error("⚠ User already exists! Try logging in.");
@@ -102,14 +102,12 @@ export default function SignUpPage() {
       else if (message.includes("Missing required fields")) {
         toast.error("⚠ Please fill all required fields.");
       }
-      else if (message.includes("Server error")) {
-        toast.error("❌ Server error. Try again later.");
-      }
       else {
         toast.error(message);
       }
     }
   };
+
   
 
   const checkAvailability = async (value: string, type: "username" | "email") => {
@@ -527,8 +525,14 @@ export default function SignUpPage() {
             
             {currentStep < 2 ? (
               <button
+                type="button"
                 onClick={handleNext}
-                className={`flex-1 ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2`}
+                disabled={!!(usernameError || emailError)}
+                aria-disabled={!!(usernameError || emailError)}
+                className={`flex-1 ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg
+                  hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
+                  flex items-center justify-center gap-2
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
               >
                 Next
                 <ArrowRight className="w-5 h-5" />
