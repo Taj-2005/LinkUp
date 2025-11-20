@@ -53,6 +53,7 @@ export default function User({ user }: UserProps) {
         }
         width={50}
         height={50}
+        unoptimized
         alt={`${user.username} avatar`}
         className="rounded-full object-cover"
       />

@@ -6,7 +6,7 @@ import { updateProfile } from "@/utils/api";
 import useDebounce from "@/hooks/useDebounce";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { FiUser, FiMapPin, FiGlobe, FiInfo, FiAtSign } from "react-icons/fi";
+import { FiUser, FiMapPin, FiGlobe, FiInfo, FiAtSign,FiSettings } from "react-icons/fi";
 import CropModal from "@/components/profile/CropModal";
 
 export default function SettingsPanel() {
@@ -151,8 +151,8 @@ export default function SettingsPanel() {
             overflow-hidden
         "
         >
-        <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white mb-6">
-          Settings
+        <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white mb-6 flex items-center gap-2">
+          <FiSettings size={26}/>Settings
         </h1>
 
         <div
@@ -170,6 +170,7 @@ export default function SettingsPanel() {
               fill
               alt="User Avatar"
               className="object-cover"
+              unoptimized
             />
 
             {uploadingAvatar && (

@@ -224,6 +224,7 @@ export default function SignUpPage() {
               <Image
                   src={ darkMode ? "/logo.png":"/dark-logo.png"}
                   alt="Logo"
+                  unoptimized
                   width={150}
                   height={150}
                   className="m-4"

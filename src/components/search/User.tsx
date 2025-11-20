@@ -25,6 +25,7 @@ export default function User({user} : UserProps) {
                     height={50}
                     alt={`${user?.username} avatar`}
                     className="rounded-full object-cover"
+                    unoptimized
                 />
                 <div className="flex flex-col">
                     <div className="font-bold text-black dark:text-white">{user?.username}</div>

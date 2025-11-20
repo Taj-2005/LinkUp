@@ -119,6 +119,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
           }
           alt={`${user.name} avatar`}
           fill
+          unoptimized
           className="object-cover"
         />
       </div>

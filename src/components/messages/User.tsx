@@ -39,6 +39,7 @@ export default function User({ user, onClick }: UserProps) {
         }
         width={50}
         height={50}
+        unoptimized
         alt="avatar"
         className="rounded-full object-cover"
       />

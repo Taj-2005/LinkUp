@@ -63,6 +63,7 @@ export default function Stories() {
                 alt={user.username}
                 width={100}
                 height={100}
+                unoptimized
                 className="rounded-full flex-shrink-0 object-cover border-4 border-primary-dark dark:border-primary-light p-[0.5px]"
               />
 

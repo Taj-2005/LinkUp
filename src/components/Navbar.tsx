@@ -40,13 +40,14 @@ function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
             src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
             width={26}
             height={26}
+            unoptimized
             alt={`${user?.username} avatar`}
             className="rounded-full object-cover"
           />
       ) : (
         <Icon className="text-white" size={size} />
       )}
-      <div className={`${text} font-montserrat font-bold text-white`}>{label}</div>
+      <div className={`${text} font-outfit font-medium text-white `}>{label}</div>
     </div>
   );
 }
@@ -78,13 +79,13 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
     <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
       <div className="flex flex-col">
         <div>
-          <Image src="/logo.png" alt="Logo" width={150} height={150} className="m-4" />
+          <Image src="/logo.png" unoptimized alt="Logo" width={150} height={150} className="m-4" />
         </div>
 
         <div className="flex flex-col justify-center items-start">
           <NavItem
             Icon={FiHome}
-            size={26}
+            size={20}
             label="LiveLinks"
             text="text-1xl"
             isActive={selectedItem === "livelinks"}
@@ -92,7 +93,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
           <NavItem
             Icon={FiSearch}
-            size={26}
+            size={20}
             label="LinkFinder"
             text="text-1xl"
             isActive={selectedItem === "linkfinder"}
@@ -100,7 +101,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
           <NavItem
             Icon={FiLink}
-            size={26}
+            size={20}
             label="LinkUps"
             text="text-1xl"
             isActive={selectedItem === "linkups"}
@@ -108,7 +109,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
           <NavItem
             Icon={FiExternalLink}
-            size={26}
+            size={20}
             label="LinkUpReqs"
             text="text-1xl"
             isActive={selectedItem === "linkupreqs"}
@@ -116,7 +117,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
           <NavItem
             Icon={FiPlusSquare}
-            size={26}
+            size={20}
             label="New Link"
             text="text-1xl"
             isActive={selectedItem === "newlink"}
@@ -124,7 +125,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
           <NavItem
             Icon={HiUserCircle}
-            size={26}
+            size={20}
             label="LinkHub"
             text="text-1xl"
             isActive={selectedItem === "linkhub"}
@@ -136,7 +137,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
       <div className="relative" ref={popupRef}>
         <NavItem
           Icon={FiMenu}
-          size={26}
+          size={20}
           label="More"
           text="text-1xl"
           isActive={selectedItem === "settings"}

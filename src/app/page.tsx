@@ -83,6 +83,7 @@ export default function LandingPage() {
             <div className="flex items-center space-x-2">
                 <Image
                     src={isDark ? "/logo.png" : "/dark-logo.png"}
+                    unoptimized
                     alt="Logo"
                     width={150}
                     height={150}
@@ -228,6 +229,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-center space-x-2 mb-4">
                 <Image
                     src={isDark ? "/logo.png" : "/dark-logo.png"}
+                    unoptimized
                     alt="Logo"
                     width={150}
                     height={150}

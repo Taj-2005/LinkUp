@@ -343,6 +343,7 @@ export default function ProfileCard() {
             }
             alt="User Avatar"
             fill
+            unoptimized
             className="object-cover"
           />
         </div>
@@ -418,7 +419,7 @@ export default function ProfileCard() {
                 <div className="flex items-center justify-between mb-8 bg-white/10 dark:bg-black/20 p-4 rounded-2xl border border-white/20 backdrop-blur-xl">
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/40">
-                      <Image src={avatarSrc} fill alt="Avatar" className="object-cover" />
+                      <Image src={avatarSrc} fill alt="Avatar" unoptimized className="object-cover" />
                       {uploadingAvatar && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                           <div className="w-6 h-6 border-2 border-white border-t-transparent animate-spin rounded-full" />

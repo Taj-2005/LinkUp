@@ -222,3 +222,14 @@ body {
 .animate-dot3 {
   animation: dot 1s ease-in-out .3s infinite;
 }
+
+.font-dm-sans {
+  font-family: var(--font-dm-sans), sans-serif;
+}
+.font-geist-sans {
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.font-outfit {
+  font-family: var(--font-outfit), sans-serif;
+}

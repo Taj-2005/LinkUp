@@ -1,6 +1,6 @@
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { type Metadata } from "next";
-import { Geist, Geist_Mono, Montserrat } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat, Inter, DM_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ThemeProviderWrapper from "@/components/ThemeProviderWrapper";
@@ -10,8 +10,23 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -29,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-primary-light dark:bg-primary-dark`}
+        className={`${geistSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-primary-light dark:bg-primary-dark`}
       >
         <Toaster position="top-right" />
 
