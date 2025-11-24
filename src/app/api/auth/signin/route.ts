@@ -55,12 +55,14 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
     res.cookies.set("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
