@@ -19,84 +19,55 @@ export interface IUser extends Document {
     createdAt: Date;
     updatedAt: Date;
     refreshToken?: string;
+
+    resetToken?: string;
+    resetTokenExpiry?: number;
 }
 
-const UserSchema: Schema = new Schema<IUser>({
-    user_avatar: {
-        type: String,
-        required: false
-    },
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
-    name: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    location: {
-        type: String,
-        trim: true
-    },
-    bio: {
-        type: String
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    linked_by: {
-        type: [String],
-        default: []
-    },
-    linked_to: {
-        type: [String],
-        default: []
-    },
-    links: {
-        type: [String],
-        default: []
-    },
-    sex: {
-        type: String,
-        enum: ["male", "female", "other"],
-        required: false,
-        default: "other"
-    },
-    isVerified: {
-        type: Boolean,
-        default: false
-    },
-    verificationToken: {
-        type: String,
-        required: false
-    },
-    verificationTokenExpiry: {
-        type: Date,
-        required: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
-    refreshToken: {
-        type: String
-    }
-}, { timestamps: true });
+const UserSchema: Schema = new Schema<IUser>(
+    {
+        user_avatar: { type: String },
+        username: {
+            type: String,
+            required: true,
+            unique: true,
+            trim: true,
+            lowercase: true,
+        },
+        name: { type: String, required: true, trim: true },
+        location: { type: String, trim: true },
+        bio: { type: String },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            trim: true,
+            lowercase: true,
+        },
+        password: { type: String, required: true },
 
-export const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+        linked_by: { type: [String], default: [] },
+        linked_to: { type: [String], default: [] },
+        links: { type: [String], default: [] },
+
+        sex: {
+            type: String,
+            enum: ["male", "female", "other"],
+            default: "other",
+        },
+
+        isVerified: { type: Boolean, default: false },
+
+        verificationToken: { type: String },
+        verificationTokenExpiry: { type: Date },
+
+        refreshToken: { type: String },
+
+        resetToken: { type: String },
+        resetTokenExpiry: { type: Number },
+    },
+    { timestamps: true }
+);
+
+export const User =
+    mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

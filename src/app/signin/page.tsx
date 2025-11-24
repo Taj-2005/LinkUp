@@ -6,6 +6,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import {signin} from "@/utils/api"
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {getUser} from "@/utils/api"
 
 export default function SignInPage() {
@@ -187,9 +188,9 @@ export default function SignInPage() {
           </div>
 
           <div className="text-right">
-            <div className={`text-sm font-medium ${theme.link} transition-colors`}>
+            <Link href="/forgot-password" className={`text-sm font-medium ${theme.link} transition-colors cursor-pointer`}>
               Forgot password?
-            </div>
+            </Link>
           </div>
 
           <button
