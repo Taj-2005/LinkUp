@@ -1,0 +1,194 @@
+"use client";
+
+import { useState } from "react";
+import { Eye, EyeOff, Lock, Check, Moon, Sun } from "lucide-react";
+import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+export default function ResetPasswordPage() {
+  const token = useSearchParams().get("token");
+  const router = useRouter();
+
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [focusedField, setFocusedField] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+
+  const theme = darkMode
+    ? {
+        bg: "bg-[#3E434C]",
+        cardBg: "bg-[#212121] backdrop-blur-xl",
+        border: "border-[#181818]",
+        text: "text-slate-100",
+        textSecondary: "text-slate-400",
+        input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
+        inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
+        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
+        link: "text-gray-400 hover:text-white",
+      }
+    : {
+        bg: "bg-[#606468]",
+        cardBg: "bg-white backdrop-blur-xl",
+        border: "border-[#e1e1e1]",
+        text: "text-slate-900",
+        textSecondary: "text-slate-600",
+        input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
+        inputFocus: "border-gray-500 ring-gray-500/20 bg-white",
+        button: "bg-gradient-to-r from-gray-300 to-gray-300 hover:from-gray-400 hover:to-gray-400",
+        link: "text-gray-600 hover:text-black",
+      };
+
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (password.length < 6) {
+      return toast.error("Password must be at least 6 characters.");
+    }
+
+    if (password !== confirm) {
+      return toast.error("Passwords do not match.");
+    }
+
+    setLoading(true);
+
+    const res = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) return toast.error(data.message);
+
+    toast.success("Password updated successfully!");
+    router.push("/signin");
+  }
+
+  return (
+    <div
+      className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}
+    >
+      {/* Background blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className={`absolute top-20 left-10 w-72 h-72 ${
+            darkMode ? "bg-violet-500/10" : "bg-violet-300/30"
+          } rounded-full blur-3xl`}
+        />
+        <div
+          className={`absolute bottom-20 right-10 w-96 h-96 ${
+            darkMode ? "bg-purple-500/10" : "bg-purple-300/30"
+          } rounded-full blur-3xl`}
+        />
+      </div>
+
+      {/* Theme Toggle */}
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
+      >
+        {darkMode ? (
+          <Sun className="w-5 h-5 text-amber-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-slate-700" />
+        )}
+      </button>
+
+      {/* Card */}
+      <div
+        className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10`}
+      >
+        <div className="p-8 pb-6 text-center">
+          <Image
+            src={darkMode ? "/logo.png" : "/dark-logo.png"}
+            width={150}
+            height={150}
+            alt="Logo"
+            unoptimized
+            className="mx-auto mb-4"
+          />
+
+          <h1 className={`text-3xl font-bold ${theme.text} mb-2`}>Reset Password</h1>
+          <p className={`${theme.textSecondary} text-sm`}>
+            Enter and confirm your new password
+          </p>
+        </div>
+
+        <form onSubmit={handleReset} className="px-8 pb-8 space-y-5">
+
+          {/* New Password */}
+          <div className="relative">
+            <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+              New Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onFocus={() => setFocusedField("pass")}
+              onBlur={() => setFocusedField("")}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className={`w-full px-4 py-3.5 pl-12 rounded-xl border ${theme.input} ${
+                focusedField === "pass" ? `${theme.inputFocus} ring-4` : ""
+              } transition-all duration-200 focus:outline-none`}
+              required
+            />
+            <Lock className="absolute left-4 bottom-4 text-gray-500" />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 bottom-4 text-gray-400"
+            >
+              {showPassword ? <EyeOff /> : <Eye />}
+            </button>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+              Confirm Password
+            </label>
+            <input
+              type={showConfirm ? "text" : "password"}
+              value={confirm}
+              onFocus={() => setFocusedField("confirm")}
+              onBlur={() => setFocusedField("")}
+              onChange={(e) => setConfirm(e.target.value)}
+              placeholder="••••••••"
+              className={`w-full px-4 py-3.5 pl-12 rounded-xl border ${theme.input} ${
+                focusedField === "confirm" ? `${theme.inputFocus} ring-4` : ""
+              } transition-all duration-200 focus:outline-none`}
+              required
+            />
+            <Lock className="absolute left-4 bottom-4 text-gray-500" />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-4 bottom-4 text-gray-400"
+            >
+              {showConfirm ? <EyeOff /> : <Eye />}
+            </button>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className={`w-full ${theme.button} text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-4`}
+          >
+            <Check className="w-5 h-5" />
+            {loading ? "Updating..." : "Update Password"}
+          </button>
+
+        </form>
+      </div>
+    </div>
+  );
+}

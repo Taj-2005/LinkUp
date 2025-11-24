@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     await user.save();
 
     return NextResponse.json({ message: "Password updated!" });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: "Something went wrong" },
       { status: 500 }
