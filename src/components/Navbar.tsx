@@ -13,9 +13,11 @@ interface NavItemProps {
   Icon: React.ElementType;
   size: number;
   label: string;
+  mobileLabel?: string;
   text: string;
   isActive: boolean;
   onClick: () => void;
+  isMobile?: boolean;
 }
 
 interface NavbarProps {
@@ -23,10 +25,34 @@ interface NavbarProps {
   setSelectedItem: (item: string) => void;
 }
 
-function NavItem({ Icon, size, label, text, isActive, onClick }: NavItemProps) {
+function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMobile = false }: NavItemProps) {
   const { resolvedTheme } = useTheme();
   const user = useUserStore((state) => state.user);
 
+  if (isMobile) {
+    return (
+      <div
+        className={`relative flex flex-col justify-center items-center p-1 md:p-2 cursor-pointer transition-colors duration-200 rounded-lg flex-1 min-w-0 ${
+          isActive ? "text-blue-500 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+        }`}
+        onClick={onClick}
+      >
+        {label === "LinkHub" ? (
+          <Image
+            src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+            width={24}
+            height={24}
+            unoptimized
+            alt={`${user?.username} avatar`}
+            className={`rounded-full object-cover ${isActive ? "ring-2 ring-blue-500 dark:ring-blue-400" : ""}`}
+          />
+        ) : (
+          <Icon size={size} />
+        )}
+        <span className="text-[10px] md:text-xs font-outfit font-medium mt-0.5 md:mt-1 truncate w-full text-center">{mobileLabel || label}</span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -58,12 +84,10 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   const popupRef = useRef<HTMLDivElement | null>(null);
 
   const handleNavClick = (item: string) => {
-
     setSelectedItem(item);
     setShowMore(false);
     router.push(`/${item.toLowerCase()}`);
   };
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -75,81 +99,98 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const navItems = [
+    { Icon: FiHome, label: "LiveLinks", mobileLabel: "Home", item: "livelinks" },
+    { Icon: FiSearch, label: "LinkFinder", mobileLabel: "Search", item: "linkfinder" },
+    { Icon: FiLink, label: "LinkUps", mobileLabel: "Links", item: "linkups" },
+    { Icon: FiExternalLink, label: "LinkUpReqs", mobileLabel: "Reqs", item: "linkupreqs" },
+    { Icon: FiPlusSquare, label: "New Link", mobileLabel: "New", item: "newlink" },
+    { Icon: HiUserCircle, label: "LinkHub", mobileLabel: "Profile", item: "linkhub" },
+  ];
+
   return (
-    <div className="relative w-[15%] min-h-screen flex flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
-      <div className="flex flex-col">
-        <div>
-          <Image src="/logo.png" unoptimized alt="Logo" width={150} height={150} className="m-4" />
-        </div>
-
-        <div className="flex flex-col justify-center items-start">
-          <NavItem
-            Icon={FiHome}
-            size={20}
-            label="LiveLinks"
-            text="text-1xl"
-            isActive={selectedItem === "livelinks"}
-            onClick={() => handleNavClick("livelinks")}
-          />
-          <NavItem
-            Icon={FiSearch}
-            size={20}
-            label="LinkFinder"
-            text="text-1xl"
-            isActive={selectedItem === "linkfinder"}
-            onClick={() => handleNavClick("linkfinder")}
-          />
-          <NavItem
-            Icon={FiLink}
-            size={20}
-            label="LinkUps"
-            text="text-1xl"
-            isActive={selectedItem === "linkups"}
-            onClick={() => handleNavClick("linkups")}
-          />
-          <NavItem
-            Icon={FiExternalLink}
-            size={20}
-            label="LinkUpReqs"
-            text="text-1xl"
-            isActive={selectedItem === "linkupreqs"}
-            onClick={() => handleNavClick("linkupreqs")}
-          />
-          <NavItem
-            Icon={FiPlusSquare}
-            size={20}
-            label="New Link"
-            text="text-1xl"
-            isActive={selectedItem === "newlink"}
-            onClick={() => handleNavClick("newlink")}
-          />
-          <NavItem
-            Icon={HiUserCircle}
-            size={20}
-            label="LinkHub"
-            text="text-1xl"
-            isActive={selectedItem === "linkhub"}
-            onClick={() => handleNavClick("linkhub")}
-          />
-        </div>
-      </div>
-
-      <div className="relative" ref={popupRef}>
-        <NavItem
-          Icon={FiMenu}
-          size={20}
-          label="More"
-          text="text-1xl"
-          isActive={selectedItem === "settings"}
-          onClick={() => handleNavClick("settings")}
-        />
-
-        {showMore && (
-          <div className="absolute bottom-20 left-4 bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
-            <SignoutButton onSignedOut={() => setShowMore(false)} />
+    <>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex relative w-[15%] min-h-screen flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
+        <div className="flex flex-col">
+          <div>
+            <Image src="/logo.png" unoptimized alt="Logo" width={150} height={150} className="m-4 max-w-full h-auto" />
           </div>
-        )}
+
+          <div className="flex flex-col justify-center items-start">
+            {navItems.map(({ Icon, label, item }) => (
+              <NavItem
+                key={item}
+                Icon={Icon}
+                size={20}
+                label={label}
+                text="text-1xl"
+                isActive={selectedItem === item}
+                onClick={() => handleNavClick(item)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="relative" ref={popupRef}>
+          <NavItem
+            Icon={FiMenu}
+            size={20}
+            label="More"
+            text="text-1xl"
+            isActive={selectedItem === "settings"}
+            onClick={() => handleNavClick("settings")}
+          />
+
+          {showMore && (
+            <div className="absolute bottom-20 left-4 bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
+              <SignoutButton onSignedOut={() => setShowMore(false)} />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Mobile Bottom Navbar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-around items-center px-1 py-1.5">
+          {navItems.map(({ Icon, label, mobileLabel, item }) => (
+            <NavItem
+              key={item}
+              Icon={Icon}
+              size={22}
+              label={label}
+              mobileLabel={mobileLabel}
+              text="text-xs"
+              isActive={selectedItem === item}
+              onClick={() => handleNavClick(item)}
+              isMobile={true}
+            />
+          ))}
+          <div className="relative flex-1 min-w-0" ref={popupRef}>
+            <NavItem
+              Icon={FiMenu}
+              size={22}
+              label="More"
+              mobileLabel="More"
+              text="text-xs"
+              isActive={selectedItem === "settings"}
+              onClick={() => {
+                if (selectedItem === "settings") {
+                  setShowMore(!showMore);
+                } else {
+                  handleNavClick("settings");
+                }
+              }}
+              isMobile={true}
+            />
+            {showMore && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
+                <SignoutButton onSignedOut={() => setShowMore(false)} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

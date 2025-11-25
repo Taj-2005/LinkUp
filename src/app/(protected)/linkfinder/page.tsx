@@ -13,17 +13,17 @@ export default function Home() {
   
   return (
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark min-h-screen">
-      <div className="w-full m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
-        <div className="w-[70%] bg-left-nav-light dark:bg-right-nav-dark">
+      <div className="w-full m-2 md:m-2 min-h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
+        <div className="w-full md:w-[70%] bg-left-nav-light dark:bg-right-nav-dark">
           <SearchBar />
         </div>
 
-        <div className="w-[30%] border border-primary-light/30 dark:border-primary-dark/30">
-          <div className="flex justify-end items-end m-2">
+        <div className="hidden md:flex w-full md:w-[30%] border-t md:border-t-0 md:border-l border-primary-light/30 dark:border-primary-dark/30 mt-4 md:mt-0 flex-col">
+          <div className="flex justify-end items-end m-2 md:m-2">
             <ToggleSwitch />
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 px-2 md:px-0">
             <Profile user={user} />
             <Ads />
           </div>

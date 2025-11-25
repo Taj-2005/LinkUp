@@ -9,12 +9,12 @@ export default function AdsPlaceholderMobile() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-2xl font-bold text-primary-dark dark:text-primary-light mb-8 text-center"
+        className="text-xl md:text-2xl font-bold text-primary-dark dark:text-primary-light mb-4 md:mb-8 text-center"
       >
         Sponsored Ads
       </motion.h2>
 
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-sm space-y-4 md:space-y-6">
 {[1].map((item) => (
   <motion.div
     key={item}

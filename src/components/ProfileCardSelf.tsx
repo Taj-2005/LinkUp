@@ -328,73 +328,74 @@ export default function ProfileCard() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-        <div
-          onClick={() => setAvatarOptionsModal(true)}
-          className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer"
-        >
-          <Image
-            src={
-              avatarSrc
-                ? avatarSrc
-                : resolvedTheme === "dark"
-                ? "/dark-profile.png"
-                : "/light-profile.png"
-            }
-            alt="User Avatar"
-            fill
-            unoptimized
-            className="object-cover"
-          />
-        </div>
-
-        <div className="flex-1">
-          <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white">
-            {displayUser.username}
-          </h1>
-
-          <p className="text-primary-light dark:text-primary-light/80 text-lg font-semibold mt-1">
-            {displayUser.name}
-          </p>
-
-          <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mt-6 mb-6">
-            <div>
-              <p className="text-2xl">{displayUser.links ? displayUser.links.length : 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Links</p>
-            </div>
-
-            <div>
-              <p className="text-2xl">{displayUser.linked_by?.length ?? 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Linked By</p>
-            </div>
-
-            <div>
-              <p className="text-2xl">{displayUser.linked_to?.length ?? 0}</p>
-              <p className="text-sm text-primary-light dark:text-gray-400">Linked To</p>
-            </div>
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
+          <div
+            onClick={() => setAvatarOptionsModal(true)}
+            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer flex-shrink-0"
+          >
+            <Image
+              src={
+                avatarSrc
+                  ? avatarSrc
+                  : resolvedTheme === "dark"
+                  ? "/dark-profile.png"
+                  : "/light-profile.png"
+              }
+              alt="User Avatar"
+              fill
+              unoptimized
+              className="object-cover"
+            />
           </div>
 
-          <div className="mt-1 max-w-lg">
-            <div className="flex items-center gap-2 text-primary-light dark:text-white text-sm">
-              <FiMapPin className="text-xl" />
-              {displayUser.location}
-            </div>
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark dark:text-white">
+              {displayUser.username}
+            </h1>
 
-            <p className="text-primary-light dark:text-white mt-2 leading-relaxed">
-              {displayUser.bio}
+            <p className="text-primary-light dark:text-primary-light/80 text-base md:text-lg font-semibold mt-1">
+              {displayUser.name}
             </p>
-          </div>
 
-          <div className="mt-4 flex flex-wrap gap-4">
-            <button
-              onClick={openEditModal}
-              className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition"
-            >
-              Edit Profile
-            </button>
+            <div className="flex gap-4 md:gap-8 text-primary-dark dark:text-white font-semibold mt-4 md:mt-6 mb-4 md:mb-6 justify-center md:justify-start">
+              <div>
+                <p className="text-xl md:text-2xl">{displayUser.links ? displayUser.links.length : 0}</p>
+                <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Links</p>
+              </div>
+
+              <div>
+                <p className="text-xl md:text-2xl">{displayUser.linked_by?.length ?? 0}</p>
+                <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Linked By</p>
+              </div>
+
+              <div>
+                <p className="text-xl md:text-2xl">{displayUser.linked_to?.length ?? 0}</p>
+                <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Linked To</p>
+              </div>
+            </div>
+
+            <div className="mt-1 max-w-lg w-full md:w-auto">
+              <div className="flex items-center justify-center md:justify-start gap-2 text-primary-light dark:text-white text-xs md:text-sm">
+                <FiMapPin className="text-lg md:text-xl" />
+                <span className="break-words">{displayUser.location}</span>
+              </div>
+
+              <p className="text-primary-light dark:text-white mt-2 leading-relaxed text-sm md:text-base break-words text-center md:text-left">
+                {displayUser.bio}
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-4 justify-center md:justify-start">
+              <button
+                onClick={openEditModal}
+                className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto"
+              >
+                Edit Profile
+              </button>
+            </div>
           </div>
         </div>
-
       </div>
 
       <ProfileNavbarSelf />
@@ -411,14 +412,14 @@ export default function ProfileCard() {
               initial={{ scale: 0.6 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.6 }}
-              className="w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl"
+              className="w-[95%] md:w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl max-h-[90vh] overflow-y-auto"
             >
-              <div className="rounded-3xl p-8 bg-white/10 dark:bg-black/20 border border-white/20">
-                <h2 className="text-3xl font-bold text-white mb-6">Edit Profile</h2>
+              <div className="rounded-3xl p-4 md:p-8 bg-white/10 dark:bg-black/20 border border-white/20">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6">Edit Profile</h2>
 
-                <div className="flex items-center justify-between mb-8 bg-white/10 dark:bg-black/20 p-4 rounded-2xl border border-white/20 backdrop-blur-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/40">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 bg-white/10 dark:bg-black/20 p-3 md:p-4 rounded-2xl border border-white/20 backdrop-blur-xl gap-3 md:gap-0">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 flex-shrink-0">
                       <Image src={avatarSrc} fill alt="Avatar" unoptimized className="object-cover" />
                       {uploadingAvatar && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
@@ -428,8 +429,8 @@ export default function ProfileCard() {
                     </div>
 
                     <div>
-                      <p className="text-white font-semibold text-lg">{displayUser.username}</p>
-                      <p className="text-white/70 text-sm">{displayUser.name}</p>
+                      <p className="text-white font-semibold text-base md:text-lg">{displayUser.username}</p>
+                      <p className="text-white/70 text-xs md:text-sm">{displayUser.name}</p>
                     </div>
                   </div>
 
@@ -438,7 +439,7 @@ export default function ProfileCard() {
                       setIsPhotoOnlyMode(false);
                       fileInputRef.current?.click();
                     }}
-                    className="px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
+                    className="px-4 md:px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold text-sm md:text-base w-full md:w-auto"
                   >
                     Change photo
                   </button>

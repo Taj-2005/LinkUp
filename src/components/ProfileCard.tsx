@@ -107,7 +107,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       
       <div
-        className={`flex-shrink-0 relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark`}
+        className={`flex-shrink-0 relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark`}
       >
         <Image
           src={
@@ -124,35 +124,35 @@ export default function ProfileCard({ user }: ProfileCardProps) {
         />
       </div>
 
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="flex-1 flex flex-col justify-between w-full">
 
         <div className="mb-4">
-          <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark dark:text-white tracking-tight">
             {user.username}
           </h1>
-          <p className="text-primary-light dark:text-primary-light/80 text-lg font-semibold mt-1">
+          <p className="text-primary-light dark:text-primary-light/80 text-base md:text-lg font-semibold mt-1">
             {user.name}
           </p>
         </div>
 
-        <div className="flex gap-8 text-center text-primary-dark dark:text-white font-semibold mb-6">
+        <div className="flex gap-4 md:gap-8 text-center text-primary-dark dark:text-white font-semibold mb-6">
           <div>
-            <p className="text-2xl">{user.links ? user.links.length : 0}</p>
-            <p className="text-sm text-primary-light dark:text-gray-400">
+            <p className="text-xl md:text-2xl">{user.links ? user.links.length : 0}</p>
+            <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">
               Links
             </p>
           </div>
 
           <div>
-            <p className="text-2xl">{user.linked_by.length}</p>
-            <p className="text-sm text-primary-light dark:text-gray-400">
+            <p className="text-xl md:text-2xl">{user.linked_by.length}</p>
+            <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">
               Linked By
             </p>
           </div>
 
           <div>
-            <p className="text-2xl">{user.linked_to.length}</p>
-            <p className="text-sm text-primary-light dark:text-gray-400">
+            <p className="text-xl md:text-2xl">{user.linked_to.length}</p>
+            <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">
               Linked To
             </p>
           </div>
@@ -170,7 +170,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-4">
-          <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition">
+          <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto">
             LinkUp
           </button>
         </div>

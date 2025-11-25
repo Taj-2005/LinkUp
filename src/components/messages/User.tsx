@@ -26,7 +26,7 @@ export default function User({ user, onClick }: UserProps) {
 
   return (
     <div
-      className="w-full flex gap-2 pl-4 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition"
+      className="w-full flex gap-2 pl-2 md:pl-4 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition"
       onClick={onClick}
     >
       <Image
@@ -41,15 +41,15 @@ export default function User({ user, onClick }: UserProps) {
         height={50}
         unoptimized
         alt="avatar"
-        className="rounded-full object-cover"
+        className="rounded-full object-cover w-10 h-10 md:w-[50px] md:h-[50px] flex-shrink-0"
       />
 
-      <div className="flex flex-col">
-        <div className="font-bold text-black dark:text-white">
+      <div className="flex flex-col min-w-0 flex-1">
+        <div className="font-bold text-black dark:text-white text-sm md:text-base truncate">
           {user.username}
         </div>
 
-        <div className="text-gray-500 dark:text-gray-400">
+        <div className="text-gray-500 dark:text-gray-400 text-xs md:text-sm truncate">
           {user.name}
         </div>
       </div>

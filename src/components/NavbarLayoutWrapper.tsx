@@ -77,7 +77,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   return (
     <div className="flex flex-row min-h-screen bg-primary-light dark:bg-primary-dark">
       <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 pb-16 md:pb-0">{children}</div>
     </div>
   );
 }
