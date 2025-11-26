@@ -1,4 +1,5 @@
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 import { type Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat, Inter, DM_Sans, Outfit } from "next/font/google";
 import "./globals.css";
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ThemeProviderWrapper>
 
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

@@ -1,21 +1,33 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+function createTransporter() {
+  const emailHost = process.env.EMAIL_HOST;
+  const emailPort = process.env.EMAIL_PORT;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  if (!emailHost || !emailUser || !emailPass) {
+    throw new Error("Email configuration is missing. Please set EMAIL_HOST, EMAIL_USER, and EMAIL_PASS environment variables.");
+  }
+
+  return nodemailer.createTransport({
+    host: emailHost,
+    port: parseInt(emailPort || "587"),
+    secure: process.env.EMAIL_SECURE === "true",
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+}
 
 export async function sendVerificationEmail(
   email: string,
   token: string,
   username: string
 ) {
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
+  const transporter = createTransporter();
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}/verify-email?token=${token}&email=${email}`;
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`,
@@ -173,5 +185,18 @@ h2 {
 `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    // Verify transporter connection before sending
+    await transporter.verify();
+    await transporter.sendMail(mailOptions);
+    console.log(`Verification email sent successfully to: ${email}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Failed to send verification email:", {
+      email,
+      error: errorMessage,
+      timestamp: new Date().toISOString(),
+    });
+    throw error; // Re-throw to let caller handle
+  }
 }

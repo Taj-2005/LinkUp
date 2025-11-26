@@ -4,15 +4,26 @@ import crypto from "crypto";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+function createTransporter() {
+  const emailHost = process.env.EMAIL_HOST;
+  const emailPort = process.env.EMAIL_PORT;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  if (!emailHost || !emailUser || !emailPass) {
+    throw new Error("Email configuration is missing. Please set EMAIL_HOST, EMAIL_USER, and EMAIL_PASS environment variables.");
+  }
+
+  return nodemailer.createTransport({
+    host: emailHost,
+    port: parseInt(emailPort || "587"),
+    secure: process.env.EMAIL_SECURE === "true",
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -23,12 +34,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Email is required" }, { status: 400 });
     }
 
+    // Verify email configuration
+    let transporter;
+    try {
+      transporter = createTransporter();
+    } catch (configError) {
+      console.error("Email configuration error:", configError);
+      return NextResponse.json(
+        { message: "Email service is not configured. Please contact support." },
+        { status: 500 }
+      );
+    }
+
     const user = await User.findOne({ email });
     if (!user)
       return NextResponse.json({ message: "User not found" }, { status: 404 });
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
     user.resetToken = resetToken;
     user.resetTokenExpiry = Date.now() + 1000 * 60 * 30; 
@@ -111,13 +134,40 @@ export async function POST(req: Request) {
       text: `Reset your LinkUp password\n\nOpen this link to reset your password (expires in 30 minutes):\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`,
     };
 
+    // Verify transporter connection before sending
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error("Email transporter verification failed:", verifyError);
+      return NextResponse.json(
+        { message: "Email service connection failed. Please contact support." },
+        { status: 500 }
+      );
+    }
+
     await transporter.sendMail(mailOptions);
 
+    console.log(`Password reset email sent successfully to: ${email}`);
     return NextResponse.json({ message: "Reset email sent!" });
   } catch (error) {
-    console.error("Forgot-password error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    console.error("Forgot-password error:", {
+      message: errorMessage,
+      stack: errorStack,
+      timestamp: new Date().toISOString(),
+    });
+    
+    // Don't expose internal error details to client in production
+    const isProduction = process.env.NODE_ENV === "production";
+    
     return NextResponse.json(
-      { message: "Something went wrong while sending reset email." },
+      { 
+        message: isProduction 
+          ? "Something went wrong while sending reset email. Please try again later or contact support." 
+          : `Error: ${errorMessage}` 
+      },
       { status: 500 }
     );
   }
