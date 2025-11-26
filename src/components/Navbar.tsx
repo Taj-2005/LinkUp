@@ -33,7 +33,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
     return (
       <div
         className={`relative flex flex-col justify-center items-center p-1 md:p-2 cursor-pointer transition-colors duration-200 rounded-lg flex-1 min-w-0 ${
-          isActive ? "text-blue-500 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+          isActive ? "text-white" : "text-primary-light dark:text-primary-dark"
         }`}
         onClick={onClick}
       >
@@ -44,7 +44,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
             height={24}
             unoptimized
             alt={`${user?.username} avatar`}
-            className={`rounded-full object-cover ${isActive ? "ring-2 ring-blue-500 dark:ring-blue-400" : ""}`}
+            className={`rounded-full object-cover ${isActive ? "ring-2 ring-white" : ""}`}
           />
         ) : (
           <Icon size={size} />
@@ -57,7 +57,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
   return (
     <div
       className={`relative flex justify-start items-center p-6 gap-4 cursor-pointer transition-colors w-50 duration-200 rounded-lg m-2 ${
-        isActive ? "bg-right-nav-dark" : "hover:bg-gray-800"
+        isActive ? "bg-right-nav-dark dark:bg-right-nav-dark" : "hover:bg-primary-dark dark:hover:bg-primary-light"
       }`}
       onClick={onClick}
     >
@@ -71,9 +71,9 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
             className="rounded-full object-cover"
           />
       ) : (
-        <Icon className="text-white" size={size} />
+        <Icon className="text-white dark:text-white" size={size} />
       )}
-      <div className={`${text} font-outfit font-medium text-white `}>{label}</div>
+      <div className={`${text} font-outfit font-medium text-white dark:text-white`}>{label}</div>
     </div>
   );
 }
@@ -85,7 +85,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
 
   const handleNavClick = (item: string) => {
     setSelectedItem(item);
-    setShowMore(false);
     router.push(`/${item.toLowerCase()}`);
   };
 
@@ -143,7 +142,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           />
 
           {showMore && (
-            <div className="absolute bottom-20 left-4 bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
+            <div className="absolute bottom-20 left-4 bg-right-nav-dark dark:bg-right-nav-dark border border-primary-light/30 dark:border-primary-dark/30 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
               <SignoutButton onSignedOut={() => setShowMore(false)} />
             </div>
           )}
@@ -151,7 +150,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
       </div>
 
       {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30">
         <div className="flex justify-around items-center px-1 py-1.5">
           {navItems.map(({ Icon, label, mobileLabel, item }) => (
             <NavItem
@@ -184,7 +183,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
               isMobile={true}
             />
             {showMore && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-900 dark:bg-gray-800 border border-gray-700 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-right-nav-dark dark:bg-right-nav-dark border border-primary-light/30 dark:border-primary-dark/30 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
                 <SignoutButton onSignedOut={() => setShowMore(false)} />
               </div>
             )}

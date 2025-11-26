@@ -12,7 +12,6 @@ export default function Stories() {
   const {users} = useUserStore();
 
   if (!users || users.length === 0) {
-    // Mobile horizontal scroll: overflow-x-auto with touch scrolling, px-4 prevents avatar clipping
     return (
       <div 
         className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar" 
@@ -62,7 +61,7 @@ export default function Stories() {
         msOverflowStyle: 'none'
       }}
     >
-      <div className="flex flex-row flex-nowrap h-full py-4 md:py-2 gap-4 md:gap-6 snap-x snap-mandatory scroll-smooth px-4 md:px-0" style={{ width: 'max-content' }}>
+      <div className="flex flex-row flex-nowrap h-full py-4 md:py-2 gap-2 md:gap-6 snap-x snap-mandatory scroll-smooth px-4 md:px-0" style={{ width: 'max-content' }}>
         {users.slice(0, 20).map((user) => (
           <div
             key={user.username}
