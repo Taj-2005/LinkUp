@@ -3,8 +3,7 @@ import bcrypt from "bcryptjs";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 import { signAccessToken, signRefreshToken } from "@/lib/tokens";
-
-const isProd = process.env.NODE_ENV === "production";
+import { setAuthCookies } from "@/lib/cookies";
 
 export async function POST(req: Request) {
   try {
@@ -51,20 +50,7 @@ export async function POST(req: Request) {
       user: { id: user._id, email: user.email, username: user.username },
     });
 
-    res.cookies.set("accessToken", accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-    res.cookies.set("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return res;
   } catch (err: unknown) {

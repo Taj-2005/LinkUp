@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { signAccessToken, signRefreshToken } from "@/lib/tokens";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
+import { setAuthCookies } from "@/lib/cookies";
 
 export async function POST(req: Request) {
   try {
@@ -20,23 +21,7 @@ export async function POST(req: Request) {
 
     const res = NextResponse.json({ ok: true, user });
 
-    const isProd = process.env.NODE_ENV === "production";
-
-    res.cookies.set("accessToken", accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    res.cookies.set("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
+    setAuthCookies(res, accessToken, refreshToken);
 
     return res;
 

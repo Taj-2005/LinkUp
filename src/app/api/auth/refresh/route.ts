@@ -8,8 +8,7 @@ import {
   verifyRefreshToken,
   JWTPayload,
 } from "@/lib/tokens";
-
-const isProd = process.env.NODE_ENV === "production";
+import { setAuthCookies } from "@/lib/cookies";
 
 export async function POST() {
   await dbConnect();
@@ -53,21 +52,7 @@ export async function POST() {
 
   const res = NextResponse.json({ ok: true });
 
-  res.cookies.set("accessToken", newAccessToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
-
-  res.cookies.set("refreshToken", newRefreshToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-    path: "/",
-  });
+  setAuthCookies(res, newAccessToken, newRefreshToken);
 
   return res;
 }

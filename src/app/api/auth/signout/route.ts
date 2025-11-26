@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
+import { deleteAuthCookies } from "@/lib/cookies";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,8 +27,7 @@ export async function POST() {
       message: "Signed out successfully",
     });
 
-    res.cookies.delete("accessToken");
-    res.cookies.delete("refreshToken");
+    deleteAuthCookies(res);
 
     return res;
   } catch (err: unknown) {
