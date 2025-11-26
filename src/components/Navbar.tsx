@@ -150,7 +150,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
       </div>
 
       {/* Mobile Bottom Navbar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30">
+      <div className="md:hidden fixed inset-x-0 bottom-0 z-[9999] bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30 shadow-lg">
         <div className="flex justify-around items-center px-1 py-1.5">
           {navItems.map(({ Icon, label, mobileLabel, item }) => (
             <NavItem
