@@ -150,8 +150,27 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
       </div>
 
       {/* Mobile Bottom Navbar */}
-      <div className="md:hidden mobile-navbar-fixed z-[9999] bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30 shadow-lg">
-        <div className="flex justify-around items-center px-1 py-1.5">
+      <div 
+        className="md:hidden mobile-navbar-fixed z-[9999] bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30 shadow-lg"
+        style={{ 
+          marginBottom: 0, 
+          paddingBottom: 0,
+          bottom: 0,
+          position: 'fixed',
+          width: '100%',
+          left: 0,
+          right: 0,
+          transform: 'translateY(0)',
+          WebkitTransform: 'translateY(0)',
+        }}
+      >
+        <div 
+          className="flex justify-around items-center px-1 py-1.5" 
+          style={{ 
+            marginBottom: 0, 
+            paddingBottom: `max(0.375rem, env(safe-area-inset-bottom, 0px))`,
+          }}
+        >
           {navItems.map(({ Icon, label, mobileLabel, item }) => (
             <NavItem
               key={item}

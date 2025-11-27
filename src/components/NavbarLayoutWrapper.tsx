@@ -75,9 +75,9 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   if (PUBLIC_ROUTES.includes(pathname)) return children;
 
   return (
-    <div className="flex flex-row min-h-screen bg-primary-light dark:bg-primary-dark">
+    <div className="flex flex-row min-h-screen bg-primary-light dark:bg-primary-dark" style={{ paddingBottom: 0, marginBottom: 0 }}>
       <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-      <div className="flex-1 pb-16 md:pb-0">{children}</div>
+      <div className="flex-1 pb-16 md:pb-0" style={{ paddingBottom: '0' }}>{children}</div>
     </div>
   );
 }

@@ -22,13 +22,22 @@ html,
 body {
   overscroll-behavior: none;
   overflow-x: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html {
+  height: 100%;
+  height: -webkit-fill-available;
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   width: 100%;
   max-width: 100vw;
+  min-height: 100%;
+  min-height: -webkit-fill-available;
 }
 
 /* Ensure mobile navbar is flush with bottom on all devices */
@@ -39,7 +48,32 @@ body {
     left: 0 !important;
     right: 0 !important;
     margin: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    transform: translateY(0) !important;
+    -webkit-transform: translateY(0) !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    background-color: var(--color-right-nav-light) !important;
+  }
+  
+  .dark .mobile-navbar-fixed {
+    background-color: var(--color-right-nav-dark) !important;
+  }
+  
+  /* Remove any potential spacing from body/html on mobile */
+  html, body {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure body background doesn't show through at bottom */
+  body {
+    background-attachment: fixed !important;
   }
 }
 
