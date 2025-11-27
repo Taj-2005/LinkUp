@@ -83,14 +83,10 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   return (
     <div className="flex flex-row h-screen md:h-full md:min-h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
       <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-      <div 
-        className="flex-1" 
-        style={{ 
-          height: '100%',
-          minHeight: '100%',
-          WebkitOverflowScrolling: 'touch'
-        }}
-      >
+      <div className="flex-1 overflow-y-auto md:overflow-y-auto" style={{ 
+        paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+        WebkitOverflowScrolling: 'touch'
+      }}>
         {children}
       </div>
     </div>
