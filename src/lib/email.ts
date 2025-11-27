@@ -188,6 +188,6 @@ h2 {
       error: errorMessage,
       timestamp: new Date().toISOString(),
     });
-    throw error; // Re-throw to let caller handle
+    throw error;
   }
 }

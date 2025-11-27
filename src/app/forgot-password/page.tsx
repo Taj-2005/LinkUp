@@ -60,35 +60,36 @@ export default function ForgotPasswordPage() {
       };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative`}>
+    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-2 xs:p-3 sm:p-4 relative overflow-y-auto`}>
       
       <button
         onClick={() => setDarkMode(!darkMode)}
-        className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
+        className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
+        aria-label="Toggle theme"
       >
-        {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+        {darkMode ? <Sun className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />}
       </button>
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md p-8 transition-all`}>
+      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md my-2 xs:my-4 sm:my-8 p-4 xs:p-5 sm:p-6 md:p-8 transition-all`}>
         <div className="text-center">
           <Image
             src={darkMode ? "/logo.png" : "/dark-logo.png"}
             alt="Logo"
             unoptimized
-            width={150}
-            height={150}
-            className="mx-auto mb-4"
+            width={533}
+            height={191}
+            className="w-32 xs:w-36 sm:w-40 md:w-48 lg:w-56 h-auto mx-auto mb-2 xs:mb-3 sm:mb-4"
           />
 
-          <h1 className={`text-3xl font-bold ${theme.text}`}>Forgot Password</h1>
-          <p className={`${theme.textSecondary} text-sm mt-2`}>
+          <h1 className={`text-xl xs:text-2xl sm:text-3xl font-bold ${theme.text}`}>Forgot Password</h1>
+          <p className={`${theme.textSecondary} text-xs mt-1 xs:mt-2`}>
             Enter your email to receive a reset link
           </p>
         </div>
 
-        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-3 xs:mt-4 sm:mt-6 space-y-3 xs:space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+            <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
               Email Address
             </label>
 
@@ -101,24 +102,24 @@ export default function ForgotPasswordPage() {
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField("")}
                 placeholder="you@example.com"
-                className={`w-full px-4 py-3.5 rounded-xl border ${theme.input} ${
-                  focusedField === "email" ? `${theme.inputFocus} ring-4` : ""
-                } transition-all`}
+                className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                  focusedField === "email" ? `${theme.inputFocus} ring-2` : ""
+                } transition-all pr-9 xs:pr-10 sm:pr-12`}
               />
-              <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Mail className="absolute right-2.5 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
             </div>
           </div>
 
           <button
             type="submit"
-            className={`w-full ${theme.button} text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2`}
+            className={`w-full ${theme.button} text-white py-2.5 xs:py-3 sm:py-3.5 rounded-lg xs:rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transition-all flex justify-center items-center gap-2`}
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
             {loading ? "Sending..." : "Send Reset Link"}
           </button>
 
-          <a href="/signin" className={`flex items-center gap-2 mx-auto w-fit mt-2 ${theme.link}`}>
-            <ArrowLeft className="w-4 h-4" /> Back to Sign In
+          <a href="/signin" className={`flex items-center gap-2 mx-auto w-fit mt-2 text-xs ${theme.link}`}>
+            <ArrowLeft className="w-3 h-3" /> Back to Sign In
           </a>
         </form>
       </div>

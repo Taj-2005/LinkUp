@@ -198,7 +198,7 @@ export default function SignUpPage() {
   ];
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden `}>
+    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-2 xs:p-3 sm:p-4 relative overflow-y-auto`}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-20 left-10 w-72 h-72 ${darkMode ? 'bg-violet-500/10' : 'bg-violet-300/30'} rounded-full blur-3xl`} />
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
@@ -206,33 +206,33 @@ export default function SignUpPage() {
 
       <button
         onClick={() => setDarkMode(!darkMode)}
-        className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
+        className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
         aria-label="Toggle theme"
       >
         {darkMode ? (
-          <Sun className="w-5 h-5 text-amber-400" />
+          <Sun className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-amber-400" />
         ) : (
-          <Moon className="w-5 h-5 text-slate-700" />
+          <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
         )}
       </button>
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-lg h-[80vh] transition-all duration-500 relative z-10 flex flex-col`}>
-        <div className="p-8 pb-6 text-center flex-shrink-0">
-          <div className={`inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-4 relative`}>
+      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 flex flex-col max-h-[98vh] xs:max-h-[95vh] sm:max-h-[90vh]`}>
+        <div className="p-3 xs:p-4 sm:p-6 md:p-8 pb-2 xs:pb-3 sm:pb-4 md:pb-6 text-center flex-shrink-0">
+          <div className={`inline-flex items-center justify-center rounded-2xl mb-2 xs:mb-3 sm:mb-4 relative`}>
               <Image
                   src={ darkMode ? "/logo.png":"/dark-logo.png"}
                   alt="Logo"
                   unoptimized
-                  width={150}
-                  height={150}
-                  className="m-4"
+                  width={533}
+                  height={191}
+                  className="w-28 xs:w-32 sm:w-36 md:w-44 lg:w-52 h-auto"
               />
           </div>
-          <h1 className={`text-2xl font-bold ${theme.text} mb-2`}>{steps[currentStep].title}</h1>
-          <p className={`${theme.textSecondary} text-sm`}>{steps[currentStep].subtitle}</p>
+          <h1 className={`text-lg xs:text-xl sm:text-2xl font-bold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>{steps[currentStep].title}</h1>
+          <p className={`${theme.textSecondary} text-xs`}>{steps[currentStep].subtitle}</p>
         </div>
 
-        <div className="px-8 mb-6 flex-shrink-0">
+        <div className="px-3 xs:px-4 sm:px-6 md:px-8 mb-3 xs:mb-4 sm:mb-6 flex-shrink-0">
           <div className={`h-2 ${theme.progress} rounded-full overflow-hidden`}>
             <div 
               className={`h-full ${theme.progressFill} transition-all duration-500 ease-out`}
@@ -251,14 +251,14 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden relative w-lg">
+        <div className="flex-1 overflow-y-auto relative min-h-0">
           <div 
-            className="absolute inset-0 px-8 pb-8"
+            className="px-3 xs:px-4 sm:px-6 md:px-8 pb-3 xs:pb-4 sm:pb-6 md:pb-8"
           >
             {currentStep === 0 && (
-              <div className="w-md h-full space-y-5 animate-fadeIn">
+              <div className="w-full space-y-3 xs:space-y-4 sm:space-y-5 animate-fadeIn">
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Username <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -268,8 +268,8 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("username")}
                     onBlur={() => setFocusedField("")}
                     placeholder="johndoe"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input}
-                      ${focusedField === "username" ? `${theme.inputFocus} ring-4` : ""}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input}
+                      ${focusedField === "username" ? `${theme.inputFocus} ring-2` : ""}
                       ${usernameError ? "border-red-500" : ""}
                       ${shakeUsername ? "shake" : ""}
                       transition-all duration-200
@@ -282,7 +282,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Email <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -292,8 +292,8 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("email")}
                     onBlur={() => setFocusedField("")}
                     placeholder="john@example.com"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input}
-                      ${focusedField === "email" ? `${theme.inputFocus} ring-4` : ""}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input}
+                      ${focusedField === "email" ? `${theme.inputFocus} ring-2` : ""}
                       ${emailError ? "border-red-500" : ""}
                       ${shakeEmail ? "shake" : ""}
                       transition-all duration-200
@@ -306,7 +306,7 @@ export default function SignUpPage() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Password <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
@@ -317,16 +317,17 @@ export default function SignUpPage() {
                       onFocus={() => setFocusedField("password")}
                       onBlur={() => setFocusedField("")}
                       placeholder="••••••••"
-                      className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                        focusedField === "password" ? `${theme.inputFocus} ring-4` : ""
-                      } transition-all duration-200 focus:outline-none pr-12`}
+                      className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                        focusedField === "password" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-200 focus:outline-none pr-9 xs:pr-10 sm:pr-12`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors`}
+                      className={`absolute right-2.5 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors p-1`}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {password && (
@@ -359,9 +360,9 @@ export default function SignUpPage() {
             )}
 
             {currentStep === 1 && (
-              <div className="w-full h-full space-y-5 animate-fadeIn">
+              <div className="w-full space-y-3 xs:space-y-4 sm:space-y-5 animate-fadeIn">
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     First Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -371,14 +372,14 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("firstName")}
                     onBlur={() => setFocusedField("")}
                     placeholder="John"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "firstName" ? `${theme.inputFocus} ring-4` : ""
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                      focusedField === "firstName" ? `${theme.inputFocus} ring-2` : ""
                     } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Last Name <span className={`${theme.textSecondary} font-normal`}>(Optional)</span>
                   </label>
                   <input
@@ -388,14 +389,14 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("lastName")}
                     onBlur={() => setFocusedField("")}
                     placeholder="Doe"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "lastName" ? `${theme.inputFocus} ring-4` : ""
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                      focusedField === "lastName" ? `${theme.inputFocus} ring-2` : ""
                     } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
                 <div className="relative">
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Sex <span className="text-red-500">*</span>
                   </label>
 
@@ -403,8 +404,8 @@ export default function SignUpPage() {
                     type="button"
                     onClick={() => setIsSexDropdownOpen(!isSexDropdownOpen)}
                     onBlur={() => setTimeout(() => setIsSexDropdownOpen(false), 150)}
-                    className={`w-full px-4 py-3 flex items-center justify-between rounded-xl border ${theme.input} ${
-                      focusedField === "sex" ? `${theme.inputFocus} ring-4` : ""
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm flex items-center justify-between rounded-lg xs:rounded-xl border ${theme.input} ${
+                      focusedField === "sex" ? `${theme.inputFocus} ring-2` : ""
                     } transition-all duration-300 focus:outline-none hover:scale-[1.01] active:scale-[0.99]`}
                   >
                     <span className={`${theme.text}`}>
@@ -414,7 +415,7 @@ export default function SignUpPage() {
                       animate={{ rotate: isSexDropdownOpen ? 180 : 0 }}
                       transition={{ duration: 0.25 }}
                     >
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
                     </motion.div>
                   </button>
 
@@ -470,9 +471,9 @@ export default function SignUpPage() {
             )}
 
             {currentStep === 2 && (
-              <div className="w-full h-full space-y-5 animate-fadeIn">
+              <div className="w-full space-y-3 xs:space-y-4 sm:space-y-5 animate-fadeIn">
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Location <span className={`${theme.textSecondary} font-normal`}>(Optional)</span>
                   </label>
                   <input
@@ -482,14 +483,14 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("location")}
                     onBlur={() => setFocusedField("")}
                     placeholder="New York, USA"
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "location" ? `${theme.inputFocus} ring-4` : ""
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                      focusedField === "location" ? `${theme.inputFocus} ring-2` : ""
                     } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+                  <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
                     Bio <span className={`${theme.textSecondary} font-normal`}>(Optional)</span>
                   </label>
                   <textarea
@@ -500,8 +501,8 @@ export default function SignUpPage() {
                     placeholder="Tell us about yourself..."
                     rows={4}
                     maxLength={500}
-                    className={`w-full px-4 py-3 rounded-xl border ${theme.input} ${
-                      focusedField === "bio" ? `${theme.inputFocus} ring-4` : ""
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                      focusedField === "bio" ? `${theme.inputFocus} ring-2` : ""
                     } transition-all duration-200 focus:outline-none resize-none`}
                   />
                   <p className={`text-xs ${theme.textSecondary} mt-1.5 text-right`}>{bio.length}/500</p>
@@ -511,15 +512,15 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="px-8 pb-8 flex-shrink-0 space-y-3 z-10 relative">
-          <div className="flex gap-3">
+        <div className="px-3 xs:px-4 sm:px-6 md:px-8 pb-3 xs:pb-4 sm:pb-6 md:pb-8 flex-shrink-0 space-y-2 xs:space-y-3 z-10 relative border-t border-primary-light/10 dark:border-primary-dark/10 pt-3 xs:pt-4 sm:pt-6">
+          <div className="flex gap-2">
             {currentStep > 0 && (
               <button
                 onClick={handleBack}
-                className={`flex-1 ${theme.buttonSecondary} py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2`}
+                className={`flex-1 ${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2`}
               >
-                <ArrowLeft className="w-5 h-5" />
-                Back
+                <ArrowLeft className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                <span className="hidden xs:inline">Back</span>
               </button>
             )}
             
@@ -529,34 +530,35 @@ export default function SignUpPage() {
                 onClick={handleNext}
                 disabled={!!(usernameError || emailError)}
                 aria-disabled={!!(usernameError || emailError)}
-                className={`flex-1 ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg
+                className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg
                   hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
-                  flex items-center justify-center gap-2
+                  flex items-center justify-center gap-1.5 xs:gap-2
                   disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
               >
                 Next
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
               </button>
             ) : (
               <>
                 <button
                   onClick={handleSkip}
-                  className={`${theme.buttonSecondary} py-3 px-4 rounded-xl font-semibold transition-all duration-200`}
+                  className={`${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200`}
                 >
                   Skip
                 </button>
                 <button
                   onClick={handleSignup}
-                  className={`flex-1 ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2`}
+                  className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2`}
                 >
-                  <Check className="w-5 h-5" />
-                  Create Account
+                  <Check className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                  <span className="hidden xs:inline">Create Account</span>
+                  <span className="xs:hidden">Create</span>
                 </button> 
               </>
             )}
           </div>
 
-          <p className={`text-center text-sm ${theme.textSecondary}`}>
+          <p className={`text-center text-xs ${theme.textSecondary}`}>
             {`Already have an account? `}
             <a href="/signin" className={`font-semibold ${theme.link} transition-colors`}>
               Sign in

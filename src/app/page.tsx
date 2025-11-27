@@ -85,8 +85,9 @@ export default function LandingPage() {
                     src={isDark ? "/logo.png" : "/dark-logo.png"}
                     unoptimized
                     alt="Logo"
-                    width={150}
-                    height={150}
+                    width={533}
+                    height={191}
+                    className="w-20 h-auto sm:w-24 sm:h-auto md:w-32 md:h-auto lg:w-36 lg:h-auto"
                 />
             </div>
             
@@ -230,8 +231,9 @@ export default function LandingPage() {
                     src={isDark ? "/logo.png" : "/dark-logo.png"}
                     unoptimized
                     alt="Logo"
-                    width={150}
-                    height={150}
+                    width={533}
+                    height={191}
+                    className="w-16 h-auto sm:w-20 sm:h-auto md:w-24 md:h-auto lg:w-32 lg:h-auto"
                 />
           </div>
           <p className={`text-xs sm:text-sm md:text-base ${textSecondary} px-4`}>

@@ -78,13 +78,13 @@ export default function VerifyEmailContent() {
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10 p-8`}>
         <div className="text-center flex flex-col items-center justify-center">
-          <div className="inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-6">
+          <div className="inline-flex items-center justify-center rounded-2xl mb-6">
             <Image
               src={darkMode ? "/logo.png" : "/dark-logo.png"}
               alt="Logo"
-              width={150}
-              height={150}
-              className="m-4"
+              width={533}
+              height={191}
+              className="m-4 w-40 sm:w-48 md:w-56 h-auto"
             />
           </div>
 

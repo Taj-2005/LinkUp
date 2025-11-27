@@ -105,7 +105,7 @@ export default function SignInPage() {
       };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}>
+    <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-2 xs:p-3 sm:p-4 relative overflow-y-auto`}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute top-20 left-10 w-72 h-72 ${darkMode ? 'bg-violet-500/10' : 'bg-violet-300/30'} rounded-full blur-3xl`} />
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
@@ -113,37 +113,37 @@ export default function SignInPage() {
 
       <button
         onClick={() => setDarkMode(!darkMode)}
-        className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
+        className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
         aria-label="Toggle theme"
       >
         {darkMode ? (
-          <Sun className="w-5 h-5 text-amber-400" />
+          <Sun className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-amber-400" />
         ) : (
-          <Moon className="w-5 h-5 text-slate-700" />
+          <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
         )}
       </button>
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10`}>
-        <div className="p-8 pb-6 text-center">
-          <div className={`inline-flex items-center justify-center w-50 h-16 rounded-2xl mb-4 relative`}>
+      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10`}>
+        <div className="p-4 xs:p-5 sm:p-6 md:p-8 pb-3 xs:pb-4 sm:pb-6 text-center">
+          <div className={`inline-flex items-center justify-center rounded-2xl mb-2 xs:mb-3 sm:mb-4 relative`}>
               <Image
                   src={ darkMode ? "/logo.png":"/dark-logo.png"}
                   alt="Logo"
                   unoptimized
-                  width={150}
-                  height={150}
-                  className="m-4"
+                  width={533}
+                  height={191}
+                  className="w-32 xs:w-36 sm:w-40 md:w-48 lg:w-56 h-auto"
               />
           </div>
-          <h1 className={`text-3xl font-bold ${theme.text} mb-2`}>Welcome Back</h1>
-          <p className={`${theme.textSecondary} text-sm`}>Sign in to continue your journey</p>
+          <h1 className={`text-xl xs:text-2xl sm:text-3xl font-bold ${theme.text} mb-1 xs:mb-2`}>Welcome Back</h1>
+          <p className={`${theme.textSecondary} text-xs xs:text-sm`}>Sign in to continue your journey</p>
         </div>
 
         <form
         onSubmit={handleSignin}
-        className="px-8 pb-8 space-y-5">
+        className="px-3 xs:px-4 sm:px-6 md:px-8 pb-4 xs:pb-6 sm:pb-8 space-y-3 xs:space-y-4 sm:space-y-5">
           <div>
-            <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+            <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
               Email or Username
             </label>
             <input
@@ -153,15 +153,15 @@ export default function SignInPage() {
               onFocus={() => setFocusedField("emailOrUsername")}
               onBlur={() => setFocusedField("")}
               placeholder="john@example.com or johndoe"
-              className={`w-full px-4 py-3.5 rounded-xl border ${theme.input} ${
-                focusedField === "emailOrUsername" ? `${theme.inputFocus} ring-4` : ""
+              className={`w-full px-3 py-2.5 xs:py-3 sm:py-3.5 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                focusedField === "emailOrUsername" ? `${theme.inputFocus} ring-2` : ""
               } transition-all duration-200 focus:outline-none`}
               required
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
+            <label className={`block text-xs font-semibold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>
               Password
             </label>
             <div className="relative">
@@ -172,36 +172,37 @@ export default function SignInPage() {
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField("")}
                 placeholder="••••••••"
-                className={`w-full px-4 py-3.5 rounded-xl border ${theme.input} ${
-                  focusedField === "password" ? `${theme.inputFocus} ring-4` : ""
-                } transition-all duration-200 focus:outline-none pr-12`}
+                className={`w-full px-3 py-2.5 xs:py-3 sm:py-3.5 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
+                  focusedField === "password" ? `${theme.inputFocus} ring-2` : ""
+                } transition-all duration-200 focus:outline-none pr-9 xs:pr-10 sm:pr-12`}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors`}
+                className={`absolute right-2.5 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors p-1`}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           <div className="text-right">
-            <Link href="/forgot-password" className={`text-sm font-medium ${theme.link} transition-colors cursor-pointer`}>
+            <Link href="/forgot-password" className={`text-xs font-medium ${theme.link} transition-colors cursor-pointer`}>
               Forgot password?
             </Link>
           </div>
 
           <button
             type="submit"
-            className={`w-full ${theme.button} ${theme.buttonText} py-3.5 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-6`}
+            className={`w-full ${theme.button} ${theme.buttonText} py-2.5 xs:py-3 sm:py-3.5 px-3 xs:px-4 rounded-lg xs:rounded-xl text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-3 xs:mt-4 sm:mt-6`}
           >
-            <LogIn className="w-5 h-5" />
+            <LogIn className="w-4 h-4" />
             Sign In
           </button>
 
-          <p className={`text-center text-sm ${theme.textSecondary} pt-4`}>
+          <p className={`text-center text-xs ${theme.textSecondary} pt-2 xs:pt-3 sm:pt-4`}>
             {`Don't have an account? `}
             <a href="/signup" className={`font-semibold ${theme.link} transition-colors`}>
               Sign up

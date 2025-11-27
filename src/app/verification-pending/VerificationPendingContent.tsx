@@ -198,9 +198,9 @@ export default function VerificationPendingContent() {
               <Image
                 src={darkMode ? "/logo.png" : "/dark-logo.png"}
                 alt="Logo"
-                width={150}
-                height={150}
-                className="m-4"
+                width={533}
+                height={191}
+                className="m-4 w-40 sm:w-48 md:w-56 h-auto"
               />
               <h1 className={`text-3xl font-bold ${theme.text} mb-2`}>
                 Check Your Email
