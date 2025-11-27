@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { IUser } from "@/models/User";
+import { SkeletonCircle, SkeletonLine } from "@/components/SkeletonLoader";
 
 interface UserProps {
   user: IUser | null;
@@ -14,11 +15,11 @@ export default function User({ user, onClick }: UserProps) {
 
   if (!user) {
     return (
-      <div className="flex gap-3 pl-4 items-center">
-        <div className="w-[50px] h-[50px] skeleton-circle skeleton-wiggle"></div>
-        <div className="flex flex-col gap-2">
-          <div className="h-4 w-32 skeleton-text"></div>
-          <div className="h-3 w-20 skeleton-text"></div>
+      <div className="flex gap-2 sm:gap-3 pl-2 sm:pl-4 items-center" role="status" aria-label="Loading user">
+        <SkeletonCircle size={40} className="sm:w-[50px] sm:h-[50px]" />
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          <SkeletonLine width="80%" height={16} className="max-w-[128px]" />
+          <SkeletonLine width="60%" height={12} className="max-w-[96px]" />
         </div>
       </div>
     );

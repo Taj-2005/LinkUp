@@ -11,7 +11,15 @@ const PROTECTED_ROUTES = [
   "/settings",
 ];
 
-const PUBLIC_ROUTES = ["/", "/signin", "/signup", "/verify-email", "/verification-pending", "/forgot-password", "/reset-password"];
+const PUBLIC_ROUTES = [
+  "/",
+  "/signin",
+  "/signup",
+  "/verify-email",
+  "/verification-pending",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -19,11 +27,14 @@ export async function middleware(req: NextRequest) {
   const hasRefreshToken = !!refreshToken;
 
   if (PUBLIC_ROUTES.includes(pathname)) {
-    if (hasRefreshToken && pathname !== "/verify-email" && pathname !== "/verification-pending") {
+    const BLOCK_FOR_LOGGED_IN = ["/", "/signin", "/signup"];
+
+    if (hasRefreshToken && BLOCK_FOR_LOGGED_IN.includes(pathname)) {
       const url = req.nextUrl.clone();
       url.pathname = "/livelinks";
       return NextResponse.redirect(url);
     }
+
     return NextResponse.next();
   }
 
@@ -58,4 +69,3 @@ export const config = {
     "/settings/:path*",
   ],
 };
-

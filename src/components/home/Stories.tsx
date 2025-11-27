@@ -51,7 +51,6 @@ export default function Stories() {
     );
   }
 
-  // Mobile horizontal scroll: overflow-x-auto with touch scrolling, px-4 prevents avatar clipping
   return (
     <div 
       className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar" 

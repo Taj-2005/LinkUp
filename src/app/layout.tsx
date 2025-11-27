@@ -43,9 +43,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth h-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-primary-light dark:bg-primary-dark`}
+        className={`${geistSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-primary-light dark:bg-primary-dark h-full overflow-x-hidden`}
       >
         <Toaster position="top-right" />
 

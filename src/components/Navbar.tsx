@@ -109,7 +109,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <div className="hidden md:flex relative w-[15%] min-h-screen flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
         <div className="flex flex-col">
           <div>
@@ -149,7 +148,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
         </div>
       </div>
 
-      {/* Mobile Bottom Navbar */}
       <div 
         className="md:hidden mobile-navbar-fixed z-[9999] bg-right-nav-light dark:bg-right-nav-dark border-t border-primary-light/30 dark:border-primary-dark/30 shadow-lg"
         style={{ 
@@ -162,6 +160,8 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
           right: 0,
           transform: 'translateY(0)',
           WebkitTransform: 'translateY(0)',
+          marginTop: 0,
+          paddingTop: 0,
         }}
       >
         <div 

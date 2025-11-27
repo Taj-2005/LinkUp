@@ -13,15 +13,20 @@ export default function Chats({ setUser }: ChatsProps) {
 
   if (!users || users.length === 0)
     return (
-      <div className="flex flex-col items-center justify-center h-full mt-10 select-none">
-        <div className="animate-wiggle text-primary-light dark:text-primary-light/70">
+      <div className="flex flex-col items-center justify-center h-full mt-6 sm:mt-10 select-none px-4">
+        <div 
+          className="animate-wiggle text-primary-light dark:text-primary-light/70"
+          style={{ transformOrigin: "center center" }}
+          aria-hidden="true"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-16 w-16 opacity-60"
+            className="h-12 w-12 sm:h-16 sm:w-16 opacity-60"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -31,11 +36,11 @@ export default function Chats({ setUser }: ChatsProps) {
           </svg>
         </div>
 
-        <p className="text-lg font-semibold text-primary-dark dark:text-primary-light/80 mt-4">
+        <p className="text-base sm:text-lg font-semibold text-primary-dark dark:text-primary-light/80 mt-3 sm:mt-4 text-center">
           No Chats
         </p>
 
-        <p className="text-sm text-primary-light/70 dark:text-primary-light/40 mt-1">
+        <p className="text-xs sm:text-sm text-primary-light/70 dark:text-primary-light/40 mt-1 text-center max-w-xs">
           Start a conversation by selecting a user
         </p>
       </div>

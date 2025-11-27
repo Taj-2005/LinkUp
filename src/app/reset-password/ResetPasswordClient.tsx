@@ -76,7 +76,6 @@ export default function ResetPasswordPage() {
     <div
       className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}
     >
-      {/* Background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className={`absolute top-20 left-10 w-72 h-72 ${
@@ -90,7 +89,6 @@ export default function ResetPasswordPage() {
         />
       </div>
 
-      {/* Theme Toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-6 right-6 p-3 rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
@@ -102,7 +100,6 @@ export default function ResetPasswordPage() {
         )}
       </button>
 
-      {/* Card */}
       <div
         className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md transition-all duration-500 relative z-10`}
       >
@@ -123,8 +120,6 @@ export default function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleReset} className="px-8 pb-8 space-y-5">
-
-          {/* New Password */}
           <div className="relative">
             <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
               New Password
@@ -151,7 +146,6 @@ export default function ResetPasswordPage() {
             </button>
           </div>
 
-          {/* Confirm Password */}
           <div className="relative">
             <label className={`block text-sm font-semibold ${theme.text} mb-2`}>
               Confirm Password
@@ -178,7 +172,6 @@ export default function ResetPasswordPage() {
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className={`w-full ${theme.button} text-white py-3.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 mt-4`}

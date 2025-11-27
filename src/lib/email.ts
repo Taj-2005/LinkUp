@@ -38,8 +38,6 @@ export async function sendVerificationEmail(
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-
-<!-- DARK MODE FIX -->
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark" />
 
@@ -135,16 +133,12 @@ h2 {
 
 <body>
   <div class="wrapper">
-
-    <!-- HEADER -->
     <div class="header">
       <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png"
            alt="LinkUp Logo" class="logo" />
       <div class="header-title">Verify Your Email</div>
       <div class="subtitle">Welcome to LinkUp — We're Glad You're Here.</div>
     </div>
-
-    <!-- CONTENT -->
     <div class="content">
       <h2>Hi ${username} 👋</h2>
 
@@ -172,8 +166,6 @@ h2 {
         simply ignore this email.
       </p>
     </div>
-
-    <!-- FOOTER -->
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br />
       <a href="https://link-up-web.vercel.app">Visit LinkUp</a>
@@ -186,7 +178,6 @@ h2 {
   };
 
   try {
-    // Verify transporter connection before sending
     await transporter.verify();
     await transporter.sendMail(mailOptions);
     console.log(`Verification email sent successfully to: ${email}`);

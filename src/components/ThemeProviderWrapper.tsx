@@ -11,7 +11,7 @@ export default function ThemeProviderWrapper({ children }: { children: ReactNode
       enableSystem={false} 
       disableTransitionOnChange={false}
     >
-      <div className="bg-primary-light dark:bg-primary-dark">
+      <div className="bg-primary-light dark:bg-primary-dark h-full min-h-screen flex flex-col">
         {children}
       </div>
     </ThemeProvider>

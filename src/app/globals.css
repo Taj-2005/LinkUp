@@ -29,6 +29,7 @@ body {
 html {
   height: 100%;
   height: -webkit-fill-available;
+  width: 100%;
 }
 
 body {
@@ -36,11 +37,21 @@ body {
   padding: 0 !important;
   width: 100%;
   max-width: 100vw;
+  height: 100%;
+  height: -webkit-fill-available;
   min-height: 100%;
   min-height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Ensure mobile navbar is flush with bottom on all devices */
+#__next {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 @media (max-width: 768px) {
   .mobile-navbar-fixed {
     position: fixed !important;
@@ -57,23 +68,53 @@ body {
     max-width: 100vw !important;
     box-sizing: border-box !important;
     background-color: var(--color-right-nav-light) !important;
+    z-index: 9999 !important;
   }
   
   .dark .mobile-navbar-fixed {
     background-color: var(--color-right-nav-dark) !important;
   }
   
-  /* Remove any potential spacing from body/html on mobile */
+  .mobile-navbar-fixed::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: inherit;
+    z-index: -1;
+  }
+  
   html, body {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     height: 100% !important;
+    height: -webkit-fill-available !important;
     overflow-x: hidden !important;
   }
   
-  /* Ensure body background doesn't show through at bottom */
   body {
     background-attachment: fixed !important;
+    position: relative !important;
+  }
+  
+  body > * {
+    position: relative;
+  }
+  
+  .flex.flex-row.h-screen {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+  }
+  
+  .pb-16 {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  
+  .mobile-navbar-fixed + *,
+  * + .mobile-navbar-fixed {
+    margin: 0 !important;
   }
 }
 
@@ -95,23 +136,68 @@ body {
 }
 
 @keyframes wiggle {
-
   0%,
   100% {
     transform: rotate(-3deg);
   }
-
   50% {
     transform: rotate(3deg);
   }
 }
 
-/* Make Tailwind see this as a utility */
-@utility animate-wiggle {
-  animation: wiggle 1s ease-in-out infinite;
+@keyframes wiggle-mobile {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
 }
 
-/* Custom borders based on your @theme vars */
+@keyframes wiggle-tablet {
+  0%,
+  100% {
+    transform: rotate(-2.5deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+@keyframes wiggle-desktop {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@utility animate-wiggle {
+  animation: wiggle-mobile 1s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+@media (min-width: 481px) {
+  .animate-wiggle {
+    animation: wiggle-tablet 1s ease-in-out infinite;
+  }
+}
+
+@media (min-width: 1025px) {
+  .animate-wiggle {
+    animation: wiggle-desktop 1s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-wiggle {
+    animation: none;
+  }
+}
+
 @utility border-primary-light {
   border-color: var(--color-primary-light);
 }
@@ -128,36 +214,92 @@ body {
   @apply bg-gray-300 dark:bg-gray-700 rounded-md;
 }
 
-@keyframes skeletonWiggle {
+.skeleton-text {
+  @apply bg-gray-300 dark:bg-gray-700 rounded;
+}
+
+@keyframes skeletonWiggle-mobile {
   0% {
     transform: rotateX(0deg) rotateY(0deg) scale(1);
   }
-
   25% {
-    transform: rotateX(4deg) rotateY(-4deg) scale(1.02);
+    transform: rotateX(2deg) rotateY(-2deg) scale(1.01);
   }
-
   50% {
     transform: rotateX(0deg) rotateY(0deg) scale(1);
   }
-
   75% {
-    transform: rotateX(-4deg) rotateY(4deg) scale(1.02);
+    transform: rotateX(-2deg) rotateY(2deg) scale(1.01);
   }
-
   100% {
     transform: rotateX(0deg) rotateY(0deg) scale(1);
   }
 }
 
-/* Tailwind v4 utility for this animation */
-@utility skeleton-wiggle {
-  animation: skeletonWiggle 1.4s ease-in-out infinite;
-  transform-style: preserve-3d;
-  perspective: 800px;
+@keyframes skeletonWiggle-tablet {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  25% {
+    transform: rotateX(3deg) rotateY(-3deg) scale(1.015);
+  }
+  50% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  75% {
+    transform: rotateX(-3deg) rotateY(3deg) scale(1.015);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
 }
 
-/* Shimmer animation for skeleton loading */
+@keyframes skeletonWiggle-desktop {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  25% {
+    transform: rotateX(4deg) rotateY(-4deg) scale(1.02);
+  }
+  50% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  75% {
+    transform: rotateX(-4deg) rotateY(4deg) scale(1.02);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(0deg) scale(1);
+  }
+}
+
+@utility skeleton-wiggle {
+  animation: skeletonWiggle-mobile 1.4s ease-in-out infinite;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  perspective: 600px;
+}
+
+@media (min-width: 481px) {
+  .skeleton-wiggle {
+    animation: skeletonWiggle-tablet 1.4s ease-in-out infinite;
+    perspective: 700px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .skeleton-wiggle {
+    animation: skeletonWiggle-desktop 1.4s ease-in-out infinite;
+    perspective: 800px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-wiggle {
+    animation: none;
+    transform: none;
+  }
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -173,12 +315,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  /* 👇 ADJUSTED: Used rgba(255, 255, 255, 0.1) and rgba(255, 255, 255, 0.3) for lighter effect */
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 20%, /* Reduced opacity from 0.2 to 0.1 */
-    rgba(255, 255, 255, 0.3) 60%, /* Reduced opacity from 0.5 to 0.3 */
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.3) 60%,
     rgba(255, 255, 255, 0) 100%
   );
   animation: shimmer 1.5s infinite forwards;

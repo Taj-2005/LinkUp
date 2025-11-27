@@ -34,7 +34,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Email is required" }, { status: 400 });
     }
 
-    // Verify email configuration
     let transporter;
     try {
       transporter = createTransporter();
@@ -131,10 +130,9 @@ export async function POST(req: Request) {
 </body>
 </html>
       `,
-      text: `Reset your LinkUp password\n\nOpen this link to reset your password (expires in 30 minutes):\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`,
+      text: `Reset your LinkUp password\n\nOpen this link to reset your password (expires in 30 minutes):\n\n${resetUrl}\n\nIf you did not request this, ignore this email.      `,
     };
 
-    // Verify transporter connection before sending
     try {
       await transporter.verify();
     } catch (verifyError) {
@@ -159,7 +157,6 @@ export async function POST(req: Request) {
       timestamp: new Date().toISOString(),
     });
     
-    // Don't expose internal error details to client in production
     const isProduction = process.env.NODE_ENV === "production";
     
     return NextResponse.json(

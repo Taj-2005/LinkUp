@@ -72,12 +72,27 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     else if (current === "settings") setSelectedItem("settings");
   }, [pathname]);
 
-  if (PUBLIC_ROUTES.includes(pathname)) return children;
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return (
+      <div className="min-h-screen h-full bg-primary-light dark:bg-primary-dark">
+        {children}
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-row min-h-screen bg-primary-light dark:bg-primary-dark" style={{ paddingBottom: 0, marginBottom: 0 }}>
+    <div className="flex flex-row h-screen md:h-auto md:min-h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
       <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-      <div className="flex-1 pb-16 md:pb-0" style={{ paddingBottom: '0' }}>{children}</div>
+      <div 
+        className="flex-1 overflow-y-auto pb-16 md:pb-0" 
+        style={{ 
+          height: '100%',
+          minHeight: '100%',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
