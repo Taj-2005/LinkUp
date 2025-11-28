@@ -10,8 +10,11 @@ interface ChatsProps {
 
 export default function Chats({ setUser }: ChatsProps) {
   const users = useUserStore((state) => state.users);
+  const currentUser = useUserStore((state) => state.user);
 
-  if (!users || users.length === 0)
+  const filteredUsers = users?.filter((u) => u._id !== currentUser?._id) || [];
+
+  if (!filteredUsers || filteredUsers.length === 0)
     return (
       <div className="flex flex-col items-center justify-center h-full mt-6 sm:mt-10 select-none px-4">
         <div 
@@ -49,7 +52,7 @@ export default function Chats({ setUser }: ChatsProps) {
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto max-h-[720px] hide-scrollbar pr-2">
-      {users.map((u) => (
+      {filteredUsers.map((u) => (
         <User key={u._id} user={u} onClick={() => setUser(u)} />
       ))}
     </div>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { FiMenu, FiHome, FiSearch, FiExternalLink, FiLink, FiPlusSquare } from "react-icons/fi";
+import { FiMenu, FiHome, FiSearch, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import {useUserStore} from "@/store/useUserStore"
@@ -38,14 +38,15 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
         onClick={onClick}
       >
         {label === "LinkHub" ? (
-          <Image
-            src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
-            width={24}
-            height={24}
-            unoptimized
-            alt={`${user?.username} avatar`}
-            className={`rounded-full object-cover ${isActive ? "ring-2 ring-white" : ""}`}
-          />
+          <div className={`relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0 ${isActive ? "ring-2 ring-white" : ""}`}>
+            <Image
+              src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              fill
+              unoptimized
+              alt={`${user?.username} avatar`}
+              className="object-cover"
+            />
+          </div>
         ) : (
           <Icon size={size} />
         )}
@@ -62,14 +63,15 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
       onClick={onClick}
     >
       {label === "LinkHub" ? (
-          <Image
-            src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
-            width={26}
-            height={26}
-            unoptimized
-            alt={`${user?.username} avatar`}
-            className="rounded-full object-cover"
-          />
+          <div className="relative w-[26px] h-[26px] rounded-full overflow-hidden flex-shrink-0">
+            <Image
+              src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              fill
+              unoptimized
+              alt={`${user?.username} avatar`}
+              className="object-cover"
+            />
+          </div>
       ) : (
         <Icon className="text-white dark:text-white" size={size} />
       )}
@@ -101,9 +103,8 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
   const navItems = [
     { Icon: FiHome, label: "LiveLinks", mobileLabel: "Home", item: "livelinks" },
     { Icon: FiSearch, label: "LinkFinder", mobileLabel: "Search", item: "linkfinder" },
-    { Icon: FiLink, label: "LinkUps", mobileLabel: "Links", item: "linkups" },
-    { Icon: FiExternalLink, label: "LinkUpReqs", mobileLabel: "Reqs", item: "linkupreqs" },
     { Icon: FiPlusSquare, label: "New Link", mobileLabel: "New", item: "newlink" },
+    { Icon: FiLink, label: "LinkUps", mobileLabel: "Links", item: "linkups" },
     { Icon: HiUserCircle, label: "LinkHub", mobileLabel: "Profile", item: "linkhub" },
   ];
 
@@ -163,29 +164,6 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
               isMobile={true}
             />
           ))}
-          <div className="relative flex-1 min-w-0" ref={popupRef}>
-            <NavItem
-              Icon={FiMenu}
-              size={22}
-              label="More"
-              mobileLabel="More"
-              text="text-xs"
-              isActive={selectedItem === "settings"}
-              onClick={() => {
-                if (selectedItem === "settings") {
-                  setShowMore(!showMore);
-                } else {
-                  handleNavClick("settings");
-                }
-              }}
-              isMobile={true}
-            />
-            {showMore && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-right-nav-dark dark:bg-right-nav-dark border border-primary-light/30 dark:border-primary-dark/30 rounded-xl shadow-xl p-3 w-48 animate-fade-in">
-                <SignoutButton onSignedOut={() => setShowMore(false)} />
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </>

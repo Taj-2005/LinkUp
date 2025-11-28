@@ -11,8 +11,11 @@ export async function POST(req: Request) {
   }
 
   const user = await User.findOne({
-    $or: [{ email: identifier }, { username: identifier }]
-  }).select("email username isVerified");
+    $or: [
+      { email: identifier.toLowerCase() }, 
+      { username: identifier.toLowerCase() }
+    ]
+  }).select("-password -__v");
 
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });

@@ -7,6 +7,7 @@ import {IUser} from "@/models/User";
 import { useUserStore } from "@/store/useUserStore";
 import { getCurrentUser, getAllUsers } from "@/utils/api";
 import { useEffect, useState } from "react";
+import { NavbarProvider } from "@/contexts/NavbarContext";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
@@ -61,15 +62,34 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   }, [allUsers, setUsers]);
 
   useEffect(() => {
+    if (pathname === "/") {
+      document.body.classList.add("landing-page");
+      document.documentElement.classList.add("landing-page");
+    } else {
+      document.body.classList.remove("landing-page");
+      document.documentElement.classList.remove("landing-page");
+    }
+    return () => {
+      document.body.classList.remove("landing-page");
+      document.documentElement.classList.remove("landing-page");
+    };
+  }, [pathname]);
+
+  useEffect(() => {
     const current = pathname.replace("/", "").toLowerCase();
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
     if (current === "livelinks") setSelectedItem("livelinks");
     else if (current === "linkfinder") setSelectedItem("linkfinder");
     else if (current === "linkups") setSelectedItem("linkups");
-    else if (current === "linkupreqs") setSelectedItem("linkupreqs");
+    else if (current === "linkupreqs") {
+      setSelectedItem(isMobile ? "linkhub" : "settings");
+    }
     else if (current === "newlink") setSelectedItem("newlink");
     else if (current === "linkhub") setSelectedItem("linkhub");
-    else if (current === "settings") setSelectedItem("settings");
+    else if (current === "settings") {
+      setSelectedItem(isMobile ? "linkhub" : "settings");
+    }
   }, [pathname]);
 
   if (PUBLIC_ROUTES.includes(pathname)) {
@@ -81,14 +101,15 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   }
 
   return (
-    <div className="flex flex-row h-screen md:h-full md:min-h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
-      <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
-      <div className="flex-1 overflow-y-auto md:overflow-y-auto" style={{ 
-        paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
-        WebkitOverflowScrolling: 'touch'
-      }}>
-        {children}
+    <NavbarProvider setSelectedItem={setSelectedItem}>
+      <div className="flex flex-row h-screen md:h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
+        <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+        <div className="flex-1 overflow-hidden" style={{ 
+          paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+        }}>
+          {children}
+        </div>
       </div>
-    </div>
+    </NavbarProvider>
   );
 }

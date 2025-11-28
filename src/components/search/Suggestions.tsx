@@ -13,9 +13,11 @@ export default function Suggestions({ users, currentUser }: SuggestionsProps) {
   const [showAll, setShowAll] = useState(false);
 
   const sortedUsers = useMemo(() => {
-    if (!users.length) return [];
+    const filteredUsers = users.filter((u) => u._id !== currentUser?._id);
+    
+    if (!filteredUsers.length) return [];
 
-    return [...users].sort((a, b) => {
+    return [...filteredUsers].sort((a, b) => {
       const userCity = (currentUser?.location || "").toLowerCase().trim();
       const prefGender =
         currentUser?.sex === "male"
@@ -102,19 +104,19 @@ export default function Suggestions({ users, currentUser }: SuggestionsProps) {
 
 
   return (
-    <div className="flex flex-col">
-      <div className="w-full p-10 flex justify-between">
-        <div className="text-gray-500 font-bold">Suggested for you</div>
+    <div className="flex flex-col h-full min-h-0">
+      <div className="w-full p-4 md:p-10 flex justify-between flex-shrink-0">
+        <div className="text-gray-500 font-bold text-sm md:text-base">Suggested for you</div>
 
         <div
-          className="text-black dark:text-white hover:opacity-75 font-bold cursor-pointer"
+          className="text-black dark:text-white hover:opacity-75 font-bold cursor-pointer text-sm md:text-base"
           onClick={() => setShowAll(!showAll)}
         >
           {showAll ? "Show less" : "See all"}
         </div>
       </div>
 
-      <div className="overflow-y-auto max-h-[70vh] hide-scrollbar">
+      <div className="flex-1 overflow-y-auto hide-scrollbar min-h-0 pb-20 md:pb-4">
         {displayed.map((u) => (
           <User key={u._id} user={u} />
         ))}

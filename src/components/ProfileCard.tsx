@@ -107,7 +107,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       
       <div
-        className={`flex-shrink-0 relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark`}
+        className={`flex-shrink-0 relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark aspect-square`}
       >
         <Image
           src={

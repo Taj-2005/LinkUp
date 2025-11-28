@@ -143,28 +143,29 @@ export default function SettingsPanel() {
         className="
             w-full max-w-3xl
             h-full
-            p-6 rounded-2xl 
+            p-3 md:p-6 pb-24 md:pb-6 rounded-2xl 
             bg-right-nav-light dark:bg-right-nav-dark
             border border-[#d7d7d7] dark:border-white/10
             shadow-xl
             flex flex-col    
-            overflow-hidden
+            overflow-y-auto hide-scrollbar
         "
         >
-        <h1 className="text-3xl font-extrabold text-primary-dark dark:text-white mb-6 flex items-center gap-2">
-          <FiSettings size={26}/>Settings
+        <h1 className="text-2xl md:text-3xl font-extrabold text-primary-dark dark:text-white mb-4 md:mb-6 flex items-center gap-2 flex-shrink-0">
+          <FiSettings size={22} className="md:w-[26px] md:h-[26px]"/>Settings
         </h1>
 
         <div
           className="
-            flex items-center gap-4 p-4 rounded-xl mb-4
+            flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl mb-4
             bg-left-nav-light dark:bg-[#1f1f1f]
             border border-[#cfcfcf] dark:border-white/10
             cursor-pointer
+            flex-shrink-0
           "
           onClick={() => setAvatarOptionsModal(true)}
         >
-          <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#d0d0d0] dark:border-white/20">
+          <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-[#d0d0d0] dark:border-white/20 flex-shrink-0 aspect-square">
             <Image
               src={avatarSrc}
               fill
@@ -175,33 +176,33 @@ export default function SettingsPanel() {
 
             {uploadingAvatar && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                <div className="w-6 h-6 border-2 border-white border-t-transparent animate-spin rounded-full" />
+                <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-white border-t-transparent animate-spin rounded-full" />
               </div>
             )}
           </div>
 
-          <div>
-            <p className="text-primary-dark dark:text-white font-semibold text-lg">
+          <div className="min-w-0 flex-1">
+            <p className="text-primary-dark dark:text-white font-semibold text-base md:text-lg truncate">
               {user?.username}
             </p>
-            <p className="text-[#606468] dark:text-white/60 text-sm">
+            <p className="text-[#606468] dark:text-white/60 text-xs md:text-sm truncate">
               {user?.email}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 md:gap-6">
 
           <div>
-            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-sm mb-1">
-              <FiAtSign /> Username
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiAtSign className="w-4 h-4" /> Username
             </label>
 
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={`
-                w-full px-4 py-2 rounded-xl
+                w-full px-3 md:px-4 py-2 rounded-xl text-sm md:text-base
                 bg-[#f3f3f3] dark:bg-[#262626]
                 border text-primary-dark dark:text-white
                 ${usernameError ? "border-red-500" : "border-[#cfcfcf] dark:border-white/10"}
@@ -210,19 +211,20 @@ export default function SettingsPanel() {
             />
 
             {usernameError && (
-              <p className="text-red-500 text-sm mt-1">{usernameError}</p>
+              <p className="text-red-500 text-xs md:text-sm mt-1">{usernameError}</p>
             )}
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-sm mb-1">
-              <FiUser /> Full Name
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiUser className="w-4 h-4" /> Full Name
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="
-                w-full px-4 py-2 rounded-xl bg-[#f3f3f3] dark:bg-[#262626]
+                w-full px-3 md:px-4 py-2 rounded-xl text-sm md:text-base
+                bg-[#f3f3f3] dark:bg-[#262626]
                 border border-[#cfcfcf] dark:border-white/10
                 text-primary-dark dark:text-white
               "
@@ -230,15 +232,15 @@ export default function SettingsPanel() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-sm mb-1">
-              <FiInfo /> Bio
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiInfo className="w-4 h-4" /> Bio
             </label>
             <textarea
               rows={4}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               className="
-                w-full px-4 py-3 rounded-xl resize-none
+                w-full px-3 md:px-4 py-2 md:py-3 rounded-xl resize-none text-sm md:text-base
                 bg-[#f3f3f3] dark:bg-[#262626]
                 border border-[#cfcfcf] dark:border-white/10
                 text-primary-dark dark:text-white
@@ -247,14 +249,14 @@ export default function SettingsPanel() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-sm mb-1">
-              <FiMapPin /> Location
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiMapPin className="w-4 h-4" /> Location
             </label>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="
-                w-full px-4 py-2 rounded-xl
+                w-full px-3 md:px-4 py-2 rounded-xl text-sm md:text-base
                 bg-[#f3f3f3] dark:bg-[#262626]
                 border border-[#cfcfcf] dark:border-white/10
                 text-primary-dark dark:text-white
@@ -263,8 +265,8 @@ export default function SettingsPanel() {
           </div>
 
           <div>
-            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-sm mb-1">
-              <FiGlobe /> Gender
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiGlobe className="w-4 h-4" /> Gender
             </label>
 
             <select
@@ -273,7 +275,7 @@ export default function SettingsPanel() {
                 setSex(e.target.value as "male" | "female" | "other")
               }
               className="
-                w-full px-4 py-2 rounded-xl
+                w-full px-3 md:px-4 py-2 rounded-xl text-sm md:text-base
                 bg-[#f3f3f3] dark:bg-[#262626]
                 border border-[#cfcfcf] dark:border-white/10
                 text-primary-dark dark:text-white
@@ -286,12 +288,12 @@ export default function SettingsPanel() {
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="flex justify-end mt-6 pt-4 border-t border-[#cfcfcf] dark:border-white/10 flex-shrink-0 bg-right-nav-light dark:bg-right-nav-dark -mx-3 md:-mx-6 px-3 md:px-6 pb-2 sticky bottom-0">
           <button
             onClick={handleSave}
             disabled={saving || !!usernameError}
             className={`
-              px-8 py-3 rounded-2xl font-semibold 
+              w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 rounded-2xl font-semibold text-sm md:text-base
               bg-primary-light text-white dark:bg-primary-dark dark:text-white
               hover:brightness-110 shadow-lg transition
               ${(saving || usernameError) ? "opacity-50 cursor-not-allowed" : ""}
@@ -316,11 +318,11 @@ export default function SettingsPanel() {
               exit={{ scale: 0.7 }}
               className="
                 bg-white/10 dark:bg-black/20 
-                border border-white/20 p-6 
-                rounded-2xl w-80 backdrop-blur-xl
+                border border-white/20 p-4 md:p-6 
+                rounded-2xl w-[90%] max-w-80 backdrop-blur-xl mx-4
               "
             >
-              <h3 className="text-xl font-bold text-white mb-4 text-center">
+              <h3 className="text-lg md:text-xl font-bold text-white mb-4 text-center">
                 Profile Photo
               </h3>
 
@@ -331,7 +333,7 @@ export default function SettingsPanel() {
                     fileInputRef.current?.click();
                   }}
                   className="
-                    w-full py-2 rounded-xl 
+                    w-full py-2.5 md:py-2 rounded-xl text-sm md:text-base
                     bg-primary-light text-black
                     dark:bg-primary-dark dark:text-white 
                     font-semibold
@@ -345,14 +347,14 @@ export default function SettingsPanel() {
                     await handleRemoveAvatar();
                     setAvatarOptionsModal(false);
                   }}
-                  className="w-full py-2 rounded-xl bg-red-500 text-white font-semibold"
+                  className="w-full py-2.5 md:py-2 rounded-xl bg-red-500 text-white font-semibold text-sm md:text-base"
                 >
                   Remove Photo
                 </button>
 
                 <button
                   onClick={() => setAvatarOptionsModal(false)}
-                  className="w-full py-2 rounded-xl bg-white/20 border border-white/20 text-white"
+                  className="w-full py-2.5 md:py-2 rounded-xl bg-white/20 border border-white/20 text-white text-sm md:text-base"
                 >
                   Cancel
                 </button>

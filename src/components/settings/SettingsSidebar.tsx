@@ -11,9 +11,13 @@ import {
   FiMessageCircle,
   FiTag,
   FiLogOut,
+  FiSun,
+  FiMoon,
 } from "react-icons/fi";
 import { signout } from "@/utils/api";
 import { toast } from "react-hot-toast";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const items = [
   { icon: FiUser, label: "Edit Profile", active: true },
@@ -26,7 +30,18 @@ const items = [
   { icon: FiTag, label: "Tags & Mentions", soon: true },
 ];
 
-export default function SettingsSidebar() {
+interface SettingsSidebarProps {
+  onItemClick?: (label: string) => void;
+}
+
+export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleSignout = async () => {
     try {
       toast.loading("Signing out...");
@@ -44,8 +59,14 @@ export default function SettingsSidebar() {
     }
   };
 
+  const handleThemeToggle = () => {
+    if (mounted) {
+      setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-4 px-4 py-5">
+    <div className="flex flex-col gap-4 px-4 py-5 pb-12 md:pb-8">
 
       <motion.div
         initial={{ opacity: 0, x: 10 }}
@@ -78,6 +99,11 @@ export default function SettingsSidebar() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.25, delay: i * 0.05 }}
               whileHover={{ scale: 1.02 }}
+              onClick={() => {
+                if (item.active && onItemClick) {
+                  onItemClick(item.label);
+                }
+              }}
               className={`
                 flex items-center justify-between 
                 px-4 py-3 rounded-lg cursor-pointer select-none
@@ -112,6 +138,25 @@ export default function SettingsSidebar() {
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.25, delay: items.length * 0.05 }}
+          whileHover={{ scale: 1.02 }}
+          onClick={handleThemeToggle}
+          className="
+            flex items-center justify-between 
+            px-4 py-3 rounded-lg cursor-pointer select-none
+            transition-all shadow-sm
+            bg-[#ffffff] dark:bg-[#181818] border border-[#dcdcdc] dark:border-white/10
+            text-[#3E434C] dark:text-white/80
+          "
+        >
+          <div className="flex items-center gap-3">
+            {mounted && (resolvedTheme === "dark" ? <FiSun size={20} /> : <FiMoon size={20} />)}
+            <span className="font-medium">Theme</span>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.25, delay: (items.length + 1) * 0.05 }}
           whileHover={{ scale: 1.02 }}
           onClick={handleSignout}
           className="

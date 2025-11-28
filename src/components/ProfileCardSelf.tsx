@@ -332,7 +332,7 @@ export default function ProfileCard() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
           <div
             onClick={() => setAvatarOptionsModal(true)}
-            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer flex-shrink-0"
+            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer flex-shrink-0 aspect-square"
           >
             <Image
               src={
@@ -412,14 +412,14 @@ export default function ProfileCard() {
               initial={{ scale: 0.6 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.6 }}
-              className="w-[95%] md:w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl max-h-[90vh] overflow-y-auto"
+              className="w-[95%] md:w-[92%] max-w-2xl rounded-3xl p-[2px] bg-gradient-to-br from-white/20 to-white/5 shadow-xl max-h-[90vh] flex flex-col"
             >
-              <div className="rounded-3xl p-4 md:p-8 bg-white/10 dark:bg-black/20 border border-white/20">
+              <div className="rounded-3xl p-4 md:p-8 bg-white/10 dark:bg-black/20 border border-white/20 flex flex-col max-h-[90vh] overflow-hidden">
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6">Edit Profile</h2>
 
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 bg-white/10 dark:bg-black/20 p-3 md:p-4 rounded-2xl border border-white/20 backdrop-blur-xl gap-3 md:gap-0">
                   <div className="flex items-center gap-3 md:gap-4">
-                    <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 flex-shrink-0">
+                    <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white/40 flex-shrink-0 aspect-square">
                       <Image src={avatarSrc} fill alt="Avatar" unoptimized className="object-cover" />
                       {uploadingAvatar && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
@@ -462,6 +462,7 @@ export default function ProfileCard() {
                   <p className="text-xs opacity-60">(Desktop only)</p>
                 </div>
 
+                <div className="flex-1 overflow-y-auto hide-scrollbar pr-2 -mr-2">
                 <div className="mb-5">
                   <label className="text-sm text-white/90">Username</label>
                   <input
@@ -503,7 +504,7 @@ export default function ProfileCard() {
                   />
                 </div>
 
-                <div className="mb-8">
+                  <div className="mb-5">
                   <label className="text-sm text-white/90">Bio</label>
                   <textarea
                     value={bio}
@@ -511,12 +512,13 @@ export default function ProfileCard() {
                     onChange={(e) => setBio(e.target.value)}
                     className="w-full px-4 py-3 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
                   />
+                  </div>
                 </div>
 
-                <div className="flex justify-end gap-4">
+                <div className="flex justify-end gap-3 md:gap-4 pt-4 mt-4 border-t border-white/20 flex-shrink-0 sticky bottom-0 bg-white/10 dark:bg-black/20 -mx-4 md:-mx-8 px-4 md:px-8 pb-2">
                   <button
                     onClick={handleCancel}
-                    className="px-5 py-2 rounded-xl text-black dark:text-white bg-white/20 border border-white/20"
+                    className="px-4 md:px-5 py-2 rounded-xl text-sm md:text-base text-black dark:text-white bg-white/20 border border-white/20 w-full md:w-auto"
                   >
                     Cancel
                   </button>
@@ -524,7 +526,7 @@ export default function ProfileCard() {
                   <button
                     onClick={handleEditSave}
                     disabled={isSaveDisabled}
-                    className={`px-6 py-2 rounded-xl font-semibold bg-primary-light text-black dark:bg-primary-dark dark:text-white ${
+                    className={`px-5 md:px-6 py-2 rounded-xl font-semibold text-sm md:text-base bg-primary-light text-black dark:bg-primary-dark dark:text-white w-full md:w-auto ${
                       isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >

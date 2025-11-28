@@ -39,10 +39,9 @@ export default function VerifyEmailContent() {
           setStatus("error");
           setMessage(data.error || "Verification failed");
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("An error occurred during verification");
-        console.error(error);
       }
     };
 

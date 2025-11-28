@@ -28,20 +28,21 @@ export default function User({ user }: UserProps) {
 
   return (
     <div className="flex gap-2 pl-4 items-center">
-      <Image
-        src={
-          user.user_avatar
-            ? user.user_avatar
-            : resolvedTheme === "dark"
-            ? "/dark-profile.png"
-            : "/light-profile.png"
-        }
-        width={50}
-        height={50}
-        unoptimized
-        alt={`${user.username} avatar`}
-        className="rounded-full object-cover"
-      />
+      <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden flex-shrink-0">
+        <Image
+          src={
+            user.user_avatar
+              ? user.user_avatar
+              : resolvedTheme === "dark"
+              ? "/dark-profile.png"
+              : "/light-profile.png"
+          }
+          fill
+          unoptimized
+          alt={`${user.username} avatar`}
+          className="object-cover"
+        />
+      </div>
 
       <div className="flex flex-col">
         <div className="font-bold text-black dark:text-white">

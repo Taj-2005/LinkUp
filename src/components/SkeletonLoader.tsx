@@ -46,7 +46,7 @@ export default function SkeletonLoader({
     >
       {animated && (
         <div
-          className="absolute inset-0 animate-shimmer opacity-60"
+          className="absolute inset-0 animate-shimmer opacity-60 pointer-events-none"
           aria-hidden="true"
         />
       )}

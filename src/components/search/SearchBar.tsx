@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
 import useDebounce from "@/hooks/useDebounce";
@@ -13,21 +13,23 @@ export default function SearchBar() {
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [filteredUsers, setFilteredUsers] = useState(users); 
+  
+  const usersWithoutCurrent = useMemo(() => 
+    users?.filter((u) => u._id !== currentUser?._id) || [],
+    [users, currentUser]
+  );
+  const [filteredUsers, setFilteredUsers] = useState(usersWithoutCurrent); 
 
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 150);
-  }, []);
 
   useEffect(() => {
-    setFilteredUsers(users);
-  }, [users]);
+    setFilteredUsers(usersWithoutCurrent);
+  }, [usersWithoutCurrent]);
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
-      setFilteredUsers(users);
+      setFilteredUsers(usersWithoutCurrent);
       setIsSearching(false);
       return;
     }
@@ -36,7 +38,7 @@ export default function SearchBar() {
 
     const q = debouncedQuery.toLowerCase();
 
-    const filtered = users.filter(
+    const filtered = usersWithoutCurrent.filter(
       (u) =>
         u.username.toLowerCase().includes(q) ||
         u.name.toLowerCase().includes(q)
@@ -46,10 +48,10 @@ export default function SearchBar() {
       setFilteredUsers(filtered);
       setIsSearching(false);
     }, 200);
-  }, [debouncedQuery, users]);
+  }, [debouncedQuery, usersWithoutCurrent]);
 
   return (
-    <div className="w-full mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl">
+    <div className="w-full h-full mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl flex flex-col min-h-0">
 
       <div
         className="
@@ -68,19 +70,19 @@ export default function SearchBar() {
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           className="
             w-full rounded-md border border-gray-300 dark:border-gray-600 
-            bg-white dark:bg-gray-800 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base text-gray-900 dark:text-gray-100 
+            bg-white dark:bg-right-nav-dark px-3 md:px-4 py-2 md:py-3 text-sm md:text-base text-gray-900 dark:text-gray-100 
             placeholder-gray-400 focus:outline-none focus:ring-2 
-            focus:ring-blue-500 transition
+            focus:ring-gray-500 transition
           "
         />
       </div>
 
       {!isFocused && searchQuery.trim() === "" && (
-        <Suggestions users={users} currentUser={currentUser} />
+        <Suggestions users={usersWithoutCurrent} currentUser={currentUser} />
       )}
 
       {(isFocused || searchQuery.trim() !== "") && (
-        <div className="max-h-[80vh] overflow-y-auto hide-scrollbar p-2 md:p-4 space-y-3 md:space-y-4">
+        <div className="flex-1 overflow-y-auto hide-scrollbar p-2 md:p-4 pb-20 md:pb-4 space-y-3 md:space-y-4 min-h-0">
           {isSearching ? (
             <div className="flex flex-col justify-center items-center py-12 gap-3 select-none">
               <div className="relative">

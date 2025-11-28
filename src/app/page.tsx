@@ -76,7 +76,7 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className={`min-h-screen h-full ${bgColor} ${textPrimary} transition-colors duration-300`}>
+    <div className={`min-h-screen ${bgColor} ${textPrimary} transition-colors duration-300`}>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? `${navBg} shadow-lg` : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-4">
           <div className="flex items-center justify-between">

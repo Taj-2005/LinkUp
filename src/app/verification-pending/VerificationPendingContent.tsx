@@ -42,7 +42,7 @@ export default function VerificationPendingContent() {
             router.push("/livelinks");
           }
         })
-        .catch(console.error);
+        .catch(() => {});
         toast.success("✅ Email verified! Logging you in...");
     }
   }, [verifiedUser, router]);

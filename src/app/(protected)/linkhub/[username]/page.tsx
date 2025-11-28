@@ -4,21 +4,19 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-import ToggleSwitch from "@/components/ToggleSwitch";
 import ProfileCard from "@/components/ProfileCard";
 import ProfileNavbar from "@/components/profile/ProfileNavbar";
 import {useUserStore} from "@/store/useUserStore";
 import { IUser } from "@/models/User";
+import { getUser } from "@/utils/api";
 
 export default function UserProfile() {
   const params = useParams();
-  const username = params.username as string;
+  const rawIdentifier = params.username as string;
+  const decodedIdentifier = decodeURIComponent(rawIdentifier).toLowerCase();
   const [searching, setSearching] = useState(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setSearching(false), 3000);
-    return () => clearTimeout(t);
-  }, []);
+  const [user, setUser] = useState<IUser | null>(null);
+  const [userNotFound, setUserNotFound] = useState(false);
 
   const { users } = useUserStore(); 
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,14 +47,88 @@ export default function UserProfile() {
     if (e.target === overlayRef.current) closeModal();
   };
 
-  const user = users?.find((u: IUser) => u.username === username) ?? null;
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let isCancelled = false;
+
+    const findUser = async () => {
+      if (!decodedIdentifier) return;
+
+      setSearching(true);
+      setUserNotFound(false);
+      setUser(null);
+
+      const foundInStore = users?.find((u: IUser) => 
+        u.username?.toLowerCase() === decodedIdentifier || 
+        u.email?.toLowerCase() === decodedIdentifier
+      );
+
+      if (foundInStore) {
+        if (!isCancelled) {
+          setUser(foundInStore);
+          setSearching(false);
+          setUserNotFound(false);
+        }
+        return;
+      }
+
+      if (users && users.length > 0) {
+        try {
+          const response = await getUser(decodedIdentifier);
+          if (!isCancelled) {
+            if (response) {
+              setUser(response);
+              setSearching(false);
+              setUserNotFound(false);
+            } else {
+              setSearching(false);
+              setUserNotFound(true);
+            }
+          }
+        } catch {
+          if (!isCancelled) {
+            setSearching(false);
+            setUserNotFound(true);
+          }
+        }
+      } else {
+        timeoutId = setTimeout(async () => {
+          if (!isCancelled) {
+            try {
+              const response = await getUser(decodedIdentifier);
+              if (response) {
+                setUser(response);
+                setSearching(false);
+                setUserNotFound(false);
+              } else {
+                setSearching(false);
+                setUserNotFound(true);
+              }
+            } catch{
+              setSearching(false);
+              setUserNotFound(true);
+            }
+          }
+        }, 3000);
+      }
+    };
+
+    findUser();
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [decodedIdentifier, users]);
 
 
-if (!user) {
+if (!user || userNotFound) {
   return (
-    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark min-h-screen">
-      <div className="w-full m-2 md:m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
-        <div className="w-full">
+    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
+      <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
+        <div className="w-full overflow-y-auto hide-scrollbar">
           <div className="flex flex-col items-center justify-center min-h-[98vh] p-2 md:p-4">
 
             <AnimatePresence mode="wait">
@@ -220,13 +292,11 @@ if (!user) {
 
 
   return (
-    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark min-h-screen">
-      <div className="w-full m-2 md:m-2 min-h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
-        <div className="w-full">
+    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
+      <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
+        <div className="w-full overflow-y-auto hide-scrollbar">
           <div className="flex flex-col gap-4 md:gap-8 items-center p-2 md:p-2">
-
-            <ToggleSwitch />
-
+            <div className="p-4"></div>
             <div
               onClick={() => openModal(user.user_avatar || "")}
               onContextMenu={(e) => {

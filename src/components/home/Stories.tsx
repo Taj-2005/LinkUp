@@ -9,9 +9,11 @@ import { motion } from "framer-motion";
 export default function Stories() {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
-  const {users} = useUserStore();
+  const {users, user: currentUser} = useUserStore();
 
-  if (!users || users.length === 0) {
+  const filteredUsers = users?.filter((u) => u._id !== currentUser?._id) || [];
+
+  if (!filteredUsers || filteredUsers.length === 0) {
     return (
       <div 
         className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar" 
@@ -37,11 +39,11 @@ export default function Stories() {
               transition={{ delay: i * 0.05, duration: 0.3 }}
               className="flex-none flex flex-col items-center text-center snap-center"
             >
-              <div className="relative w-[100px] h-[100px] rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700">
+              <div className="relative w-16 h-16 md:w-[100px] md:h-[100px] rounded-full overflow-hidden bg-gray-300 dark:bg-gray-700">
                 <div className="absolute inset-0 animate-shimmer opacity-60" />
               </div>
 
-              <div className="relative skeleton-line w-[80px] h-4 mt-3 overflow-hidden">
+              <div className="relative skeleton-line w-[80px] md:w-[100px] h-4 mt-2 overflow-hidden">
                 <div className="absolute inset-0 animate-shimmer opacity-60" />
               </div>
             </motion.div>
@@ -60,28 +62,29 @@ export default function Stories() {
         msOverflowStyle: 'none'
       }}
     >
-      <div className="flex flex-row flex-nowrap h-full py-4 md:py-2 gap-2 md:gap-6 snap-x snap-mandatory scroll-smooth px-4 md:px-0" style={{ width: 'max-content' }}>
-        {users.slice(0, 20).map((user) => (
+      <div className="flex flex-row flex-nowrap h-full py-4 md:py-2 gap-2 md:gap-6 snap-x snap-mandatory scroll-smooth px-4 md:p-4" style={{ width: 'max-content' }}>
+        {filteredUsers.slice(0, 20).map((user) => (
           <div
             key={user.username}
             data-story-item
             onClick={() => router.push(`/linkhub/${user.username}`)}
             className="flex-none flex flex-col items-center text-center cursor-pointer snap-center"
           >
-            <Image
-              src={
-                user.user_avatar
-                  ? user.user_avatar
-                  : resolvedTheme === "dark"
-                  ? "/dark-profile.png"
-                  : "/light-profile.png"
-              }
-              alt={user.username}
-              width={100}
-              height={100}
-              unoptimized
-              className="rounded-full object-cover border-4 border-primary-dark dark:border-primary-light p-[0.5px] w-16 h-16 md:w-[100px] md:h-[100px] max-w-full"
-            />
+            <div className="relative w-16 h-16 md:w-[100px] md:h-[100px] rounded-full overflow-hidden border-4 border-primary-dark dark:border-primary-light flex-shrink-0">
+              <Image
+                src={
+                  user.user_avatar
+                    ? user.user_avatar
+                    : resolvedTheme === "dark"
+                    ? "/dark-profile.png"
+                    : "/light-profile.png"
+                }
+                alt={user.username}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
 
             <span className="mt-2 text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 truncate w-[80px] md:w-[100px]">
               {user.username}

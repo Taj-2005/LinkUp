@@ -15,9 +15,13 @@ export default function User({ user, onClick }: UserProps) {
 
   if (!user) {
     return (
-      <div className="flex gap-2 sm:gap-3 pl-2 sm:pl-4 items-center" role="status" aria-label="Loading user">
-        <SkeletonCircle size={40} className="sm:w-[50px] sm:h-[50px]" />
-        <div className="flex flex-col gap-2 flex-1 min-w-0">
+      <div
+        className="flex gap-2 items-center p-2 rounded-xl min-w-0 flex-1"
+        role="status"
+        aria-label="Loading user"
+      >
+        <SkeletonCircle size={40} className="w-10 h-10 md:w-[50px] md:h-[50px] flex-shrink-0" />
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
           <SkeletonLine width="80%" height={16} className="max-w-[128px]" />
           <SkeletonLine width="60%" height={12} className="max-w-[96px]" />
         </div>
@@ -27,23 +31,24 @@ export default function User({ user, onClick }: UserProps) {
 
   return (
     <div
-      className="w-full flex gap-2 pl-2 md:pl-4 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition"
+      className="flex gap-2 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition min-w-0 flex-1"
       onClick={onClick}
     >
-      <Image
-        src={
-          user.user_avatar
-            ? user.user_avatar
-            : resolvedTheme === "dark"
-            ? "/dark-profile.png"
-            : "/light-profile.png"
-        }
-        width={50}
-        height={50}
-        unoptimized
-        alt="avatar"
-        className="rounded-full object-cover w-10 h-10 md:w-[50px] md:h-[50px] flex-shrink-0"
-      />
+      <div className="relative w-10 h-10 md:w-[50px] md:h-[50px] rounded-full overflow-hidden flex-shrink-0">
+        <Image
+          src={
+            user.user_avatar
+              ? user.user_avatar
+              : resolvedTheme === "dark"
+              ? "/dark-profile.png"
+              : "/light-profile.png"
+          }
+          fill
+          unoptimized
+          alt="avatar"
+          className="object-cover"
+        />
+      </div>
 
       <div className="flex flex-col min-w-0 flex-1">
         <div className="font-bold text-black dark:text-white text-sm md:text-base truncate">
