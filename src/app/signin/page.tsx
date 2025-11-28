@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Moon, Sun, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import {signin} from "@/utils/api"
@@ -11,7 +11,7 @@ import {getUser} from "@/utils/api"
 
 export default function SignInPage() {
   const router = useRouter();
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode] = useState(true);
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -111,7 +111,7 @@ export default function SignInPage() {
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      <button
+      {/* <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
         aria-label="Toggle theme"
@@ -121,9 +121,9 @@ export default function SignInPage() {
         ) : (
           <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
         )}
-      </button>
+      </button> */}
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10`}>
+      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 md:p-4`}>
         <div className="p-4 xs:p-5 sm:p-6 md:p-8 pb-3 xs:pb-4 sm:pb-6 text-center">
           <div className={`inline-flex items-center justify-center rounded-2xl mb-2 xs:mb-3 sm:mb-4 relative`}>
               <Image

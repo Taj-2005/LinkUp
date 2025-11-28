@@ -23,7 +23,32 @@ export default function LandingPage() {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    const html = document.documentElement;
+    const body = document.body;
+    
+    html.classList.add('landing-page');
+    body.classList.add('landing-page');
+    body.classList.remove('h-full');
+    
+    html.style.setProperty('height', 'auto', 'important');
+    html.style.setProperty('overflow-y', 'auto', 'important');
+    body.style.setProperty('height', 'auto', 'important');
+    body.style.setProperty('overflow-y', 'auto', 'important');
+    body.style.setProperty('overflow-x', 'hidden', 'important');
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      html.classList.remove('landing-page');
+      body.classList.remove('landing-page');
+      body.classList.add('h-full');
+      
+      html.style.removeProperty('height');
+      html.style.removeProperty('overflow-y');
+      body.style.removeProperty('height');
+      body.style.removeProperty('overflow-y');
+      body.style.removeProperty('overflow-x');
+    };
   }, []);
 
   const bgColor = isDark ? 'bg-[#181818]' : 'bg-[#e1e1e1]';
@@ -69,10 +94,10 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { value: "10K+", label: "Active Users" },
-    { value: "50K+", label: "Photos Shared" },
-    { value: "100K+", label: "Daily Interactions" },
-    { value: "99.9%", label: "Uptime" }
+    { value: "10+", label: "Active Users" },
+    { value: "5+", label: "Photos Shared" },
+    { value: "200+", label: "Daily Interactions" },
+    { value: "96%", label: "Uptime" }
   ];
 
   return (

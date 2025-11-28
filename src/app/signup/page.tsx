@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Moon, Sun, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {signup} from "@/utils/api"
 import Image from "next/image";
@@ -15,7 +15,7 @@ export default function SignUpPage() {
   const [emailError, setEmailError] = useState("");
   const [shakeUsername, setShakeUsername] = useState(false);
   const [shakeEmail, setShakeEmail] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -204,7 +204,7 @@ export default function SignUpPage() {
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      <button
+      {/* <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
         aria-label="Toggle theme"
@@ -214,9 +214,9 @@ export default function SignUpPage() {
         ) : (
           <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
         )}
-      </button>
+      </button> */}
 
-      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 flex flex-col max-h-[98vh] xs:max-h-[95vh] sm:max-h-[90vh]`}>
+      <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 flex flex-col max-h-[98vh] xs:max-h-[95vh] sm:max-h-[90vh] md:p-4`}>
         <div className="p-3 xs:p-4 sm:p-6 md:p-8 pb-2 xs:pb-3 sm:pb-4 md:pb-6 text-center flex-shrink-0">
           <div className={`inline-flex items-center justify-center rounded-2xl mb-2 xs:mb-3 sm:mb-4 relative`}>
               <Image
