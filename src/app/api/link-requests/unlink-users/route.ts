@@ -17,14 +17,38 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Other user ID is required" }, { status: 400 });
         }
 
-        // Remove from linked arrays
-        await User.findByIdAndUpdate(payload.userId, {
-            $pull: { linked_to: otherUserId, linked_by: otherUserId },
-        });
+        const currentUser = await User.findById(payload.userId);
+        const otherUser = await User.findById(otherUserId);
 
-        await User.findByIdAndUpdate(otherUserId, {
-            $pull: { linked_to: payload.userId, linked_by: payload.userId },
-        });
+        if (!currentUser || !otherUser) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        // Determine the relationship direction
+        // If current user has otherUserId in linked_to, current user was the requester
+        // If current user has otherUserId in linked_by, other user was the requester
+        
+        // Remove from current user's linked_to (if current user initiated the link)
+        if (currentUser.linked_to.includes(otherUserId)) {
+            await User.findByIdAndUpdate(payload.userId, {
+                $pull: { linked_to: otherUserId },
+            });
+            // Remove current user from other user's linked_by
+            await User.findByIdAndUpdate(otherUserId, {
+                $pull: { linked_by: payload.userId },
+            });
+        }
+        
+        // Remove from current user's linked_by (if other user initiated the link)
+        if (currentUser.linked_by.includes(otherUserId)) {
+            await User.findByIdAndUpdate(payload.userId, {
+                $pull: { linked_by: otherUserId },
+            });
+            // Remove current user from other user's linked_to
+            await User.findByIdAndUpdate(otherUserId, {
+                $pull: { linked_to: payload.userId },
+            });
+        }
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
