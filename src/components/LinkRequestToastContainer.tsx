@@ -68,7 +68,7 @@ export default function LinkRequestToastContainer() {
             }
         };
 
-        const handleLinkRequestAccepted = async (data: { requestId: string; receiverId: string | unknown }) => {
+        const handleLinkRequestAccepted = async (data: { requestId: string; receiverId: string | number | { toString(): string } }) => {
             // Only show toast if current user is the requester (not the receiver)
             // If receiverId is not the current user, then current user is the requester
             if (user && user._id) {
