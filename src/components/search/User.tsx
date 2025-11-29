@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import {IUser} from "@/models/User"
 import Image from "next/image";
+import LinkUpButton from "../LinkUpButton";
 
 interface UserProps {
     user: IUser | null
@@ -33,9 +34,7 @@ export default function User({user} : UserProps) {
                     <div className="text-gray-500">{user?.name}</div>
                 </div>
             </div>
-            <button className="border-2 font-bold border-black dark:border-white px-4 rounded-lg hover:bg-white hover:text-black transition-colors w-fit h-fit py-1">
-                LinkUp
-            </button>
+            <LinkUpButton receiverId={user?._id || ""} variant="border" />
         </div>
     )
 }

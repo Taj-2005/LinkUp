@@ -1,12 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiSettings } from "react-icons/fi";
 import ProfileCardSelf from "@/components/ProfileCardSelf";
+import { useUserStore } from "@/store/useUserStore";
+import { getCurrentUser } from "@/utils/api";
 
 export default function Home() {
   const router = useRouter();
+  const { setUser } = useUserStore();
+
+  useEffect(() => {
+    // Fetch updated user data when navigating to linkhub
+    const fetchUpdatedUser = async () => {
+      try {
+        const currentUserData = await getCurrentUser();
+        if (currentUserData?.user) {
+          setUser(currentUserData.user);
+        }
+      } catch (error) {
+        console.error("Failed to fetch updated user data:", error);
+      }
+    };
+
+    fetchUpdatedUser();
+  }, [setUser]);
 
   return (
     <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">

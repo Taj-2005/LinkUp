@@ -50,7 +50,10 @@ export async function POST() {
   user.refreshToken = newRefreshToken;
   await user.save();
 
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ 
+    ok: true, 
+    accessToken: newAccessToken // Return token for standalone backend use
+  });
 
   setAuthCookies(res, newAccessToken, newRefreshToken);
 

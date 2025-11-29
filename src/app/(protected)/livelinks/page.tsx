@@ -8,12 +8,14 @@ import Ads from "@/components/Ads";
 import Stories from "@/components/home/Stories";
 import Post from "@/components/home/Post";
 import { useUserStore } from "@/store/useUserStore";
-import { useNavbar } from "@/contexts/NavbarContext";
+import { useNavbarStore } from "@/store/useNavbarStore";
+import { useSocketStore } from "@/store/useSocketStore";
 
 export default function Home() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
-  const { setSelectedItem } = useNavbar();
+  const setSelectedItem = useNavbarStore((state) => state.setSelectedItem);
+  const unseenCount = useSocketStore((state) => state.unseenCount);
 
   // User data for posts
   const postUser = {
@@ -49,7 +51,9 @@ export default function Home() {
           >
             <div className="relative">
               <FiBell size={24} />
+              {unseenCount > 0 && (
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark"></span>
+              )}
             </div>
           </button>
           <div className="pt-6 md:pt-0 pb-4">
@@ -80,7 +84,9 @@ export default function Home() {
               aria-label="Notifications"
             >
               <FiBell size={30} />
+              {unseenCount > 0 && (
               <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark"></span>
+              )}
             </button>
           </div>
 

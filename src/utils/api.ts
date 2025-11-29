@@ -153,22 +153,15 @@ export function getAllUsers(): Promise<IUser[]> {
   return authFetch("/api/protected/users") as Promise<IUser[]>;
 }
 
-export async function updateProfile(data: UpdateProfilePayload) {
-  const res = await fetch("/api/protected/update-profile", {
+export async function updateProfile(data: UpdateProfilePayload): Promise<{ success: boolean; user: IUser }> {
+  return authFetch("/api/protected/update-profile", {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error("Failed to update user: " + text);
-  }
-
-  return res.json();
+  }) as Promise<{ success: boolean; user: IUser }>;
 }
 
 export async function getUser(identifier: string) {
+  try {
   const res = await fetch("/api/auth/get-user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -177,7 +170,17 @@ export async function getUser(identifier: string) {
 
   const json = await res.json();
 
-  if (!res.ok) throw new Error(json.error || "Failed to get user");
+    if (!res.ok) {
+      // Don't throw for 404 - user might not exist, just return null
+      if (res.status === 404) {
+        return null;
+      }
+      throw new Error(json.error || "Failed to get user");
+    }
 
   return json.user;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return null;
+  }
 }

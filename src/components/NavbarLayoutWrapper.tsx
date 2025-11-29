@@ -5,9 +5,9 @@ import Navbar from "@/components/Navbar";
 import useSWR from "swr";
 import {IUser} from "@/models/User";
 import { useUserStore } from "@/store/useUserStore";
+import { useNavbarStore } from "@/store/useNavbarStore";
 import { getCurrentUser, getAllUsers } from "@/utils/api";
-import { useEffect, useState } from "react";
-import { NavbarProvider } from "@/contexts/NavbarContext";
+import { useEffect } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
@@ -15,7 +15,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   const pathname = usePathname();
   const router = useRouter();
   const { setUser, setUsers } = useUserStore();
-  const [selectedItem, setSelectedItem] = useState("");
+  const { selectedItem, setSelectedItem } = useNavbarStore();
 
   const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
 
@@ -90,7 +90,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     else if (current === "settings") {
       setSelectedItem(isMobile ? "linkhub" : "settings");
     }
-  }, [pathname]);
+  }, [pathname, setSelectedItem]);
 
   if (PUBLIC_ROUTES.includes(pathname)) {
     return (
@@ -101,7 +101,6 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   }
 
   return (
-    <NavbarProvider setSelectedItem={setSelectedItem}>
       <div className="flex flex-row h-screen md:h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
         <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
         <div className="flex-1 overflow-hidden" style={{ 
@@ -110,6 +109,5 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
           {children}
         </div>
       </div>
-    </NavbarProvider>
   );
 }

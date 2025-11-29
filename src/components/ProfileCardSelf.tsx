@@ -44,6 +44,9 @@ export default function ProfileCard() {
 
   const [isPhotoOnlyMode, setIsPhotoOnlyMode] = useState(false);
 
+  const [zoomModalOpen, setZoomModalOpen] = useState(false);
+  const zoomOverlayRef = useRef<HTMLDivElement | null>(null);
+
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
@@ -101,6 +104,31 @@ export default function ProfileCard() {
     }
     checkUsername(debouncedUsername);
   }, [debouncedUsername, displayUser?.username]);
+
+  const openZoomModal = () => {
+    setZoomModalOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeZoomModal = () => {
+    setZoomModalOpen(false);
+    document.body.style.overflow = "";
+  };
+
+  const onZoomOverlayClick = (e: React.MouseEvent) => {
+    // Close modal if clicking on the overlay itself
+    if (e.target === zoomOverlayRef.current) {
+      closeZoomModal();
+    }
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && zoomModalOpen) closeZoomModal();
+    };
+    if (zoomModalOpen) window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomModalOpen]);
 
   const openEditModal = () => {
     setUsername(displayUser?.username ?? "");
@@ -331,7 +359,7 @@ export default function ProfileCard() {
       <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
           <div
-            onClick={() => setAvatarOptionsModal(true)}
+            onClick={openZoomModal}
             className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer flex-shrink-0 aspect-square"
           >
             <Image
@@ -358,19 +386,19 @@ export default function ProfileCard() {
               {displayUser.name}
             </p>
 
-            <div className="flex gap-4 md:gap-8 text-primary-dark dark:text-white font-semibold mt-4 md:mt-6 mb-4 md:mb-6 justify-center md:justify-start">
+            <div className="flex gap-4 md:gap-8 text-primary-dark dark:text-white font-semibold mt-4 md:mt-6 mb-4 md:mb-6 justify-center items-center">
               <div>
-                <p className="text-xl md:text-2xl">{displayUser.links ? displayUser.links.length : 0}</p>
+                <p className="text-xl text-center md:text-2xl">{displayUser.links ? displayUser.links.length : 0}</p>
                 <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Links</p>
               </div>
 
               <div>
-                <p className="text-xl md:text-2xl">{displayUser.linked_by?.length ?? 0}</p>
+                <p className="text-xl text-center md:text-2xl">{displayUser.linked_by?.length ?? 0}</p>
                 <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Linked By</p>
               </div>
 
               <div>
-                <p className="text-xl md:text-2xl">{displayUser.linked_to?.length ?? 0}</p>
+                <p className="text-xl text-center md:text-2xl">{displayUser.linked_to?.length ?? 0}</p>
                 <p className="text-xs md:text-sm text-primary-light dark:text-gray-400">Linked To</p>
               </div>
             </div>
@@ -615,8 +643,9 @@ export default function ProfileCard() {
           imageSrc={cropImageSrc}
           onClose={() => {
             setCropImageSrc(null);
-            setIsPhotoOnlyMode(false);
             setUploadingAvatar(false);
+            // Reset isPhotoOnlyMode when user cancels crop
+            setIsPhotoOnlyMode(false);
           }}
           uploadToCloudinary={uploadToCloudinary}
           onCropDone={handleCropDone}
@@ -630,6 +659,117 @@ export default function ProfileCard() {
         accept="image/*"
         onChange={handleFileSelect}
       />
+
+      <AnimatePresence>
+        {zoomModalOpen && (
+          <motion.div
+            ref={zoomOverlayRef}
+            onClick={onZoomOverlayClick}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm p-2 md:p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="relative max-w-[95vw] max-h-[95vh] flex flex-col items-center gap-3 md:gap-4"
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.6, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 180, damping: 15 }}
+            >
+              <motion.button
+                onClick={closeZoomModal}
+                className="absolute -top-3 -right-3 z-50 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg p-1.5"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-800 dark:text-gray-100"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </motion.button>
+
+              <motion.img
+                src={
+                  avatarSrc
+                    ? avatarSrc
+                    : resolvedTheme === "dark"
+                    ? "/dark-profile.png"
+                    : "/light-profile.png"
+                }
+                alt="Profile preview"
+                className="block max-w-[calc(95vw-2rem)] max-h-[calc(70vh-10rem)] object-contain rounded-lg shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+                draggable={false}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 18 }}
+              />
+
+              <div 
+                className="flex flex-col gap-2 md:gap-3 w-full max-w-md px-2 md:px-4 pb-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => {
+                    setIsPhotoOnlyMode(true);
+                    closeZoomModal();
+                    // Use setTimeout to ensure modal closes before file picker opens
+                    setTimeout(() => {
+                      fileInputRef.current?.click();
+                    }, 100);
+                  }}
+                  className="w-full py-2.5 md:py-3 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold text-sm md:text-base shadow-lg hover:brightness-110 transition"
+                >
+                  Change Photo
+                </button>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      await updateProfile({ user_avatar: "" });
+
+                      const current = userFromStore;
+                      mutate("current-user");
+
+                      if (current) {
+                        const plainUser = JSON.parse(JSON.stringify(current)) as IUser;
+
+                        const updatedUser = {
+                          ...plainUser,
+                          user_avatar: "",
+                        } as unknown as IUser;
+
+                        setUserInStore(updatedUser);
+                        setDisplayUser(updatedUser);
+                      }
+
+                      setAvatarPreview(null);
+                      setTempAvatar(null);
+                      closeZoomModal();
+                    } catch {
+                    }
+                  }}
+                  className="w-full py-2.5 md:py-3 rounded-xl bg-red-500 text-white font-semibold text-sm md:text-base shadow-lg hover:brightness-110 transition"
+                >
+                  Remove Photo
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

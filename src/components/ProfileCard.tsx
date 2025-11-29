@@ -5,12 +5,14 @@ import { FiMapPin } from "react-icons/fi";
 import { IUser } from "@/models/User";
 import { useTheme } from "next-themes";
 import {motion} from "framer-motion"
+import LinkUpButton from "./LinkUpButton";
 
 interface ProfileCardProps {
   user: IUser | null;
+  onImageClick?: () => void;
 }
 
-export default function ProfileCard({ user }: ProfileCardProps) {
+export default function ProfileCard({ user, onImageClick }: ProfileCardProps) {
   const { resolvedTheme } = useTheme();
 
   if (!user) {
@@ -107,7 +109,14 @@ export default function ProfileCard({ user }: ProfileCardProps) {
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
       
       <div
-        className={`flex-shrink-0 relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark aspect-square`}
+        onClick={onImageClick}
+        onContextMenu={(e) => {
+          if (onImageClick) {
+            e.preventDefault();
+            onImageClick();
+          }
+        }}
+        className={`flex-shrink-0 relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark aspect-square ${onImageClick ? 'cursor-pointer' : ''}`}
       >
         <Image
           src={
@@ -170,9 +179,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-4">
-          <button className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto">
-            LinkUp
-          </button>
+          <LinkUpButton receiverId={user._id} />
         </div>
 
       </div>

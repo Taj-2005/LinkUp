@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 import SettingsSidebar from "@/components/settings/SettingsSidebar";
 import { ArrowLeft } from "lucide-react";
-import { useNavbar } from "@/contexts/NavbarContext";
+import { useNavbarStore } from "@/store/useNavbarStore";
 
 export default function SettingsPage() {
   const [selectedSetting, setSelectedSetting] = useState<string | null>(null);
-  const { setSelectedItem } = useNavbar();
+  const setSelectedItem = useNavbarStore((state) => state.setSelectedItem);
 
   const showSidebar = selectedSetting === null;
 

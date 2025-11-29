@@ -297,16 +297,10 @@ if (!user || userNotFound) {
         <div className="w-full overflow-y-auto hide-scrollbar">
           <div className="flex flex-col gap-4 md:gap-8 items-center p-2 md:p-2">
             <div className="p-4"></div>
-            <div
-              onClick={() => openModal(user.user_avatar || "")}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                openModal(user.user_avatar || "");
-              }}
-              className="cursor-pointer"
-            >
-              <ProfileCard user={user} />
-            </div>
+            <ProfileCard 
+              user={user} 
+              onImageClick={() => openModal(user.user_avatar || "")}
+            />
 
             <ProfileNavbar />
           </div>
