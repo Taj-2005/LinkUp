@@ -12,7 +12,7 @@ export async function GET() {
   try {
     requireAuth(cookieStore);
 
-    const users = await User.find().select("-password -__v");
+    const users = await User.find().select("bio createdAt linked_by linked_to links location name sex user_avatar username _id");
     return NextResponse.json(users, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
