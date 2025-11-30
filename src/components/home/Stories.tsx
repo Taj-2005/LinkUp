@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -9,9 +9,9 @@ import { motion } from "framer-motion";
 export default function Stories() {
   const { resolvedTheme } = useTheme();
   const router = useRouter();
-  const {users, user: currentUser} = useUserStore();
+  const { allUsers, currentUser } = useUsers();
 
-  const filteredUsers = users?.filter((u) => u._id !== currentUser?._id) || [];
+  const filteredUsers = allUsers?.filter((u) => u._id !== currentUser?._id) || [];
 
   if (!filteredUsers || filteredUsers.length === 0) {
     return (

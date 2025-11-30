@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { FiMenu, FiHome, FiSearch, FiLink, FiPlusSquare } from "react-icons/fi";
 import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
-import {useUserStore} from "@/store/useUserStore"
+import { useUsers } from "@/hooks/useUsers";
 import SignoutButton from "@/components/SignoutButton";
 
 interface NavItemProps {
@@ -27,7 +27,7 @@ interface NavbarProps {
 
 function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMobile = false }: NavItemProps) {
   const { resolvedTheme } = useTheme();
-  const user = useUserStore((state) => state.user);
+  const { currentUser } = useUsers();
 
   if (isMobile) {
     return (
@@ -40,10 +40,10 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
         {label === "LinkHub" ? (
           <div className={`relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0 ${isActive ? "ring-2 ring-white" : ""}`}>
             <Image
-              src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              src={ currentUser?.user_avatar ? currentUser.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
               fill
               unoptimized
-              alt={`${user?.username} avatar`}
+              alt={`${currentUser?.username} avatar`}
               className="object-cover"
             />
           </div>
@@ -65,10 +65,10 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
       {label === "LinkHub" ? (
           <div className="relative w-[26px] h-[26px] rounded-full overflow-hidden flex-shrink-0">
             <Image
-              src={ user?.user_avatar ? user.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              src={ currentUser?.user_avatar ? currentUser.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
               fill
               unoptimized
-              alt={`${user?.username} avatar`}
+              alt={`${currentUser?.username} avatar`}
               className="object-cover"
             />
           </div>

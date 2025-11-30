@@ -11,7 +11,7 @@ import useDebounce from "@/hooks/useDebounce";
 import { updateProfile } from "@/utils/api";
 import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
 import CropModal from "@/components/profile/CropModal";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 
 type UpdateProfilePayload = Partial<{
   username: string;
@@ -26,8 +26,7 @@ export default function ProfileCard() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const userFromStore = useUserStore((s) => s.user);
-  const setUserInStore = useUserStore((s) => s.setUser);
+  const { currentUser, mutateCurrentUser } = useUsers();
 
   const [displayUser, setDisplayUser] = useState<IUser | null>(null);
 
@@ -60,8 +59,8 @@ export default function ProfileCard() {
   const debouncedUsername = useDebounce(username, 600);
 
   useEffect(() => {
-    if (!editModal) setDisplayUser(userFromStore);
-  }, [userFromStore, editModal]);
+    if (!editModal) setDisplayUser(currentUser);
+  }, [currentUser, editModal]);
 
   const validateName = (value: string) => {
     const words = value.trim().split(/\s+/).filter(Boolean);
@@ -161,7 +160,8 @@ export default function ProfileCard() {
       if (Object.keys(changed).length > 0) {
         const result = await updateProfile(changed);
 
-        setUserInStore(result.user);
+        // Refresh user data via SWR mutate (industry standard)
+        await mutateCurrentUser();
 
         setDisplayUser(result.user);
         mutate("current-user");
@@ -248,9 +248,9 @@ export default function ProfileCard() {
     if (isPhotoOnlyMode) {
       try {
         const result = await updateProfile({ user_avatar: url });
-        setUserInStore(result.user);
+        // Refresh user data via SWR mutate (industry standard)
+        await mutateCurrentUser();
         setDisplayUser(result.user);
-        mutate("current-user");
       } catch {
       } finally {
         setIsPhotoOnlyMode(false);
@@ -600,18 +600,17 @@ export default function ProfileCard() {
                     try {
                       await updateProfile({ user_avatar: "" });
 
-                      const current = userFromStore;
-                      mutate("current-user");
+                      // Refresh user data via SWR mutate (industry standard)
+                      await mutateCurrentUser();
 
-                      if (current) {
-                        const plainUser = JSON.parse(JSON.stringify(current)) as IUser;
+                      if (currentUser) {
+                        const plainUser = JSON.parse(JSON.stringify(currentUser)) as IUser;
 
                         const updatedUser = {
                           ...plainUser,
                           user_avatar: "",
                         } as unknown as IUser;
 
-                        setUserInStore(updatedUser);
                         setDisplayUser(updatedUser);
                       }
 
@@ -740,18 +739,17 @@ export default function ProfileCard() {
                     try {
                       await updateProfile({ user_avatar: "" });
 
-                      const current = userFromStore;
-                      mutate("current-user");
+                      // Refresh user data via SWR mutate (industry standard)
+                      await mutateCurrentUser();
 
-                      if (current) {
-                        const plainUser = JSON.parse(JSON.stringify(current)) as IUser;
+                      if (currentUser) {
+                        const plainUser = JSON.parse(JSON.stringify(currentUser)) as IUser;
 
                         const updatedUser = {
                           ...plainUser,
                           user_avatar: "",
                         } as unknown as IUser;
 
-                        setUserInStore(updatedUser);
                         setDisplayUser(updatedUser);
                       }
 

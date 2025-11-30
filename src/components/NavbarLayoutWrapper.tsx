@@ -1,67 +1,23 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import useSWR from "swr";
-import {IUser} from "@/models/User";
-import { useUserStore } from "@/store/useUserStore";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
-import { getCurrentUser, getAllUsers } from "@/utils/api";
+import { useUsers } from "@/hooks/useUsers";
 import { useEffect } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 
 export default function NavbarLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { setUser, setUsers } = useUserStore();
   const { selectedItem, setSelectedItem } = useNavbarStore();
+  const { mutateCurrentUser, mutateAllUsers } = useUsers();
 
   const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
 
-  const { data: currentUser } = useSWR<{ user: IUser }>(
-    shouldFetchAuth ? "current-user" : null,
-    getCurrentUser,
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-      shouldRetryOnError: false,
-      onError: (err) => {
-        if (err.message.includes("Authentication failed") || err.message.includes("Redirecting")) {
-          router.push("/signin");
-        }
-      }
-    }
-  );
-
-  const { data: allUsers, mutate: mutateAllUsers } = useSWR<IUser[]>(
-    shouldFetchAuth ? "all-users" : null,
-    getAllUsers,
-    {
-      // Removed aggressive polling - using socket events instead
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-      shouldRetryOnError: false,
-      onError: (err) => {
-        if (err.message.includes("Authentication failed") || err.message.includes("Redirecting")) {
-          router.push("/signin");
-        }
-      }
-    }
-  );
-
-  useEffect(() => {
-    if (currentUser?.user) {
-      setUser(currentUser.user);
-    }
-  }, [currentUser, setUser]);
-
-  useEffect(() => {
-    if (allUsers) {
-      setUsers(allUsers);
-    }
-  }, [allUsers, setUsers]);
+  // Handle authentication errors via SWR onError (handled in useUsers hook)
+  // Router redirects are handled in individual components as needed
 
   // Listen for socket events to update users list (replaces polling)
   const { socket, isConnected } = useSocketStore();
@@ -75,21 +31,37 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
       mutateAllUsers();
     };
 
+    // Handle link acceptance - refresh both current user and all users
+    const handleLinkRequestAccepted = () => {
+      // Refresh current user data (in case their linked_to or linked_by changed)
+      mutateCurrentUser();
+      // Refresh all users list
+      mutateAllUsers();
+    };
+
+    // Handle unlink events - refresh both current user and all users
+    const handleUserUnlinked = () => {
+      // Refresh current user data (in case their linked_to or linked_by changed)
+      mutateCurrentUser();
+      // Refresh all users list
+      mutateAllUsers();
+    };
+
     // Listen for profile updates, link changes, etc.
     socket.on("userUpdated", handleUserUpdate);
     socket.on("linkRequestReceived", handleUserUpdate);
-    socket.on("linkRequestAccepted", handleUserUpdate);
+    socket.on("linkRequestAccepted", handleLinkRequestAccepted);
     socket.on("linkRequestRejected", handleUserUpdate);
-    socket.on("userUnlinked", handleUserUpdate);
+    socket.on("userUnlinked", handleUserUnlinked);
 
     return () => {
       socket.off("userUpdated", handleUserUpdate);
       socket.off("linkRequestReceived", handleUserUpdate);
-      socket.off("linkRequestAccepted", handleUserUpdate);
+      socket.off("linkRequestAccepted", handleLinkRequestAccepted);
       socket.off("linkRequestRejected", handleUserUpdate);
-      socket.off("userUnlinked", handleUserUpdate);
+      socket.off("userUnlinked", handleUserUnlinked);
     };
-  }, [shouldFetchAuth, socket, isConnected, mutateAllUsers]);
+  }, [shouldFetchAuth, socket, isConnected, mutateAllUsers, mutateCurrentUser]);
 
   useEffect(() => {
     if (pathname === "/") {

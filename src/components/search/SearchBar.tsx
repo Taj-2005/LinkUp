@@ -4,19 +4,19 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
 import useDebounce from "@/hooks/useDebounce";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 
 export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { user: currentUser, users } = useUserStore();
+  const { currentUser, allUsers } = useUsers();
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   
   const usersWithoutCurrent = useMemo(() => 
-    users?.filter((u) => u._id !== currentUser?._id) || [],
-    [users, currentUser]
+    allUsers?.filter((u) => u._id !== currentUser?._id) || [],
+    [allUsers, currentUser]
   );
   const [filteredUsers, setFilteredUsers] = useState(usersWithoutCurrent); 
 

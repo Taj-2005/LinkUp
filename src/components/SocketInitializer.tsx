@@ -2,13 +2,14 @@
 
 import { useEffect } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { getUnseenRequestCount } from "@/utils/linkRequestApi";
 import Cookies from "js-cookie";
 
 export default function SocketInitializer({ children }: { children: React.ReactNode }) {
     const { initializeSocket, disconnectSocket, setUnseenCount } = useSocketStore();
-    const { user } = useUserStore();
+    const { currentUser } = useUsers();
+    const user = currentUser;
 
     useEffect(() => {
         // Initialize socket when user is logged in

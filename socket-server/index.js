@@ -40,6 +40,114 @@ app.post("/api/verification/email-verified", (req, res) => {
     }
 });
 
+// Link accepted notification endpoint (called from Next.js API route)
+app.post("/api/link-requests/link-accepted-notify", (req, res) => {
+    const { requesterId, receiverId, requestId } = req.body;
+    
+    if (!requesterId || !receiverId) {
+        return res.status(400).json({ error: "Requester ID and Receiver ID are required" });
+    }
+    
+    // Emit socket events to both users for real-time updates
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        
+        // Notify requester (who sent the request)
+        authenticatedNamespace.to(`user:${requesterId}`).emit("linkRequestAccepted", {
+            requestId: requestId || null,
+            requesterId: requesterId,
+            receiverId: receiverId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        // Notify receiver (who accepted the request)
+        authenticatedNamespace.to(`user:${receiverId}`).emit("linkRequestAccepted", {
+            requestId: requestId || null,
+            requesterId: requesterId,
+            receiverId: receiverId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        // Emit userUpdated events to trigger user list refresh for both users
+        authenticatedNamespace.to(`user:${requesterId}`).emit("userUpdated", {
+            userId: requesterId,
+        });
+        authenticatedNamespace.to(`user:${receiverId}`).emit("userUpdated", {
+            userId: receiverId,
+        });
+        
+        console.log(`Emitted link accepted events to users: ${requesterId} and ${receiverId}`);
+        res.json({ success: true, message: "Link accepted events emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
+// Profile updated notification endpoint (called from Next.js API route)
+app.post("/api/users/profile-updated-notify", (req, res) => {
+    const { userId } = req.body;
+    
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+    
+    // Emit socket events to notify all connected clients about profile update
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        
+        // Emit userUpdated event to trigger user list refresh for all users
+        // This ensures everyone sees the updated profile information
+        authenticatedNamespace.emit("userUpdated", {
+            userId: userId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        console.log(`Emitted profile updated event for user: ${userId}`);
+        res.json({ success: true, message: "Profile updated event emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
+// Unlink notification endpoint (called from Next.js API route)
+app.post("/api/link-requests/unlink-notify", (req, res) => {
+    const { currentUserId, otherUserId } = req.body;
+    
+    if (!currentUserId || !otherUserId) {
+        return res.status(400).json({ error: "User IDs are required" });
+    }
+    
+    // Emit socket events to both users for real-time updates
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        
+        // Notify current user (who performed the unlink)
+        authenticatedNamespace.to(`user:${currentUserId}`).emit("userUnlinked", {
+            userId: otherUserId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        // Notify other user (who was unlinked)
+        authenticatedNamespace.to(`user:${otherUserId}`).emit("userUnlinked", {
+            userId: currentUserId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        // Emit userUpdated events to trigger user list refresh for both users
+        authenticatedNamespace.to(`user:${currentUserId}`).emit("userUpdated", {
+            userId: currentUserId,
+        });
+        authenticatedNamespace.to(`user:${otherUserId}`).emit("userUpdated", {
+            userId: otherUserId,
+        });
+        
+        console.log(`Emitted unlink events to users: ${currentUserId} and ${otherUserId}`);
+        res.json({ success: true, message: "Unlink events emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
 // Health check
 app.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });

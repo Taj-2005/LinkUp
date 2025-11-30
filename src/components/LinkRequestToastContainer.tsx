@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSocketStore } from "@/store/useSocketStore";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import LinkRequestToast from "./LinkRequestToast";
 import LinkAcceptedToast from "./LinkAcceptedToast";
-import { getUser, getCurrentUser, getAllUsers } from "@/utils/api";
+import { getUser } from "@/utils/api";
 
 interface LinkRequest {
     requestId: string;
@@ -32,7 +32,7 @@ interface LinkAccepted {
 
 export default function LinkRequestToastContainer() {
     const socket = useSocketStore((state) => state.socket);
-    const { user, setUser, setUsers } = useUserStore();
+    const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
     const [toasts, setToasts] = useState<LinkRequest[]>([]);
     const [acceptedToasts, setAcceptedToasts] = useState<LinkAccepted[]>([]);
 
@@ -71,13 +71,13 @@ export default function LinkRequestToastContainer() {
         const handleLinkRequestAccepted = async (data: { requestId: string; receiverId: string | number | { toString(): string } }) => {
             // Only show toast if current user is the requester (not the receiver)
             // If receiverId is not the current user, then current user is the requester
-            if (user && user._id) {
+            if (currentUser && currentUser._id) {
                 const receiverIdStr = typeof data.receiverId === 'string' 
                     ? data.receiverId 
                     : String(data.receiverId);
-                const currentUserIdStr = typeof user._id === 'string' 
-                    ? user._id 
-                    : String(user._id);
+                const currentUserIdStr = typeof currentUser._id === 'string' 
+                    ? currentUser._id 
+                    : String(currentUser._id);
 
                 if (receiverIdStr !== currentUserIdStr) {
                     try {
@@ -97,21 +97,11 @@ export default function LinkRequestToastContainer() {
                                 },
                             ]);
 
-                            // Update current user data and users list to reflect the new link
-                            try {
-                                const [currentUserData, allUsersData] = await Promise.all([
-                                    getCurrentUser(),
-                                    getAllUsers()
-                                ]);
-                                if (currentUserData?.user) {
-                                    setUser(currentUserData.user);
-                                }
-                                if (allUsersData) {
-                                    setUsers(allUsersData);
-                                }
-                            } catch (error) {
-                                console.error("Failed to update user data:", error);
-                            }
+                            // Refresh user data via SWR mutate (industry standard)
+                            await Promise.all([
+                                mutateCurrentUser(),
+                                mutateAllUsers()
+                            ]);
                         } else {
                             console.warn("Receiver not found:", receiverIdStr);
                         }
@@ -129,7 +119,7 @@ export default function LinkRequestToastContainer() {
             socket.off("linkRequestReceived", handleLinkRequestReceived);
             socket.off("linkRequestAccepted", handleLinkRequestAccepted);
         };
-    }, [socket, user, setUser, setUsers]);
+    }, [socket, currentUser, mutateCurrentUser, mutateAllUsers]);
 
     const removeToast = (requestId: string) => {
         setToasts((prev) => prev.filter((toast) => toast.requestId !== requestId));

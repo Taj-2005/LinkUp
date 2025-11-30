@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { updateProfile } from "@/utils/api";
 import useDebounce from "@/hooks/useDebounce";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,8 +10,8 @@ import { FiUser, FiMapPin, FiGlobe, FiInfo, FiAtSign,FiSettings } from "react-ic
 import CropModal from "@/components/profile/CropModal";
 
 export default function SettingsPanel() {
-  const user = useUserStore((s) => s.user);
-  const setUser = useUserStore((s) => s.setUser);
+  const { currentUser, mutateCurrentUser } = useUsers();
+  const user = currentUser;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -67,8 +67,9 @@ export default function SettingsPanel() {
 
   const handleCropDone = async (url: string) => {
     try {
-      const updated = await updateProfile({ user_avatar: url });
-      setUser(updated.user);
+      await updateProfile({ user_avatar: url });
+      // Refresh user data via SWR mutate (industry standard)
+      await mutateCurrentUser();
     } catch {}
     setUploadingAvatar(false);
     setCropImageSrc(null);
@@ -76,8 +77,9 @@ export default function SettingsPanel() {
 
   const handleRemoveAvatar = async () => {
     try {
-      const updated = await updateProfile({ user_avatar: "" });
-      setUser(updated.user);
+      await updateProfile({ user_avatar: "" });
+      // Refresh user data via SWR mutate (industry standard)
+      await mutateCurrentUser();
     } catch {}
   };
 
@@ -109,14 +111,15 @@ export default function SettingsPanel() {
 
     setSaving(true);
     try {
-      const updated = await updateProfile({
+      await updateProfile({
         username,
         name,
         bio,
         location,
         sex,
       });
-      setUser(updated.user);
+      // Refresh user data via SWR mutate (industry standard)
+      await mutateCurrentUser();
     } catch {}
     setSaving(false);
   };

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { useRouter } from "next/navigation";
 
 export default function TestEmailPage() {
-  const { user } = useUserStore();
+  const { currentUser } = useUsers();
+  const user = currentUser;
   const router = useRouter();
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error" | null; message: string }>({

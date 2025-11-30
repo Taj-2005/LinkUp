@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import ProfileCard from "@/components/ProfileCard";
 import ProfileNavbar from "@/components/profile/ProfileNavbar";
-import {useUserStore} from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { IUser } from "@/models/User";
 import { getUser } from "@/utils/api";
 
@@ -18,7 +18,8 @@ export default function UserProfile() {
   const [user, setUser] = useState<IUser | null>(null);
   const [userNotFound, setUserNotFound] = useState(false);
 
-  const { users } = useUserStore(); 
+  const { allUsers } = useUsers();
+  const users = allUsers; 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);

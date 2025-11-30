@@ -1,6 +1,6 @@
 "use client";
 
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import User from "@/components/messages/User";
 import { IUser } from "@/models/User";
 
@@ -9,8 +9,8 @@ interface ChatsProps {
 }
 
 export default function Chats({ setUser }: ChatsProps) {
-  const users = useUserStore((state) => state.users);
-  const currentUser = useUserStore((state) => state.user);
+  const { allUsers, currentUser } = useUsers();
+  const users = allUsers;
 
   const filteredUsers = users?.filter((u) => u._id !== currentUser?._id) || [];
 

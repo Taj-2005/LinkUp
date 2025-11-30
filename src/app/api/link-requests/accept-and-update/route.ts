@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 
+const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+
 export async function POST(req: Request) {
     await dbConnect();
 
@@ -25,6 +27,24 @@ export async function POST(req: Request) {
         await User.findByIdAndUpdate(requesterId, {
             $addToSet: { linked_to: payload.userId },
         });
+
+        // Notify Socket.IO server to emit real-time updates for both users
+        try {
+            await fetch(`${SOCKET_SERVER_URL}/api/link-requests/link-accepted-notify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    requesterId: requesterId,
+                    receiverId: payload.userId,
+                    requestId: requestId
+                }),
+            }).catch(() => {
+                // Silently fail - link still succeeded
+            });
+        } catch (socketError) {
+            // Silently fail - link still succeeded, socket notification is optional
+            console.error("Socket notification error (non-critical):", socketError);
+        }
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {

@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { sendLinkRequest, getLinkStatus } from "@/utils/linkRequestApi";
 import { authFetch } from "@/lib/authFetch";
-import { getCurrentUser, getAllUsers } from "@/utils/api";
 import UnlinkModal from "./UnlinkModal";
 import toast from "react-hot-toast";
 
@@ -19,13 +18,13 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
     const [status, setStatus] = useState<"none" | "requested" | "linked" | "loading">("loading");
     const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const socket = useSocketStore((state) => state.socket);
-    const { user, setUser, setUsers } = useUserStore();
+    const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
 
     useEffect(() => {
-        if (!user || !receiverId) return;
+        if (!currentUser || !receiverId) return;
 
         // Don't show button if trying to link to self
-        if (user._id === receiverId) {
+        if (currentUser._id === receiverId) {
             setStatus("none");
             return;
         }
@@ -33,13 +32,13 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
         // Check if already linked
         // Only show "Linked" if current user is the requester (has receiverId in linked_to)
         // If current user is the receiver (has receiverId in linked_by), show "LinkUp" instead
-        if (user.linked_to.includes(receiverId)) {
+        if (currentUser.linked_to.includes(receiverId)) {
             setStatus("linked");
             return;
         }
         
         // If user is in linked_by, they are the receiver, so don't show "Linked"
-        if (user.linked_by.includes(receiverId)) {
+        if (currentUser.linked_by.includes(receiverId)) {
             setStatus("none");
             return;
         }
@@ -58,44 +57,62 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             .catch(() => {
                 setStatus("none");
             });
-    }, [user, receiverId]);
+    }, [currentUser, receiverId]);
 
     useEffect(() => {
         if (!socket) return;
 
-        const handleLinkRequestAccepted = (data: { requestId: string; receiverId: string }) => {
-            if (data.receiverId === receiverId || user?._id === data.receiverId) {
-                setStatus("linked");
+        const handleLinkRequestAccepted = async (data: { requestId: string; receiverId: string; requesterId?: string }) => {
+            // Check if this acceptance affects the current button
+            // Current user could be either the requester or the receiver
+            const currentUserId = currentUser?._id;
+            const isCurrentUserRequester = currentUserId === data.requesterId;
+            const isCurrentUserReceiver = currentUserId === data.receiverId;
+            const isReceiverInvolved = receiverId === data.receiverId || receiverId === data.requesterId;
+            
+            if ((isCurrentUserRequester || isCurrentUserReceiver) && isReceiverInvolved) {
+                // Refresh user data via SWR mutate (industry standard)
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers()
+                ]);
+                
+                // Re-check link status after data refresh
+                // The useEffect will handle status update when currentUser changes
+            }
+        };
+
+        const handleUserUnlinked = async (data: { userId: string }) => {
+            // If this unlink affects the current user or the receiver, update status
+            if (data.userId === receiverId || currentUser?._id === data.userId) {
+                setStatus("none");
+                // Refresh user data via SWR mutate (industry standard)
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers()
+                ]);
             }
         };
 
         const handleUnlinked = async () => {
             setStatus("none");
-            // Update current user data and users list to reflect the unlink
-            try {
-                const [currentUserData, allUsersData] = await Promise.all([
-                    getCurrentUser(),
-                    getAllUsers()
-                ]);
-                if (currentUserData?.user) {
-                    setUser(currentUserData.user);
-                }
-                if (allUsersData) {
-                    setUsers(allUsersData);
-                }
-            } catch (error) {
-                console.error("Failed to update user data after unlink:", error);
-            }
+            // Refresh user data via SWR mutate (industry standard)
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers()
+            ]);
         };
 
         socket.on("linkRequestAccepted", handleLinkRequestAccepted);
+        socket.on("userUnlinked", handleUserUnlinked);
         socket.on("unlinked", handleUnlinked);
 
         return () => {
             socket.off("linkRequestAccepted", handleLinkRequestAccepted);
+            socket.off("userUnlinked", handleUserUnlinked);
             socket.off("unlinked", handleUnlinked);
         };
-    }, [socket, receiverId, user, setUser, setUsers]);
+    }, [socket, receiverId, currentUser, mutateCurrentUser, mutateAllUsers]);
 
     const handleLinkUp = async () => {
         if (status === "linked") {
@@ -131,26 +148,14 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
                 body: JSON.stringify({ otherUserId: receiverId }),
             });
 
-            // Emit socket event
-            if (socket) {
-                socket.emit("unlink", { otherUserId: receiverId });
-            }
+            // Refresh user data via SWR mutate (industry standard)
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers()
+            ]);
 
-            // Update current user data and users list to reflect the unlink
-            try {
-                const [currentUserData, allUsersData] = await Promise.all([
-                    getCurrentUser(),
-                    getAllUsers()
-                ]);
-                if (currentUserData?.user) {
-                    setUser(currentUserData.user);
-                }
-                if (allUsersData) {
-                    setUsers(allUsersData);
-                }
-            } catch (error) {
-                console.error("Failed to update user data:", error);
-            }
+            // Socket events are now handled by the API route via socket server
+            // Real-time updates will be received via socket listeners in useEffect
 
             setStatus("none");
             setShowUnlinkModal(false);

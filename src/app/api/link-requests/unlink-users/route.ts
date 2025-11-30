@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/auth";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 
+const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+
 export async function POST(req: Request) {
     await dbConnect();
 
@@ -24,30 +26,61 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        // Determine the relationship direction
-        // If current user has otherUserId in linked_to, current user was the requester
-        // If current user has otherUserId in linked_by, other user was the requester
+        // Correct unlink logic:
+        // When User A unlinks User B:
+        // - User A removes User B from A's linked_to (if A was the requester)
+        // - User B removes User A from B's linked_by (if A was the requester)
+        // OR
+        // - User A removes User B from A's linked_by (if B was the requester)
+        // - User B removes User A from B's linked_to (if B was the requester)
         
-        // Remove from current user's linked_to (if current user initiated the link)
+        let unlinked = false;
+
+        // Case 1: Current user was the requester (has other in linked_to)
         if (currentUser.linked_to.includes(otherUserId)) {
+            // Current user removes other from linked_to
             await User.findByIdAndUpdate(payload.userId, {
                 $pull: { linked_to: otherUserId },
             });
-            // Remove current user from other user's linked_by
+            // Other user removes current from linked_by
             await User.findByIdAndUpdate(otherUserId, {
                 $pull: { linked_by: payload.userId },
             });
+            unlinked = true;
         }
         
-        // Remove from current user's linked_by (if other user initiated the link)
+        // Case 2: Other user was the requester (current has other in linked_by)
         if (currentUser.linked_by.includes(otherUserId)) {
+            // Current user removes other from linked_by
             await User.findByIdAndUpdate(payload.userId, {
                 $pull: { linked_by: otherUserId },
             });
-            // Remove current user from other user's linked_to
+            // Other user removes current from linked_to
             await User.findByIdAndUpdate(otherUserId, {
                 $pull: { linked_to: payload.userId },
             });
+            unlinked = true;
+        }
+
+        if (!unlinked) {
+            return NextResponse.json({ error: "Users are not linked" }, { status: 400 });
+        }
+
+        // Notify Socket.IO server to emit real-time updates
+        try {
+            await fetch(`${SOCKET_SERVER_URL}/api/link-requests/unlink-notify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    currentUserId: payload.userId,
+                    otherUserId: otherUserId 
+                }),
+            }).catch(() => {
+                // Silently fail - unlink still succeeded
+            });
+        } catch (socketError) {
+            // Silently fail - unlink still succeeded, socket notification is optional
+            console.error("Socket notification error (non-critical):", socketError);
         }
 
         return NextResponse.json({ success: true }, { status: 200 });

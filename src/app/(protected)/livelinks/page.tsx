@@ -7,12 +7,13 @@ import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
 import Stories from "@/components/home/Stories";
 import Post from "@/components/home/Post";
-import { useUserStore } from "@/store/useUserStore";
+import { useUsers } from "@/hooks/useUsers";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
 
 export default function Home() {
-  const user = useUserStore((state) => state.user);
+  const { currentUser } = useUsers();
+  const user = currentUser;
   const router = useRouter();
   const setSelectedItem = useNavbarStore((state) => state.setSelectedItem);
   const unseenCount = useSocketStore((state) => state.unseenCount);

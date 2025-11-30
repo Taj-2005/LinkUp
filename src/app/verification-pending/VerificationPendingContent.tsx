@@ -4,11 +4,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { FiCheckCircle, FiRefreshCcw } from "react-icons/fi";
 import Image from "next/image";
-import { useUserStore } from "@/store/useUserStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { io, Socket } from "socket.io-client";
+import { mutate } from "swr";
 
 const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
 
@@ -23,7 +23,6 @@ export default function VerificationPendingContent() {
   const [darkMode] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
   
-  const { setUser } = useUserStore();
   const verificationSocketRef = useRef<Socket | null>(null);
 
   // Socket.IO real-time verification listener (replaces SWR polling)
@@ -73,13 +72,15 @@ export default function VerificationPendingContent() {
         const responseData = await res.json();
 
         if (responseData.ok) {
-          setUser(responseData.user);
+          // Refresh SWR cache with new user data (industry standard)
+          await mutate("current-user");
+          await mutate("all-users");
           
           // Initialize main socket with new auth token
           const { initializeSocket } = useSocketStore.getState();
           initializeSocket();
           
-            router.push("/livelinks");
+          router.push("/livelinks");
         } else {
           toast.error("Failed to log in. Please try signing in manually.");
         }
@@ -100,7 +101,7 @@ export default function VerificationPendingContent() {
       socket.disconnect();
       verificationSocketRef.current = null;
     };
-  }, [userEmail, router, setUser]);
+  }, [userEmail, router]);
 
   const handleResend = async () => {
     setResending(true);
