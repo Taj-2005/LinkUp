@@ -95,7 +95,14 @@ app.post("/api/users/profile-updated-notify", (req, res) => {
     if (io) {
         const authenticatedNamespace = io.of("/");
         
-        // Emit userUpdated event to trigger user list refresh for all users
+        // Emit userUpdated event to the specific user who was updated
+        // This ensures their current user data refreshes immediately
+        authenticatedNamespace.to(`user:${userId}`).emit("userUpdated", {
+            userId: userId,
+            timestamp: new Date().toISOString(),
+        });
+        
+        // Also emit to all users to refresh the all users list
         // This ensures everyone sees the updated profile information
         authenticatedNamespace.emit("userUpdated", {
             userId: userId,

@@ -100,7 +100,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             await Promise.all([
                 mutateCurrentUser(),
                 mutateAllUsers()
-            ]);
+                ]);
         };
 
         socket.on("linkRequestAccepted", handleLinkRequestAccepted);
@@ -152,7 +152,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             await Promise.all([
                 mutateCurrentUser(),
                 mutateAllUsers()
-            ]);
+                ]);
 
             // Socket events are now handled by the API route via socket server
             // Real-time updates will be received via socket listeners in useEffect

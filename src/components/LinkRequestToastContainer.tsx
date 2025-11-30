@@ -101,7 +101,7 @@ export default function LinkRequestToastContainer() {
                             await Promise.all([
                                 mutateCurrentUser(),
                                 mutateAllUsers()
-                            ]);
+                                ]);
                         } else {
                             console.warn("Receiver not found:", receiverIdStr);
                         }

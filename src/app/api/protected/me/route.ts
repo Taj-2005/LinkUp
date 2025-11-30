@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const payload = requireAuth(cookieStore);
 
-    const user = await User.findById(payload.userId).select("-password -__v");
+    const user = await User.findById(payload.userId).select("_id name username user_avatar bio sex location email createdAt linked_by linked_to links");
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

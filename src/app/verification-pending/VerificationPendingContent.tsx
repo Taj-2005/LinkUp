@@ -80,7 +80,7 @@ export default function VerificationPendingContent() {
           const { initializeSocket } = useSocketStore.getState();
           initializeSocket();
           
-          router.push("/livelinks");
+            router.push("/livelinks");
         } else {
           toast.error("Failed to log in. Please try signing in manually.");
         }

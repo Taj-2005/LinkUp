@@ -12,7 +12,7 @@ const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
 export default function NavbarLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { selectedItem, setSelectedItem } = useNavbarStore();
-  const { mutateCurrentUser, mutateAllUsers } = useUsers();
+  const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
 
   const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
 
@@ -21,14 +21,23 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
 
   // Listen for socket events to update users list (replaces polling)
   const { socket, isConnected } = useSocketStore();
-  
+
   useEffect(() => {
     if (!shouldFetchAuth || !socket || !isConnected) return;
 
     // Listen for user updates from socket server
-    const handleUserUpdate = () => {
-      // Revalidate users list when socket event is received
+    const handleUserUpdate = (data?: { userId?: string }) => {
+      const updatedUserId = data?.userId;
+      const currentUserId = currentUser?._id;
+      
+      // Always refresh all users list when any user is updated
       mutateAllUsers();
+      
+      // If the updated user is the current user, also refresh their data
+      // This ensures linked_by, linked_to, and other counts update immediately
+      if (updatedUserId && currentUserId && updatedUserId === currentUserId) {
+        mutateCurrentUser();
+      }
     };
 
     // Handle link acceptance - refresh both current user and all users
@@ -61,7 +70,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
       socket.off("linkRequestRejected", handleUserUpdate);
       socket.off("userUnlinked", handleUserUnlinked);
     };
-  }, [shouldFetchAuth, socket, isConnected, mutateAllUsers, mutateCurrentUser]);
+  }, [shouldFetchAuth, socket, isConnected, currentUser, mutateAllUsers, mutateCurrentUser]);
 
   useEffect(() => {
     if (pathname === "/") {

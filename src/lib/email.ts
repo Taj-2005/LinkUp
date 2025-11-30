@@ -343,7 +343,7 @@ export async function sendPasswordResetEmail(
     </div>
 
     <div class="footer">
-      © ${new Date().getFullYear()} LinkUp · All rights reserved.<br/>
+      © 2025 LinkUp · All rights reserved.<br/>
       <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}" style="color:inherit; text-decoration:none;">Visit LinkUp</a>
     </div>
   </div>
@@ -397,22 +397,26 @@ export async function sendEngagementEmail(
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "🚀 New Updates on LinkUp - Connect & Explore!",
+    subject: "🚀 Real-Time Notifications & Instant Linkup Requests on LinkUp",
     html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark" />
+<meta name="description" content="Experience real-time notifications and instant linkup request management on LinkUp - accept, reject, or unlink connections instantly with seamless UX." />
 
 <style>
 body {
   margin: 0;
   padding: 0;
   background: #0f0f10;
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   color: #ffffff !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .wrapper {
@@ -422,6 +426,7 @@ body {
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .header {
@@ -434,34 +439,47 @@ body {
 .logo {
   width: 120px;
   margin-bottom: 10px;
+  height: auto;
 }
 
 .header-title {
   font-size: 28px;
   font-weight: 700;
   margin-top: 10px;
+  line-height: 1.2;
 }
 
 .subtitle {
   font-size: 15px;
   opacity: 0.95;
+  margin-top: 8px;
 }
 
 .content {
   padding: 30px 25px;
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #e7e7e7 !important;
 }
 
 h2 {
   margin-top: 0;
   color: #ffffff !important;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+h3 {
+  color: #ffffff !important;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
 }
 
 .cta-btn {
   display: inline-block;
-  padding: 15px 28px;
+  padding: 15px 32px;
   background: linear-gradient(135deg, #8b5cf6, #6366f1);
   color: #ffffff !important;
   font-weight: 600;
@@ -469,11 +487,19 @@ h2 {
   margin: 25px 0;
   font-size: 16px;
   text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
 }
 
 .link {
   color: #a78bfa !important;
   word-break: break-all;
+  text-decoration: none;
 }
 
 .feature-list {
@@ -483,23 +509,41 @@ h2 {
 }
 
 .feature-list li {
-  padding: 10px 0;
-  padding-left: 30px;
+  padding: 12px 0;
+  padding-left: 32px;
   position: relative;
   color: #e7e7e7 !important;
+  line-height: 1.6;
 }
 
 .feature-list li:before {
-  content: "✨";
+  content: "⚡";
   position: absolute;
   left: 0;
+  font-size: 18px;
+}
+
+.highlight-box {
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 3px solid #8b5cf6;
+  padding: 16px 20px;
+  margin: 24px 0;
+  border-radius: 8px;
+}
+
+.highlight-box strong {
+  color: #a78bfa !important;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
 }
 
 .note {
   font-size: 13px;
-  opacity: 0.8;
+  opacity: 0.85;
   color: #cccccc !important;
   margin-top: 20px;
+  line-height: 1.6;
 }
 
 .footer {
@@ -508,10 +552,32 @@ h2 {
   font-size: 12px;
   background: #0d0d0e;
   color: #777 !important;
+  line-height: 1.6;
 }
 
 .footer a {
   color: #a78bfa !important;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .wrapper {
+    margin: 15px;
+    border-radius: 12px;
+  }
+  
+  .header {
+    padding: 30px 18px;
+  }
+  
+  .header-title {
+    font-size: 24px;
+  }
+  
+  .content {
+    padding: 24px 20px;
+    font-size: 14px;
+  }
 }
 </style>
 </head>
@@ -520,51 +586,86 @@ h2 {
   <div class="wrapper">
     <div class="header">
       <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png"
-           alt="LinkUp Logo" class="logo" />
-      <div class="header-title">New Updates Await! 🎉</div>
-      <div class="subtitle">Your LinkUp journey just got better</div>
+           alt="LinkUp - Real-Time Social Networking Platform" class="logo" />
+      <div class="header-title">Real-Time Updates & Instant Connections! ⚡</div>
+      <div class="subtitle">Experience seamless linkup request management</div>
     </div>
     <div class="content">
       <h2>Hi ${username} 👋</h2>
 
       <p>
-        We hope you're enjoying your time on <strong>LinkUp</strong>! 
-        We've been working hard to make your experience even better, and 
-        we wanted to share some exciting updates with you.
+        We're thrilled to share exciting updates on <strong>LinkUp</strong>! 
+        We've enhanced your networking experience with <strong>real-time notifications</strong> 
+        and streamlined <strong>linkup request management</strong> — making it easier than ever 
+        to connect, engage, and grow your network.
       </p>
 
-      <p>
-        <strong>What's New:</strong>
-      </p>
+      <div class="highlight-box">
+        <strong>🚀 What's New: Real-Time Notifications</strong>
+        Get instant updates the moment they happen! Our advanced real-time notification system 
+        ensures you never miss a connection opportunity, profile update, or network activity. 
+        Everything syncs instantly across all your devices — no page refresh needed.
+      </div>
+
+      <h3>✨ Enhanced Linkup Request Features</h3>
 
       <ul class="feature-list">
-        <li>Enhanced profile features for better connections</li>
-        <li>Improved search and discovery tools</li>
-        <li>New ways to engage with your network</li>
-        <li>Faster and smoother experience across all features</li>
+        <li>
+          <strong>Instant Accept:</strong> Accept linkup requests in real-time with a single click. 
+          Your network updates immediately, and both parties are notified instantly.
+        </li>
+        <li>
+          <strong>Quick Reject:</strong> Politely decline requests with our streamlined rejection flow. 
+          Your preferences are respected, and the process is smooth and intuitive.
+        </li>
+        <li>
+          <strong>Easy Unlink:</strong> Manage your connections effortlessly. Unlink from users 
+          anytime with our user-friendly interface, and changes reflect instantly across the platform.
+        </li>
+        <li>
+          <strong>Real-Time Sync:</strong> All linkup actions — accept, reject, or unlink — 
+          update in real-time. Your connection counts, linked_by, and linked_to lists refresh 
+          automatically without manual page refreshes.
+        </li>
       </ul>
 
       <p>
-        Ready to explore? Visit LinkUp now and discover what's waiting for you! 
-        Connect with new people, share your story, and be part of our growing community.
-      </p>
-
-      <center>
-        <a href="${appUrl}" class="cta-btn">Visit LinkUp Now</a>
-      </center>
-
-      <p class="note">
-        We're constantly improving LinkUp based on your feedback. 
-        If you have any suggestions or questions, feel free to reach out!
+        <strong>Why This Matters:</strong> Our real-time infrastructure powered by Socket.IO 
+        ensures that every interaction is instant and seamless. Whether you're accepting a new 
+        connection, managing your network, or updating your profile, changes appear immediately 
+        for you and all affected users — creating a truly responsive and engaging social experience.
       </p>
 
       <p>
-        Thank you for being part of the LinkUp community. We're excited to see 
-        what connections you'll make next! 🌟
+        <strong>Ready to experience the difference?</strong> Visit LinkUp now and discover how 
+        real-time notifications and instant linkup management can transform your networking journey. 
+        Connect with confidence, manage relationships effortlessly, and build meaningful connections 
+        that matter.
+      </p>
+
+      <center>
+        <a href="${appUrl}" class="cta-btn">Explore LinkUp Now →</a>
+      </center>
+
+      <p class="note">
+        <strong>Pro Tip:</strong> Keep LinkUp open in your browser to receive real-time notifications 
+        as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date 
+        automatically, providing you with the most current information at all times.
+      </p>
+
+      <p>
+        Thank you for being part of the LinkUp community. We're committed to providing you with 
+        the best social networking experience, and these updates are just the beginning. 
+        We're excited to see the connections you'll make! 🌟
+      </p>
+
+      <p style="margin-top: 24px; font-size: 14px; color: #a78bfa !important;">
+        <strong>Questions or feedback?</strong> We'd love to hear from you! Your input helps us 
+        create a better platform for everyone.
       </p>
     </div>
     <div class="footer">
-      © ${new Date().getFullYear()} LinkUp · All rights reserved.<br />
+      © 2025 LinkUp · All rights reserved.<br />
       <a href="${appUrl}">Visit LinkUp</a> · 
       <a href="${appUrl}/settings">Manage Preferences</a>
     </div>
@@ -572,7 +673,7 @@ h2 {
 </body>
 </html>
 `,
-    text: `Hi ${username}!\n\nWe hope you're enjoying LinkUp! We've been working on exciting updates and improvements.\n\nVisit us now: ${appUrl}\n\nThank you for being part of our community!\n\n- The LinkUp Team`,
+    text: `Hi ${username}!\n\nWe're excited to share major updates on LinkUp! We've enhanced your experience with real-time notifications and streamlined linkup request management.\n\n✨ What's New:\n\n⚡ Real-Time Notifications\nGet instant updates the moment they happen! Our advanced real-time notification system ensures you never miss a connection opportunity, profile update, or network activity. Everything syncs instantly across all your devices — no page refresh needed.\n\n🚀 Enhanced Linkup Request Features:\n\n• Instant Accept: Accept linkup requests in real-time with a single click. Your network updates immediately, and both parties are notified instantly.\n\n• Quick Reject: Politely decline requests with our streamlined rejection flow. Your preferences are respected, and the process is smooth and intuitive.\n\n• Easy Unlink: Manage your connections effortlessly. Unlink from users anytime with our user-friendly interface, and changes reflect instantly across the platform.\n\n• Real-Time Sync: All linkup actions — accept, reject, or unlink — update in real-time. Your connection counts, linked_by, and linked_to lists refresh automatically without manual page refreshes.\n\nWhy This Matters: Our real-time infrastructure powered by Socket.IO ensures that every interaction is instant and seamless. Whether you're accepting a new connection, managing your network, or updating your profile, changes appear immediately for you and all affected users — creating a truly responsive and engaging social experience.\n\nReady to experience the difference? Visit LinkUp now: ${appUrl}\n\nPro Tip: Keep LinkUp open in your browser to receive real-time notifications as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date automatically.\n\nThank you for being part of the LinkUp community. We're committed to providing you with the best social networking experience!\n\n- The LinkUp Team`,
   };
 
   try {
