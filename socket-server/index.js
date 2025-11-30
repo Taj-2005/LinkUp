@@ -1,11 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const { Server } = require("socket.io");
+const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
 const dbConnect = require("./utils/dbConnect");
 const { socketAuthMiddleware } = require("./utils/auth");
 const linkRequestRoutes = require("./routes/linkRequestRoutes");
 const setupLinkRequestSockets = require("./sockets/linkRequestSocket");
+const { setupVerificationSockets, emitEmailVerified } = require("./sockets/verificationSocket");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -19,6 +21,24 @@ app.use(express.json());
 
 // Express Routes
 app.use("/api/link-requests", linkRequestRoutes);
+
+// Email verification endpoint (called from Next.js API route)
+app.post("/api/verification/email-verified", (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+    
+    // Emit socket event to verification namespace
+    if (io) {
+        const verificationNamespace = io.of("/verification");
+        emitEmailVerified(verificationNamespace, email);
+        res.json({ success: true, message: "Verification event emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
 
 // Health check
 app.get("/health", (req, res) => {
@@ -40,18 +60,8 @@ async function startServer() {
         server = app.listen(PORT, () => {
             console.log(`✓ Express server running on port ${PORT}`);
             console.log(`✓ CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:3000"}`);
-        }).on("error", (err) => {
-            if (err.code === "EADDRINUSE") {
-                console.error(`\n✗ Port ${PORT} is already in use.`);
-                console.error(`  Please stop the process using port ${PORT} or change the PORT in .env file.\n`);
-                console.error(`  To find and kill the process:`);
-                console.error(`  lsof -ti:${PORT} | xargs kill -9\n`);
-            } else {
-                console.error("Server error:", err);
-            }
-            process.exit(1);
-        });
-
+        })
+        
         // Initialize Socket.IO with Express's HTTP server
         io = new Server(server, {
             cors: {
@@ -65,13 +75,39 @@ async function startServer() {
         // Store io instance for use in controllers
         app.set("io", io);
 
-        // Socket.IO authentication middleware
-        io.use(socketAuthMiddleware);
+        // Create a namespace for authenticated connections (link requests, etc.)
+        const authenticatedNamespace = io.of("/");
+        
+        // Apply auth middleware only to authenticated namespace
+        authenticatedNamespace.use(socketAuthMiddleware);
 
-        // Setup socket event handlers
-        setupLinkRequestSockets(io);
+        // Setup authenticated socket handlers (link requests)
+        setupLinkRequestSockets(authenticatedNamespace);
+
+        // Create a separate namespace for verification (no auth required)
+        const verificationNamespace = io.of("/verification");
+        
+        // Setup verification sockets (no auth required - user not logged in yet)
+        setupVerificationSockets(verificationNamespace);
+
+        // Setup Socket.IO Admin UI (with authentication)
+        if (process.env.ADMIN_UI_USERNAME && process.env.ADMIN_UI_PASSWORD) {
+            instrument(io, {
+                auth: {
+                    type: "basic",
+                    username: process.env.ADMIN_UI_USERNAME,
+                    password: process.env.ADMIN_UI_PASSWORD,
+                },
+                mode: process.env.NODE_ENV === "production" ? "production" : "development",
+            });
+            console.log(`✓ Socket.IO Admin UI enabled at https://admin.socket.io`);
+            console.log(`  Username: ${process.env.ADMIN_UI_USERNAME}`);
+        } else {
+            console.log(`⚠ Socket.IO Admin UI disabled (ADMIN_UI_USERNAME or ADMIN_UI_PASSWORD not set)`);
+        }
 
         console.log(`✓ Socket.IO enabled on /socket.io`);
+        console.log(`✓ Verification sockets enabled (no auth required)`);
     } catch (error) {
         console.error("Failed to start server:", error);
         process.exit(1);

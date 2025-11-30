@@ -6,6 +6,7 @@ import useSWR from "swr";
 import {IUser} from "@/models/User";
 import { useUserStore } from "@/store/useUserStore";
 import { useNavbarStore } from "@/store/useNavbarStore";
+import { useSocketStore } from "@/store/useSocketStore";
 import { getCurrentUser, getAllUsers } from "@/utils/api";
 import { useEffect } from "react";
 
@@ -34,12 +35,13 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     }
   );
 
-  const { data: allUsers } = useSWR<IUser[]>(
+  const { data: allUsers, mutate: mutateAllUsers } = useSWR<IUser[]>(
     shouldFetchAuth ? "all-users" : null,
     getAllUsers,
     {
-      refreshInterval: 15000,
+      // Removed aggressive polling - using socket events instead
       revalidateOnFocus: false,
+      revalidateIfStale: false,
       shouldRetryOnError: false,
       onError: (err) => {
         if (err.message.includes("Authentication failed") || err.message.includes("Redirecting")) {
@@ -60,6 +62,34 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
       setUsers(allUsers);
     }
   }, [allUsers, setUsers]);
+
+  // Listen for socket events to update users list (replaces polling)
+  const { socket, isConnected } = useSocketStore();
+  
+  useEffect(() => {
+    if (!shouldFetchAuth || !socket || !isConnected) return;
+
+    // Listen for user updates from socket server
+    const handleUserUpdate = () => {
+      // Revalidate users list when socket event is received
+      mutateAllUsers();
+    };
+
+    // Listen for profile updates, link changes, etc.
+    socket.on("userUpdated", handleUserUpdate);
+    socket.on("linkRequestReceived", handleUserUpdate);
+    socket.on("linkRequestAccepted", handleUserUpdate);
+    socket.on("linkRequestRejected", handleUserUpdate);
+    socket.on("userUnlinked", handleUserUpdate);
+
+    return () => {
+      socket.off("userUpdated", handleUserUpdate);
+      socket.off("linkRequestReceived", handleUserUpdate);
+      socket.off("linkRequestAccepted", handleUserUpdate);
+      socket.off("linkRequestRejected", handleUserUpdate);
+      socket.off("userUnlinked", handleUserUpdate);
+    };
+  }, [shouldFetchAuth, socket, isConnected, mutateAllUsers]);
 
   useEffect(() => {
     if (pathname === "/") {

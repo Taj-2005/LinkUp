@@ -3,6 +3,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/tokens";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 import { setAuthCookies } from "@/lib/cookies";
+import { addRefreshToken, generateDeviceId } from "@/lib/tokenUtils";
 
 export async function POST(req: Request) {
   try {
@@ -16,8 +17,12 @@ export async function POST(req: Request) {
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
 
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Generate device ID from user agent
+    const userAgent = req.headers.get("user-agent") || "";
+    const deviceId = generateDeviceId(userAgent);
+
+    // Add token to array (supports multiple devices)
+    await addRefreshToken(user._id.toString(), refreshToken, deviceId);
 
     const res = NextResponse.json({ ok: true, user });
 

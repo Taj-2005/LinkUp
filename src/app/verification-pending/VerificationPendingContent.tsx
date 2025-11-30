@@ -1,14 +1,16 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import useSWR from "swr";
-import { getUser } from "@/utils/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FiCheckCircle, FiRefreshCcw } from "react-icons/fi";
 import Image from "next/image";
 import { useUserStore } from "@/store/useUserStore";
+import { useSocketStore } from "@/store/useSocketStore";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { io, Socket } from "socket.io-client";
+
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
 
 export default function VerificationPendingContent() {
   const router = useRouter();
@@ -19,33 +21,86 @@ export default function VerificationPendingContent() {
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
   const [darkMode] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
+  
+  const { setUser } = useUserStore();
+  const verificationSocketRef = useRef<Socket | null>(null);
 
-  const { data: verifiedUser } = useSWR(
-    userEmail ? ["check-user-status", userEmail] : null,
-    () => getUser(userEmail as string),
-    { refreshInterval: 5000 }
-  );
-
+  // Socket.IO real-time verification listener (replaces SWR polling)
   useEffect(() => {
-    if (!verifiedUser) return;
+    if (!userEmail) return;
 
-    if (verifiedUser.isVerified) {
-      fetch("/api/auth/login-without-password", {
+    // Connect to verification namespace (no auth required)
+    const verificationNamespace = `${SOCKET_SERVER_URL}/verification`;
+    const socket = io(verificationNamespace, {
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+
+    verificationSocketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Verification socket connected");
+      // Join verification room for this email
+      socket.emit("joinVerificationRoom", { email: userEmail });
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Verification socket connection error:", error);
+      // Fallback: Use polling if socket fails (optional)
+    });
+
+    // Listen for email verification event from socket server
+    const handleEmailVerified = async (data: { email: string; timestamp?: string }) => {
+      // Verify the email matches
+      if (data.email.toLowerCase() !== userEmail?.toLowerCase()) {
+        return;
+      }
+
+      setIsVerifying(true);
+      toast.success("✅ Email verified! Logging you in...");
+
+      try {
+        // Auto-login after verification
+        const res = await fetch("/api/auth/login-without-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: verifiedUser.email })
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.ok) {
-            useUserStore.getState().setUser(data.user);
+          body: JSON.stringify({ email: userEmail }),
+        });
+
+        const responseData = await res.json();
+
+        if (responseData.ok) {
+          setUser(responseData.user);
+          
+          // Initialize main socket with new auth token
+          const { initializeSocket } = useSocketStore.getState();
+          initializeSocket();
+          
             router.push("/livelinks");
-          }
-        })
-        .catch(() => {});
-        toast.success("✅ Email verified! Logging you in...");
-    }
-  }, [verifiedUser, router]);
+        } else {
+          toast.error("Failed to log in. Please try signing in manually.");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        toast.error("Failed to log in. Please try signing in manually.");
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    socket.on("email-verified", handleEmailVerified);
+
+    // Cleanup on unmount
+    return () => {
+      socket.off("email-verified", handleEmailVerified);
+      socket.emit("leaveVerificationRoom", { email: userEmail });
+      socket.disconnect();
+      verificationSocketRef.current = null;
+    };
+  }, [userEmail, router, setUser]);
 
   const handleResend = async () => {
     setResending(true);
@@ -208,19 +263,25 @@ export default function VerificationPendingContent() {
               <p className={`${theme.textSecondary} text-sm mb-6`}>
                 We&apos;ve sent a verification link to <span className="font-semibold text-violet-400">{userEmail}</span>
               </p>
+              {isVerifying && (
+                <p className={`${theme.textSecondary} text-sm mb-2 flex items-center gap-2`}>
+                  <FiRefreshCcw className="w-4 h-4 animate-spin" />
+                  Verifying and logging you in...
+                </p>
+              )}
             </div>
 
             <div className={`${darkMode ? "bg-[#181818]" : "bg-gray-50"} rounded-xl p-6 mb-6`}>
               <Step title="Step 1: Check your inbox" text="Find an email titled 'Verify Your Email Address'" />
               <Step title="Step 2: Click the verification link" text="Works across all devices" />
-              <Step title="Step 3: Auto-login" text="You will be redirected automatically" />
+              <Step title="Step 3: Auto-login" text="You will be redirected automatically via real-time socket" />
             </div>
 
             <div className="space-y-3">
               <button
                 onClick={handleResend}
-                disabled={resending || resent}
-                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl flex items-center justify-center gap-2`}
+                disabled={resending || resent || isVerifying}
+                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {resending ? (
                   <>

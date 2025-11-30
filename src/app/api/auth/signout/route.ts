@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 import { deleteAuthCookies } from "@/lib/cookies";
+import { removeRefreshToken } from "@/lib/tokenUtils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,10 +16,17 @@ export async function POST() {
     const token = cookieStore.get("refreshToken")?.value;
 
     if (token) {
-      const user = await User.findOne({ refreshToken: token });
+      // Find user by token (check both array and legacy field)
+      const user = await User.findOne({
+        $or: [
+          { refreshToken: token },
+          { "refreshTokens.token": token }
+        ]
+      });
+
       if (user) {
-        user.refreshToken = undefined;
-        await user.save();
+        // Remove the specific token (supports multi-device logout)
+        await removeRefreshToken(user._id.toString(), token);
       }
     }
 

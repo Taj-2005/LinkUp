@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+export interface RefreshToken {
+    token: string;
+    deviceId: string;
+    createdAt: Date;
+}
+
 export interface IUser extends Document {
     _id: string;
     user_avatar?: string;
@@ -18,7 +24,8 @@ export interface IUser extends Document {
     verificationTokenExpiry?: Date;
     createdAt: Date;
     updatedAt: Date;
-    refreshToken?: string;
+    refreshToken?: string; // Legacy field for backward compatibility
+    refreshTokens?: RefreshToken[]; // New: Array of refresh tokens for multi-device support
 
     resetToken?: string;
     resetTokenExpiry?: number;
@@ -61,7 +68,12 @@ const UserSchema: Schema = new Schema<IUser>(
         verificationToken: { type: String },
         verificationTokenExpiry: { type: Date },
 
-        refreshToken: { type: String },
+        refreshToken: { type: String }, // Legacy field for backward compatibility
+        refreshTokens: [{
+            token: { type: String, required: true },
+            deviceId: { type: String, required: true },
+            createdAt: { type: Date, default: Date.now }
+        }],
 
         resetToken: { type: String },
         resetTokenExpiry: { type: Number },

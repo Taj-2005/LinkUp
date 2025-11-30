@@ -1,5 +1,6 @@
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from "@/lib/tokens";
 import { User, IUser } from "@/models/User";
+import { findRefreshToken, replaceRefreshToken } from "@/lib/tokenUtils";
 
 interface RefreshResult {
   success: boolean;
@@ -30,12 +31,14 @@ export async function validateAndRefreshTokens(refreshToken: string): Promise<Re
       return { success: false, error: "User not found" };
     }
 
-    console.log("Stored DB refresh token begins:", user.refreshToken?.slice(0, 12));
-    if (!user.refreshToken || user.refreshToken !== refreshToken) {
+    // Find the refresh token in the array (supports multiple devices)
+    const tokenData = await findRefreshToken(user._id.toString(), refreshToken);
+    if (!tokenData) {
       console.log("❌ Refresh token mismatch!");
       return { success: false, error: "Invalid refresh token" };
     }
 
+    console.log("Stored DB refresh token found for device:", tokenData.deviceId);
 
     const newAccessToken = signAccessToken({
       userId: user._id.toString(),
@@ -50,8 +53,13 @@ export async function validateAndRefreshTokens(refreshToken: string): Promise<Re
     console.log("New access token generated");
     console.log("New refresh token generated (trimmed):", newRefreshToken.slice(0, 12));
 
-    user.refreshToken = newRefreshToken;
-    await user.save();
+    // Replace old token with new one (token rotation)
+    await replaceRefreshToken(
+      user._id.toString(),
+      refreshToken,
+      newRefreshToken,
+      tokenData.deviceId
+    );
 
     console.log("Refresh token UPDATED in DB");
     console.log("--- REFRESH SUCCESS ---\n");
