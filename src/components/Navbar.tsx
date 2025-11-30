@@ -29,6 +29,20 @@ interface NavbarProps {
 function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMobile = false }: NavItemProps) {
   const { resolvedTheme } = useTheme();
   const { currentUser } = useUsers();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only using resolvedTheme after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use default theme during SSR to match server render
+  const theme = mounted ? resolvedTheme : "dark";
+  const profileImageSrc = currentUser?.user_avatar 
+    ? currentUser.user_avatar 
+    : theme === "dark" 
+      ? "/dark-profile.png" 
+      : "/light-profile.png";
 
   if (isMobile) {
     return (
@@ -41,7 +55,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
         {label === "LinkHub" ? (
           <div className={`relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0 ${isActive ? "ring-2 ring-white" : ""}`}>
             <Image
-              src={ currentUser?.user_avatar ? currentUser.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              src={profileImageSrc}
               fill
               unoptimized
               alt={`${currentUser?.username} avatar`}
@@ -66,7 +80,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
       {label === "LinkHub" ? (
           <div className="relative w-[26px] h-[26px] rounded-full overflow-hidden flex-shrink-0">
             <Image
-              src={ currentUser?.user_avatar ? currentUser.user_avatar : resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png"}
+              src={profileImageSrc}
               fill
               unoptimized
               alt={`${currentUser?.username} avatar`}

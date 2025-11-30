@@ -360,7 +360,7 @@ export default function ProfileCard() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-8">
           <div
             onClick={openZoomModal}
-            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl border-4 cursor-pointer flex-shrink-0 aspect-square"
+            className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 transition-all duration-300 cursor-pointer flex-shrink-0 aspect-square "
           >
             <Image
               src={
@@ -373,7 +373,7 @@ export default function ProfileCard() {
               alt="User Avatar"
               fill
               unoptimized
-              className="object-cover"
+              className="object-cover p-1 rounded-full"
             />
           </div>
 
@@ -417,7 +417,7 @@ export default function ProfileCard() {
             <div className="mt-4 flex flex-wrap gap-4 justify-center md:justify-start">
               <button
                 onClick={openEditModal}
-                className="bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto"
+                className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 flex-shrink-0 transition-all duration-300 text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto"
               >
                 Edit Profile
               </button>

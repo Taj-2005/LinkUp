@@ -85,6 +85,32 @@ class LinkRequestController {
             // Emit socket events
             const io = req.app.get("io");
             if (io) {
+                const authenticatedNamespace = io.of("/");
+                
+                // Notify requester (who sent the request) that it was rejected
+                authenticatedNamespace.to(`user:${request.requesterId}`).emit("linkRequestRejected", {
+                    requestId: request._id.toString(),
+                    requesterId: request.requesterId,
+                    receiverId: request.receiverId,
+                    timestamp: new Date().toISOString(),
+                });
+                
+                // Notify receiver (who rejected the request)
+                authenticatedNamespace.to(`user:${request.receiverId}`).emit("linkRequestRejected", {
+                    requestId: request._id.toString(),
+                    requesterId: request.requesterId,
+                    receiverId: request.receiverId,
+                    timestamp: new Date().toISOString(),
+                });
+                
+                // Emit userUpdated events to trigger user list refresh for both users
+                authenticatedNamespace.to(`user:${request.requesterId}`).emit("userUpdated", {
+                    userId: request.requesterId,
+                });
+                authenticatedNamespace.to(`user:${request.receiverId}`).emit("userUpdated", {
+                    userId: request.receiverId,
+                });
+
                 // Update unseen count
                 const unseenCount = await linkRequestService.getUnseenRequestCount(userId);
                 io.to(`user:${userId}`).emit("unseenRequestCount", unseenCount);

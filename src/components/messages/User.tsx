@@ -34,7 +34,7 @@ export default function User({ user, onClick }: UserProps) {
       className="flex gap-2 items-center p-2 rounded-xl hover:bg-primary-light/20 dark:hover:bg-primary-dark/30 cursor-pointer transition min-w-0 flex-1"
       onClick={onClick}
     >
-      <div className="relative w-10 h-10 md:w-[50px] md:h-[50px] rounded-full overflow-hidden flex-shrink-0">
+      <div className="relative w-10 h-10 md:w-[50px] md:h-[50px] rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 transition-all duration-300">
         <Image
           src={
             user.user_avatar
@@ -46,7 +46,7 @@ export default function User({ user, onClick }: UserProps) {
           fill
           unoptimized
           alt="avatar"
-          className="object-cover"
+          className="object-cover p-0.5 rounded-full"
         />
       </div>
 

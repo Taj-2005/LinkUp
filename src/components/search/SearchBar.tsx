@@ -18,37 +18,34 @@ export default function SearchBar() {
     allUsers?.filter((u) => u._id !== currentUser?._id) || [],
     [allUsers, currentUser]
   );
-  const [filteredUsers, setFilteredUsers] = useState(usersWithoutCurrent); 
 
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-
-  useEffect(() => {
-    setFilteredUsers(usersWithoutCurrent);
-  }, [usersWithoutCurrent]);
-
-  useEffect(() => {
+  // Use useMemo for filteredUsers to avoid infinite loops
+  const filteredUsers = useMemo(() => {
     if (!debouncedQuery.trim()) {
-      setFilteredUsers(usersWithoutCurrent);
-      setIsSearching(false);
-      return;
+      return usersWithoutCurrent;
     }
 
-    setIsSearching(true);
-
     const q = debouncedQuery.toLowerCase();
-
-    const filtered = usersWithoutCurrent.filter(
+    return usersWithoutCurrent.filter(
       (u) =>
         u.username.toLowerCase().includes(q) ||
         u.name.toLowerCase().includes(q)
     );
-
-    setTimeout(() => {
-      setFilteredUsers(filtered);
-      setIsSearching(false);
-    }, 200);
   }, [debouncedQuery, usersWithoutCurrent]);
+
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setIsSearching(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      setIsSearching(false);
+    }
+  }, [debouncedQuery]);
 
   return (
     <div className="w-full h-full mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl flex flex-col min-h-0">

@@ -29,33 +29,33 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             return;
         }
 
-        // Check if already linked
-        // Only show "Linked" if current user is the requester (has receiverId in linked_to)
-        // If current user is the receiver (has receiverId in linked_by), show "LinkUp" instead
-        if (currentUser.linked_to.includes(receiverId)) {
-            setStatus("linked");
-            return;
-        }
-        
-        // If user is in linked_by, they are the receiver, so don't show "Linked"
-        if (currentUser.linked_by.includes(receiverId)) {
-            setStatus("none");
-            return;
-        }
-
-        // Check request status
+        // Always check request status via API to get accurate state
+        // This ensures we catch pending requests even after page reload
         getLinkStatus(receiverId)
             .then((data) => {
-                if (data.status === "linked") {
+                // Ensure we have the status in the response
+                const statusValue = data?.status || data;
+                if (statusValue === "linked") {
                     setStatus("linked");
-                } else if (data.status === "requested") {
+                } else if (statusValue === "requested") {
                     setStatus("requested");
                 } else {
                     setStatus("none");
                 }
             })
-            .catch(() => {
-                setStatus("none");
+            .catch((error) => {
+                // Log error for debugging
+                console.error("Failed to get link status:", error);
+                // Fallback: check local state if API fails
+                // Check if already linked
+                if (currentUser.linked_to.includes(receiverId)) {
+                    setStatus("linked");
+                } else if (currentUser.linked_by.includes(receiverId)) {
+                    // If user is in linked_by, they are already linked (receiver sent request)
+                    setStatus("none");
+                } else {
+                    setStatus("none");
+                }
             });
     }, [currentUser, receiverId]);
 
@@ -82,6 +82,26 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             }
         };
 
+        const handleLinkRequestRejected = async (data: { requestId: string; requesterId: string; receiverId: string }) => {
+            // Check if this rejection affects the current button
+            // Current user could be either the requester or the receiver
+            const currentUserId = currentUser?._id;
+            const isCurrentUserRequester = currentUserId === data.requesterId;
+            const isCurrentUserReceiver = currentUserId === data.receiverId;
+            const isReceiverInvolved = receiverId === data.receiverId || receiverId === data.requesterId;
+            
+            if ((isCurrentUserRequester || isCurrentUserReceiver) && isReceiverInvolved) {
+                // Change status from "requested" back to "none" (which shows "LinkUp")
+                setStatus("none");
+                
+                // Refresh user data via SWR mutate (industry standard)
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers()
+                ]);
+            }
+        };
+
         const handleUserUnlinked = async (data: { userId: string }) => {
             // If this unlink affects the current user or the receiver, update status
             if (data.userId === receiverId || currentUser?._id === data.userId) {
@@ -103,18 +123,53 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
                 ]);
         };
 
+        const handleLinkRequestReceived = async (data: { requestId?: string; requesterId?: string; receiverId?: string }) => {
+            // If a link request was received that affects this button, refresh the status
+            const isReceiverInvolved = receiverId === data.receiverId || receiverId === data.requesterId;
+            
+            if (isReceiverInvolved) {
+                // Re-check status from API to get accurate state
+                try {
+                    const statusData = await getLinkStatus(receiverId);
+                    const statusValue = statusData?.status || statusData;
+                    if (statusValue === "linked") {
+                        setStatus("linked");
+                    } else if (statusValue === "requested") {
+                        setStatus("requested");
+                    } else {
+                        setStatus("none");
+                    }
+                } catch {
+                    // If API fails, refresh user data
+                    await Promise.all([
+                        mutateCurrentUser(),
+                        mutateAllUsers()
+                    ]);
+                }
+            }
+        };
+
         socket.on("linkRequestAccepted", handleLinkRequestAccepted);
+        socket.on("linkRequestRejected", handleLinkRequestRejected);
+        socket.on("linkRequestReceived", handleLinkRequestReceived);
         socket.on("userUnlinked", handleUserUnlinked);
         socket.on("unlinked", handleUnlinked);
 
         return () => {
             socket.off("linkRequestAccepted", handleLinkRequestAccepted);
+            socket.off("linkRequestRejected", handleLinkRequestRejected);
+            socket.off("linkRequestReceived", handleLinkRequestReceived);
             socket.off("userUnlinked", handleUserUnlinked);
             socket.off("unlinked", handleUnlinked);
         };
     }, [socket, receiverId, currentUser, mutateCurrentUser, mutateAllUsers]);
 
-    const handleLinkUp = async () => {
+    const handleLinkUp = async (e?: React.MouseEvent) => {
+        // Prevent event bubbling to parent elements (e.g., when inside a clickable container)
+        if (e) {
+            e.stopPropagation();
+        }
+
         if (status === "linked") {
             setShowUnlinkModal(true);
             return;
@@ -166,13 +221,23 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
     };
 
     if (status === "loading") {
+        // Skeleton button that matches the real button styling exactly
+        const skeletonBaseClasses = variant === "border"
+            ? "border-2 font-bold border-black dark:border-white px-4 rounded-lg w-fit h-fit py-1 text-sm md:text-base flex items-center justify-center"
+            : "bg-primary-light dark:bg-primary-dark px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg text-sm md:text-base w-full md:w-auto flex items-center justify-center";
+
         return (
-            <button
-                className={`${className} opacity-50 cursor-not-allowed`}
-                disabled
-            >
-                Loading...
-            </button>
+            <div className={`${skeletonBaseClasses} ${className} relative overflow-hidden skeleton-wiggle`}>
+                {/* Shimmer effect overlay */}
+                <div className="absolute inset-0 animate-shimmer opacity-60 pointer-events-none" />
+                
+                {/* Text placeholder - matches approximate button text width */}
+                <div className={`relative ${
+                    variant === "border"
+                        ? "h-4 w-14 md:w-16 bg-gray-300/70 dark:bg-gray-600/70 rounded"
+                        : "h-4 w-20 md:w-24 bg-gray-300/50 dark:bg-gray-600/50 rounded"
+                }`} />
+            </div>
         );
     }
 
@@ -185,8 +250,11 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
     return (
         <>
             <button
-                onClick={handleLinkUp}
-                className={`${baseClasses} ${className} ${status === "requested" ? "opacity-60 cursor-not-allowed" : ""}`}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    handleLinkUp(e);
+                }}
+                className={`${baseClasses} bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 ${className} ${status === "requested" ? "opacity-60 cursor-not-allowed" : ""}`}
                 disabled={status === "requested"}
             >
                 {buttonText}

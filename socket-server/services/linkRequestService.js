@@ -117,34 +117,66 @@ class LinkRequestService {
     async getRequestStatus(requesterId, receiverId) {
         await dbConnect();
 
-        // Check if users are already linked by checking User model
-        const User = require("../../src/models/User");
-        const requester = await User.findById(requesterId);
+        // FIRST: Check for existing pending request where current user is the requester
+        // This is the most important check - if user sent a request, show "requested"
+        const pendingRequest = await LinkRequest.findOne({
+            requesterId: requesterId,
+            receiverId: receiverId,
+            status: "requested",
+        });
+
+        if (pendingRequest) {
+            return "requested";
+        }
+
+        // SECOND: Check if users are already linked by querying User collection directly
+        // Since we can't require TypeScript models, we use mongoose to query the collection
+        const mongoose = require("mongoose");
+        
+        // Ensure connection is ready
+        if (mongoose.connection.readyState !== 1) {
+            await dbConnect();
+        }
+        
+        const requester = await mongoose.connection.db.collection("users").findOne({
+            _id: new mongoose.Types.ObjectId(requesterId)
+        });
         
         if (requester) {
+            // Convert receiverId to string for comparison (MongoDB stores as ObjectId)
+            const receiverIdStr = receiverId.toString();
+            
             // If requester has receiverId in linked_to, they are linked (requester sees "Linked")
-            if (requester.linked_to && requester.linked_to.includes(receiverId)) {
+            const linkedTo = requester.linked_to || [];
+            if (Array.isArray(linkedTo) && linkedTo.some(id => {
+                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+                return idStr === receiverIdStr;
+            })) {
                 return "linked";
             }
-            // If requester has receiverId in linked_by, they are the receiver (should not see "Linked")
-            if (requester.linked_by && requester.linked_by.includes(receiverId)) {
+            // If requester has receiverId in linked_by, they are already linked (receiver sent request)
+            // In this case, they're linked, so don't show "requested"
+            const linkedBy = requester.linked_by || [];
+            if (Array.isArray(linkedBy) && linkedBy.some(id => {
+                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+                return idStr === receiverIdStr;
+            })) {
                 return "none";
             }
         }
 
-        // Check for existing request
-        const request = await LinkRequest.findOne({
-            $or: [
-                { requesterId, receiverId, status: "requested" },
-                { requesterId: receiverId, receiverId: requesterId, status: "requested" },
-            ],
+        // THIRD: Check for any other pending requests (e.g., receiver sent request to requester)
+        // This is less common but should be checked
+        const reverseRequest = await LinkRequest.findOne({
+            requesterId: receiverId,
+            receiverId: requesterId,
+            status: "requested",
         });
 
-        if (request) {
-            if (request.requesterId.toString() === requesterId.toString()) {
-                return "requested";
-            }
-            return request.status === "accepted" ? "accepted" : "requested";
+        if (reverseRequest) {
+            // If receiver sent request to requester, requester should see "LinkUp" (not "requested")
+            // The "requested" status is only shown when the current user is the requester
+            return "none";
         }
 
         return "none";

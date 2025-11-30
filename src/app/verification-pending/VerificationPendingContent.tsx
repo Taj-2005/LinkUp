@@ -222,19 +222,10 @@ export default function VerificationPendingContent() {
 
                     <button
                       onClick={() => router.push("/signup")}
-                      className="flex-1 py-3 px-4 rounded-xl border border-[rgba(255,255,255,0.06)] text-slate-100 font-semibold bg-transparent hover:bg-white/2 transition"
+                      className="flex-1 py-3 px-4 rounded-xl text-slate-100 font-semibold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600  hover:from-pink-600 hover:to-violet-600 transition"
                     >
                       Resend verification
                     </button>
-                  </motion.div>
-
-                  <motion.div
-                    className="mt-2 text-xs text-slate-400"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.28 }}
-                  >
-                    Tip: open the email on the same device or copy the link into a browser with your LinkUp session.
                   </motion.div>
                 </div>
               </motion.div>

@@ -17,7 +17,7 @@ export default function Home() {
             <div className="flex justify-end items-end w-full p-4">
               <button
                 onClick={() => router.push("/settings")}
-                className="text-black dark:text-white hover:opacity-75 transition-all flex justify-end items-end hover:rotate-90"
+                className="text-violet-300 hover:opacity-75 transition-all flex justify-end items-end hover:rotate-90"
                 aria-label="Settings"
               >
                 <FiSettings size={30} />

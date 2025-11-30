@@ -70,20 +70,22 @@ export default function Stories() {
             onClick={() => router.push(`/linkhub/${user.username}`)}
             className="flex-none flex flex-col items-center text-center cursor-pointer snap-center"
           >
-            <div className="relative w-16 h-16 md:w-[100px] md:h-[100px] rounded-full overflow-hidden border-4 border-primary-dark dark:border-primary-light flex-shrink-0">
-              <Image
-                src={
-                  user.user_avatar
-                    ? user.user_avatar
-                    : resolvedTheme === "dark"
-                    ? "/dark-profile.png"
-                    : "/light-profile.png"
-                }
-                alt={user.username}
-                fill
-                unoptimized
-                className="object-cover"
-              />
+            <div className="relative w-16 h-16 md:w-[100px] md:h-[100px] rounded-full p-1 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 flex-shrink-0 transition-all duration-300">
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src={
+                    user.user_avatar
+                      ? user.user_avatar
+                      : resolvedTheme === "dark"
+                      ? "/dark-profile.png"
+                      : "/light-profile.png"
+                  }
+                  alt={user.username}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
             </div>
 
             <span className="mt-2 text-xs md:text-sm font-medium text-gray-700 dark:text-gray-300 truncate w-[80px] md:w-[100px]">

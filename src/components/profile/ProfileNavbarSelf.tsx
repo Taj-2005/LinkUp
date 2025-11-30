@@ -8,13 +8,13 @@ const ProfileNavbarSelf = () => {
     return (
     <div className='w-full'>
         <div className='w-full'>
-            <div className='flex justify-center items-center gap-50 w-full'>
+            <div className='flex justify-center items-center gap-50 w-full transition-all duration-300'>
                 <button>
                 {
                     selected === 'links' ? 
                         <FaTh 
                             size={36} 
-                            className='cursor-pointer text-primary-light dark:text-white border-b-2 border-amber-50 pb-2' 
+                            className='cursor-pointer text-violet-600 border-b-2 border-violet-600 pb-2' 
                             onClick={() => setSelected('links')} 
                         /> 
                         : 
@@ -29,7 +29,7 @@ const ProfileNavbarSelf = () => {
                     {selected === 'savedlinks' ? (
                     <FaBookmark
                         size={36}
-                        className='text-primary-light dark:text-white border-b-2 border-amber-50 pb-2'
+                        className='text-violet-600 border-b-2 border-violet-600 pb-2'
                     />
                     ) : (
                     <FaRegBookmark

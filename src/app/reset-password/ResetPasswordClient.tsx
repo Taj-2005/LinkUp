@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
         textSecondary: "text-slate-400",
         input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
         inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
-        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
+        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600  hover:from-pink-600 hover:to-violet-600",
         link: "text-gray-400 hover:text-white",
       }
     : {
@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
         textSecondary: "text-slate-600",
         input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
         inputFocus: "border-gray-500 ring-gray-500/20 bg-white",
-        button: "bg-gradient-to-r from-gray-300 to-gray-300 hover:from-gray-400 hover:to-gray-400",
+        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600  hover:from-pink-600 hover:to-violet-600",
         link: "text-gray-600 hover:text-black",
       };
 
