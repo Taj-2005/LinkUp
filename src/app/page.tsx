@@ -11,6 +11,7 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import TechStack from '@/components/landing/TechStack';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
+import StructuredData from '@/components/landing/StructuredData';
 
 export default function LandingPage() {
   const [isDark, setIsDark] = useState(true);
@@ -77,6 +78,7 @@ export default function LandingPage() {
 
   return (
     <div className={`min-h-screen ${bgColor} ${textPrimary} transition-colors duration-300`}>
+      <StructuredData />
       <ScrollProgress />
       
       {/* Navigation */}
