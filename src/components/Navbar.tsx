@@ -8,6 +8,7 @@ import { HiUserCircle } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { useUsers } from "@/hooks/useUsers";
 import SignoutButton from "@/components/SignoutButton";
+import { motion } from "framer-motion";
 
 interface NavItemProps {
   Icon: React.ElementType;
@@ -112,8 +113,16 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
     <>
       <div className="hidden md:flex relative w-[15%] min-h-screen flex-col justify-between mx-4 bg-primary-light dark:bg-primary-dark">
         <div className="flex flex-col">
-          <div>
-            <Image src="/logo.png" unoptimized alt="Logo" width={150} height={150} className="m-4 max-w-full h-auto" />
+          <div className="m-4">
+            <motion.a
+              href={process.env.NEXT_PUBLIC_APP_URL || '/'}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-block cursor-pointer"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              <Image src="/logo.png" unoptimized alt="Logo" width={150} height={150} className="max-w-full h-auto" />
+            </motion.a>
           </div>
 
           <div className="flex flex-col justify-center items-start">

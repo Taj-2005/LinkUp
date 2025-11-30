@@ -117,7 +117,7 @@ body {
 }
 
 .header {
-  background: linear-gradient(135deg, #7f5bff, #a855f7, #6366f1);
+  background: linear-gradient(135deg, #9333ea, #9333ea, #db2777);
   padding: 40px 20px;
   text-align: center;
   color: #ffffff !important;
@@ -154,7 +154,7 @@ h2 {
 .verify-btn {
   display: inline-block;
   padding: 15px 28px;
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, #9333ea, #9333ea, #db2777);
   color: #ffffff !important;
   font-weight: 600;
   border-radius: 10px;
@@ -290,13 +290,13 @@ export async function sendPasswordResetEmail(
 <style>
   body { margin:0; padding:0; background:#0f0f10; font-family: Arial, sans-serif; color: #e7e7e7; }
   .wrapper { max-width:600px; margin:28px auto; background:#121214; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }
-  .header { background: linear-gradient(135deg,#7f5bff,#a855f7,#6366f1); padding:34px 18px; text-align:center; color:#fff; }
+  .header { background: linear-gradient(135deg,#9333ea,#9333ea,#db2777); padding:34px 18px; text-align:center; color:#fff; }
   .logo { width:110px; margin-bottom:6px; }
   .header-title { font-size:22px; font-weight:700; margin-top:6px; }
   .subtitle { font-size:13px; opacity:0.95; }
   .content { padding:26px 22px; font-size:15px; line-height:1.6; color:#e7e7e7; }
   h2 { margin:0 0 8px 0; color:#fff; }
-  .btn { display:inline-block; padding:12px 22px; background: linear-gradient(135deg,#8b5cf6,#6366f1); color:#fff; font-weight:600; border-radius:10px; margin:18px 0; text-decoration:none; }
+  .btn { display:inline-block; padding:12px 22px; background: linear-gradient(135deg,#9333ea,#9333ea,#db2777); color:#fff; font-weight:600; border-radius:10px; margin:18px 0; text-decoration:none; }
   .link { color:#a78bfa; word-break:break-all; font-size:13px; }
   .note { font-size:13px; opacity:0.85; color:#d0d0d0; }
   .footer { text-align:center; padding:18px; font-size:12px; background:#0d0d0e; color:#9b9b9b; }
@@ -430,7 +430,7 @@ body {
 }
 
 .header {
-  background: linear-gradient(135deg, #7f5bff, #a855f7, #6366f1);
+  background: linear-gradient(135deg, #9333ea, #9333ea, #db2777);
   padding: 40px 20px;
   text-align: center;
   color: #ffffff !important;
@@ -480,7 +480,7 @@ h3 {
 .cta-btn {
   display: inline-block;
   padding: 15px 32px;
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, #9333ea, #9333ea, #db2777);
   color: #ffffff !important;
   font-weight: 600;
   border-radius: 10px;
@@ -488,12 +488,12 @@ h3 {
   font-size: 16px;
   text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
 }
 
 .cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(147, 51, 234, 0.4);
 }
 
 .link {
@@ -524,8 +524,8 @@ h3 {
 }
 
 .highlight-box {
-  background: rgba(139, 92, 246, 0.1);
-  border-left: 3px solid #8b5cf6;
+  background: rgba(147, 51, 234, 0.1);
+  border-left: 3px solid #9333ea;
   padding: 16px 20px;
   margin: 24px 0;
   border-radius: 8px;

@@ -215,7 +215,7 @@ export default function VerificationPendingContent() {
                   >
                     <button
                       onClick={() => router.push("/signin")}
-                      className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold shadow-md hover:shadow-lg active:translate-y-0.5 transform transition"
+                      className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white font-semibold shadow-md hover:shadow-lg active:translate-y-0.5 transform transition"
                     >
                       Go to Sign In
                     </button>

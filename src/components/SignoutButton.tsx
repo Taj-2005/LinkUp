@@ -29,7 +29,7 @@ export default function SignoutButton({ onSignedOut }: SignoutButtonProps) {
   return (
     <div
       onClick={handleSignout}
-      className="text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
+      className="text-white font-semibold py-2 px-4 rounded-lg transition-colors cursor-pointer"
     >
       Sign Out
     </div>

@@ -163,11 +163,11 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
             flex items-center justify-between 
             px-4 py-3 rounded-lg cursor-pointer select-none
             transition-all shadow-sm
-            bg-red-500 text-white 
-            dark:bg-red-500 dark:text-white
+            bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 
+            dark:bg-pink-600 dark:text-white
           "
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ">
             <FiLogOut size={20} />
             <span className="font-medium">Sign Out</span>
           </div>

@@ -159,12 +159,12 @@ export default function SignUpPage() {
         textSecondary: "text-slate-400",
         input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
         inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
-        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
+        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
         buttonSecondary: "bg-[#606468] hover:bg-[#3E434C] text-slate-300",
         buttonText: "text-white",
-        link: "text-gray-400 hover:text-white",
+        link: "text-gray-400 hover:text-violet-400",
         progress: "bg-[#181818]",
-        progressFill: "bg-gradient-to-r from-gray-400 to-gray-400",
+        progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
       }
     : {
         bg: "bg-[#606468]",
@@ -174,12 +174,12 @@ export default function SignUpPage() {
         textSecondary: "text-slate-600",
         input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
         inputFocus: "border-gray-500 ring-gray-500/20 bg-[#ffffff]",
-        button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
+        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
         buttonSecondary: "bg-[#e1e1e1] hover:bg-[#606468] text-slate-700",
         buttonText: "text-white",
-        link: "text-gray-600 hover:text-black",
+        link: "text-gray-600 hover:text-violet-600",
         progress: "bg-[#e1e1e1]",
-        progressFill: "bg-gradient-to-r from-gray-500 to-gray-500",
+        progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
       };
 
   const steps = [
@@ -233,21 +233,79 @@ export default function SignUpPage() {
         </div>
 
         <div className="px-3 xs:px-4 sm:px-6 md:px-8 mb-3 xs:mb-4 sm:mb-6 flex-shrink-0">
-          <div className={`h-2 ${theme.progress} rounded-full overflow-hidden`}>
-            <div 
-              className={`h-full ${theme.progressFill} transition-all duration-500 ease-out`}
-              style={{ width: `${((currentStep + 1) / 3) * 100}%` }}
+          {/* Enhanced Progress Bar */}
+          <div className={`h-2 ${theme.progress} rounded-full overflow-hidden shadow-inner`}>
+            <motion.div 
+              className={`h-full ${theme.progressFill} transition-all duration-500 ease-out shadow-lg`}
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentStep + 1) / 3) * 100}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
-          <div className="flex justify-between mt-2">
-            {steps.map((step, index) => (
+          
+          {/* Premium Step Indicators */}
+          <div className="flex items-center justify-between mt-6 mb-2 relative">
+            {steps.map((step, index) => {
+              const isCompleted = index < currentStep;
+              const isCurrent = index === currentStep;
+              
+              return (
+                <div key={index} className="flex items-center flex-1 relative z-10">
+                  {/* Step Circle */}
+                  <div className="flex flex-col items-center flex-1">
+                    <motion.div
+                      className={`
+                        w-10 h-10 rounded-full flex items-center justify-center
+                        ${isCompleted 
+                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg' 
+                          : isCurrent
+                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg ring-2 ring-violet-400/50'
+                          : `${theme.progress} ${theme.textSecondary} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-400'}`
+                        }
+                        transition-all duration-300
+                        relative z-10
+                      `}
+                      animate={{
+                        scale: isCurrent ? [1, 1.15, 1] : 1,
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: isCurrent ? Infinity : 0,
+                        ease: 'easeInOut',
+                      }}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-5 h-5" />
+                      ) : (
+                        <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : ''}`}>{index + 1}</span>
+                      )}
+                    </motion.div>
               <span 
-                key={index}
-                className={`text-xs ${index <= currentStep ? theme.text : theme.textSecondary} transition-colors duration-300`}
+                      className={`text-xs mt-2 font-medium text-center transition-colors duration-300 ${
+                        isCompleted || isCurrent 
+                          ? darkMode ? 'text-violet-400' : 'text-violet-600'
+                          : theme.textSecondary
+                      }`}
               >
-                Step {index + 1}
+                      {step.title}
               </span>
-            ))}
+                  </div>
+                  
+                  {/* Connector Line */}
+                  {index < steps.length - 1 && (
+                    <div className={`
+                      absolute left-[calc(50%+20px)] right-[calc(50%+20px)] h-0.5 top-5
+                      ${index < currentStep 
+                        ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600' 
+                        : theme.progress
+                      }
+                      transition-colors duration-500
+                      z-0
+                    `} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -525,7 +583,7 @@ export default function SignUpPage() {
             )}
             
             {currentStep < 2 ? (
-              <button
+              <motion.button
                 type="button"
                 onClick={handleNext}
                 disabled={!!(usernameError || emailError)}
@@ -533,27 +591,50 @@ export default function SignUpPage() {
                 className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg
                   hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
                   flex items-center justify-center gap-1.5 xs:gap-2
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                  relative overflow-hidden`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
+                <span className="relative z-10 flex items-center gap-1.5 xs:gap-2">
                 Next
                 <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
-              </button>
+                </span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.button>
             ) : (
               <>
-                <button
+                <motion.button
                   onClick={handleSkip}
                   className={`${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   Skip
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={handleSignup}
-                  className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2`}
+                  className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2 relative overflow-hidden`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
+                  <span className="relative z-10 flex items-center gap-1.5 xs:gap-2">
                   <Check className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                   <span className="hidden xs:inline">Create Account</span>
                   <span className="xs:hidden">Create</span>
-                </button> 
+                  </span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </motion.button>
               </>
             )}
           </div>
