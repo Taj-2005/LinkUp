@@ -54,7 +54,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
                     // If user is in linked_by, they are already linked (receiver sent request)
                     setStatus("none");
                 } else {
-                    setStatus("none");
+                setStatus("none");
                 }
             });
     }, [currentUser, receiverId]);

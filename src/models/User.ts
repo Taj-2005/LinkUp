@@ -18,6 +18,7 @@ export interface IUser extends Document {
     linked_to: string[];
     linked_by: string[];
     links: string[];
+    savedLinks: string[];
     sex?: "male" | "female" | "other";
     isVerified: boolean;
     verificationToken?: string;
@@ -56,6 +57,7 @@ const UserSchema: Schema = new Schema<IUser>(
         linked_by: { type: [String], default: [] },
         linked_to: { type: [String], default: [] },
         links: { type: [String], default: [] },
+        savedLinks: { type: [String], default: [] },
 
         sex: {
             type: String,

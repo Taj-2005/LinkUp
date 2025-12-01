@@ -24,6 +24,7 @@ interface NavItemProps {
 interface NavbarProps {
   selectedItem: string;
   setSelectedItem: (item: string) => void;
+  hideOnMobile?: boolean;
 }
 
 function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMobile = false }: NavItemProps) {
@@ -95,7 +96,7 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
   );
 }
 
-export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
+export default function Navbar({ selectedItem, setSelectedItem, hideOnMobile = false }: NavbarProps) {
   const router = useRouter();
   const [showMore, setShowMore] = useState(false);
   const popupRef = useRef<HTMLDivElement | null>(null);
@@ -172,7 +173,7 @@ export default function Navbar({ selectedItem, setSelectedItem }: NavbarProps) {
         </div>
       </div>
 
-      <div className="md:hidden mobile-navbar-fixed">
+      <div className={`md:hidden mobile-navbar-fixed transition-transform duration-300 ${hideOnMobile ? 'translate-y-full' : 'translate-y-0'}`}>
         <div className="flex justify-around items-center px-1 py-1.5">
           {navItems.map(({ Icon, label, mobileLabel, item }) => (
             <NavItem

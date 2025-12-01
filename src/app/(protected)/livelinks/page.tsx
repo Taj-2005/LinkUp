@@ -1,47 +1,63 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiBell } from "react-icons/fi";
 import Profile from "@/components/home/Profile";
 import Ads from "@/components/Ads";
 import Stories from "@/components/home/Stories";
-import Post from "@/components/home/Post";
+import LinkCard from "@/components/home/LinkCard";
+import PostModal from "@/components/links/PostModal";
+import FeedLinkSkeleton from "@/components/links/FeedLinkSkeleton";
+import EmptyState from "@/components/links/EmptyState";
 import { useUsers } from "@/hooks/useUsers";
+import { useFeedLinks } from "@/hooks/useLinks";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
+import { useModalStore } from "@/store/useModalStore";
+import { ILink } from "@/models/Link";
+
+interface LinkWithUser extends ILink {
+  userInfo?: {
+    username?: string;
+    user_avatar?: string;
+    name?: string;
+  } | null;
+}
 
 export default function Home() {
-  const { currentUser } = useUsers();
+  const { currentUser, mutateCurrentUser } = useUsers();
   const user = currentUser;
   const router = useRouter();
   const setSelectedItem = useNavbarStore((state) => state.setSelectedItem);
   const unseenCount = useSocketStore((state) => state.unseenCount);
+  const isModalOpen = useModalStore((state) => state.isModalOpen);
+  const setIsModalOpen = useModalStore((state) => state.setIsModalOpen);
+  const { links, isLoading, mutate: mutateFeedLinks } = useFeedLinks();
+  const [selectedLink, setSelectedLink] = useState<LinkWithUser | null>(null);
 
-  // User data for posts
-  const postUser = {
-    _id: "691dcfccfbb80b7bc3659700",
-    username: "aesthetic",
-    name: "Aesthetic",
-    location: "Delhi",
-    bio: "Photographer",
-    user_avatar: "https://res.cloudinary.com/doexqrehm/image/upload/v1763561545/user_avatars/jfv9zazhriy9t24ve5bm.jpg",
+  const handleCommentClick = (link: LinkWithUser) => {
+    setSelectedLink(link);
+    setIsModalOpen(true);
   };
 
-  // Post images
-  const postImages = [
-    "https://images.pexels.com/photos/9454915/pexels-photo-9454915.jpeg",
-    "https://images.pexels.com/photos/9002742/pexels-photo-9002742.jpeg",
-    "https://images.pexels.com/photos/8832898/pexels-photo-8832898.jpeg",
-    "https://images.pexels.com/photos/10079452/pexels-photo-10079452.jpeg",
-  ];
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedLink(null);
+  };
+
+  const handleLinkUpdated = () => {
+    // Refresh links when a link is updated (like, comment, etc.)
+    mutateFeedLinks();
+    mutateCurrentUser();
+  };
 
   return (
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
 
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
         
-        <div className="w-full p-2 max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark overflow-y-auto hide-scrollbar relative">
+        <div className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-hidden relative">
           <button
             onClick={() => {
               setSelectedItem("linkhub");
@@ -57,19 +73,37 @@ export default function Home() {
               )}
             </div>
           </button>
-          <div className="pt-6 md:pt-0 pb-4">
+          
+          {/* Fixed Stories Section */}
+          <div className="flex-shrink-0 pt-6 md:pt-0 pb-4 px-2">
             <Stories />
           </div>
           
-          {/* Posts Section */}
-          <div className="w-full flex flex-col items-center px-2 md:px-4 pb-4">
-            {postImages.map((imageUrl, index) => (
-              <Post
-                key={`post-${index}`}
-                user={postUser}
-                imageUrl={imageUrl}
-              />
-            ))}
+          {/* Scrollable Links Section */}
+          <div className="flex-1 overflow-y-auto hide-scrollbar px-2 md:px-4 pb-20 md:pb-4">
+            <div className="w-full flex flex-col items-center">
+              {isLoading ? (
+                <>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <FeedLinkSkeleton key={i} />
+                  ))}
+                </>
+              ) : links.length === 0 ? (
+                <EmptyState
+                  message="No links or posts yet — let's wait until someone posts!"
+                  subMessage="Be the first to share a link!"
+                />
+              ) : (
+                links.map((link) => (
+                  <LinkCard
+                    key={link._id.toString()}
+                    link={link}
+                    onCommentClick={() => handleCommentClick(link)}
+                    onLinkUpdated={handleLinkUpdated}
+                  />
+                ))
+              )}
+            </div>
           </div>
         </div>
 
@@ -98,6 +132,16 @@ export default function Home() {
 
         </div>
       </div>
+
+      {/* Post Modal */}
+      {selectedLink && (
+        <PostModal
+          isOpen={isModalOpen}
+          link={selectedLink}
+          onClose={handleCloseModal}
+          onLinkUpdated={handleLinkUpdated}
+        />
+      )}
     </div>
   );
 }

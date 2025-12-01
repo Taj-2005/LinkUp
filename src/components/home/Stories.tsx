@@ -55,7 +55,7 @@ export default function Stories() {
 
   return (
     <div 
-      className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar" 
+      className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar md:p-4" 
       style={{ 
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',

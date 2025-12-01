@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUsers } from "@/hooks/useUsers";
+import { useModalStore } from "@/store/useModalStore";
 import { useEffect } from "react";
 
 const PUBLIC_ROUTES = ["/", "/signin", "/signup"];
@@ -13,6 +14,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   const pathname = usePathname();
   const { selectedItem, setSelectedItem } = useNavbarStore();
   const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
+  const isModalOpen = useModalStore((state) => state.isModalOpen);
 
   const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
 
@@ -111,11 +113,13 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     );
   }
 
+  const hideNavbarOnMobile = isModalOpen && (pathname === "/linkhub" || pathname === "/livelinks");
+
   return (
       <div className="flex flex-row h-screen md:h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
-        <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} />
+        <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} hideOnMobile={hideNavbarOnMobile} />
         <div className="flex-1 overflow-hidden" style={{ 
-          paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: hideNavbarOnMobile ? '0' : 'calc(4rem + env(safe-area-inset-bottom, 0px))',
         }}>
           {children}
         </div>

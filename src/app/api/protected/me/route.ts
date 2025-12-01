@@ -12,13 +12,19 @@ export async function GET() {
   try {
     const payload = requireAuth(cookieStore);
 
-    const user = await User.findById(payload.userId).select("_id name username user_avatar bio sex location email createdAt linked_by linked_to links");
+    const user = await User.findById(payload.userId).select("_id name username user_avatar bio sex location email createdAt linked_by linked_to links savedLinks");
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ user }, { status: 200 });
+    // Ensure savedLinks is always an array, never null or undefined
+    const userObj = user.toObject();
+    if (!Array.isArray(userObj.savedLinks)) {
+      userObj.savedLinks = [];
+    }
+
+    return NextResponse.json({ user: userObj }, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

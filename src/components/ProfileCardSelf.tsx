@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import { updateProfile } from "@/utils/api";
-import ProfileNavbarSelf from "@/components/profile/ProfileNavbarSelf";
 import CropModal from "@/components/profile/CropModal";
 import { useUsers } from "@/hooks/useUsers";
 
@@ -426,7 +425,6 @@ export default function ProfileCard() {
         </div>
       </div>
 
-      <ProfileNavbarSelf />
 
       <AnimatePresence>
         {editModal && !cropImageSrc && (
