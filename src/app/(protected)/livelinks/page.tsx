@@ -94,7 +94,7 @@ function HomeContent() {
     if (searchParams?.get("link")) {
       router.replace("/livelinks", { scroll: false });
     }
-  }, [isModalOpen, searchParams, router]);
+  }, [searchParams, router, setIsModalOpen]);
 
   const handleLinkUpdated = useCallback(() => {
 

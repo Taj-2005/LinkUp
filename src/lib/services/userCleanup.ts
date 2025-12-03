@@ -37,12 +37,18 @@ export async function cleanupUnverifiedUsers(): Promise<CleanupResult> {
     };
   }
 
-  const userIds = unverifiedUsers.map((u) => u._id.toString());
+  const userIds = unverifiedUsers.map((u) => {
+    const id = u._id as mongoose.Types.ObjectId | string;
+    return typeof id === 'string' ? id : id.toString();
+  });
 
   const linkIdsToDelete = await Link.find({ userId: { $in: userIds } })
     .select("_id")
     .lean();
-  const linkIds = linkIdsToDelete.map((l) => l._id.toString());
+  const linkIds = linkIdsToDelete.map((l) => {
+    const id = l._id as mongoose.Types.ObjectId | string;
+    return typeof id === 'string' ? id : id.toString();
+  });
 
   const [deletedLinksResult, deletedNotificationsResult, deletedLinkRequestsResult] =
     await Promise.all([

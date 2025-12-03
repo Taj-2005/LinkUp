@@ -18,7 +18,7 @@ interface InteractionToastProps {
     onClose: () => void;
 }
 
-export default function InteractionToast({ actor, type, linkId, deepLink, onClose }: InteractionToastProps) {
+export default function InteractionToast({ actor, type, deepLink, onClose }: InteractionToastProps) {
     const { resolvedTheme } = useTheme();
     const router = useRouter();
 

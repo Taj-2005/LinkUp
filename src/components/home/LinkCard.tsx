@@ -10,7 +10,6 @@ import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
 import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
-import { mutate } from "swr";
 import FullImageModal from "@/components/links/FullImageModal";
 import toast from "react-hot-toast";
 

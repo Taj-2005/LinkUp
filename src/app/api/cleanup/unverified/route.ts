@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { cleanupUnverifiedUsers } from "@/lib/services/userCleanup";
 
-const CLEANUP_SECRET = process.env.CLEANUP_SECRET;
+const CLEANUP_SECRET: string = process.env.CLEANUP_SECRET || "";
 
 if (!CLEANUP_SECRET) {
   throw new Error("CLEANUP_SECRET environment variable is required");
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
 
     let isValid: boolean;
     try {
-      isValid = await bcrypt.compare(CLEANUP_SECRET, token);
-    } catch (bcryptError) {
+      isValid = (await bcrypt.compare(CLEANUP_SECRET, token)) as boolean;
+    } catch {
       return NextResponse.json(
         { error: "Invalid token format" },
         { status: 400 }

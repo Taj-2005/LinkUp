@@ -1,6 +1,5 @@
 import { Socket } from "socket.io-client";
 import { invalidateGlobalLinkUpCaches } from "./globalCacheInvalidation";
-import { getCombinedUnreadCount } from "./notificationBadge";
 
 export interface LinkUpUserInfo {
   name: string;

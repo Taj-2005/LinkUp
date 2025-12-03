@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useState } from "react";
+import React, { memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSend } from "react-icons/fi";
 import Image from "next/image";

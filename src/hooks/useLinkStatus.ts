@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { useUsers } from "./useUsers";
 import { getLinkStatus } from "@/utils/linkRequestApi";
-import { IUser } from "@/models/User";
 import { useSocketStore } from "@/store/useSocketStore";
 
 export type LinkStatus = "none" | "requested" | "pending" | "linked" | "linked-by";
@@ -70,7 +69,7 @@ export function useLinkStatus(targetId: string): LinkStatusResult {
       socket.off("linkup:unlinked", handleLinkUpEvent);
       socket.off("global:linkup", handleLinkUpEvent);
     };
-  }, [socket, currentUser?._id, targetId, mutateStatus]);
+  }, [socket, currentUser?._id, targetId, mutateStatus, currentUser]);
 
   useEffect(() => {
     if (!currentUser || !targetId) {

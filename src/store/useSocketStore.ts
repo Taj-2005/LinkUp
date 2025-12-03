@@ -90,8 +90,7 @@ export const useSocketStore = create<SocketStore>((set, get) => {
             set({ unseenCount: validCount });
         });
 
-        socket.on("unseenRequestCount", (count: number) => {
-
+        socket.on("unseenRequestCount", () => {
         });
 
         let storageHandler: ((e: StorageEvent) => void) | null = null;

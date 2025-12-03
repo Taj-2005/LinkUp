@@ -59,7 +59,6 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
 
         setIsProcessing(true);
 
-        const previousStatus = status;
         const previousLinkedTo = currentUser.linked_to || [];
 
         try {

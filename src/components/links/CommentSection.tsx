@@ -15,7 +15,6 @@ import {
   replaceTempComment,
   replaceTempReply,
 } from "@/utils/commentOptimistic";
-import CommentItem from "./CommentItem";
 import toast from "react-hot-toast";
 
 interface CommentSectionProps {
@@ -39,7 +38,6 @@ export default function CommentSection({
   const [submittingReply, setSubmittingReply] = useState<string | null>(null);
   const commentsContainerRef = useRef<HTMLDivElement>(null);
   const scrollToCommentRef = useRef<string | null>(null);
-  const lastScrollHeightRef = useRef<number>(0);
 
   const [localComments, setLocalComments] = useState<IComment[]>(propsComments);
   const rollbackRef = useRef<(() => IComment[]) | null>(null);
@@ -293,18 +291,6 @@ export default function CommentSection({
   const getAvatarSrc = useCallback((userAvatar?: string) => {
     if (userAvatar) return userAvatar;
     return "/dark-profile.png";
-  }, []);
-
-  const handleReplyClick = useCallback((commentId: string) => {
-    setReplyingTo((prev) => prev === commentId ? null : commentId);
-  }, []);
-
-  const handleReplyTextChange = useCallback((text: string) => {
-    setReplyText(text);
-  }, []);
-
-  const handleReplySubmit = useCallback((commentId: string) => {
-    handleAddReply(commentId);
   }, []);
 
   useEffect(() => {

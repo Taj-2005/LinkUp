@@ -62,14 +62,8 @@ export default function SocketInitializer({ children }: { children: React.ReactN
 
         };
 
-        const handleNotificationUpdate = (data: {
-            unseenCount: number;
-            action: string;
-            notificationId?: string;
-        }) => {
-
+        const handleNotificationUpdate = () => {
             mutate("notifications");
-
         };
 
         const handleUnseenCountUpdate = (data: {

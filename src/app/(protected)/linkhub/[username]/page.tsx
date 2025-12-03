@@ -10,7 +10,6 @@ import { useUsers } from "@/hooks/useUsers";
 import { IUser } from "@/models/User";
 import { getUser } from "@/utils/api";
 import { useSocketStore } from "@/store/useSocketStore";
-import { mutate } from "swr";
 
 export default function UserProfile() {
   const params = useParams();
@@ -171,7 +170,7 @@ export default function UserProfile() {
       socket.off("linkup:unlinked", handleLinkUpEvent);
       socket.off("global:linkup", handleLinkUpEvent);
     };
-  }, [socket, user?._id, currentUser?._id, allUsers]);
+  }, [socket, user?._id, currentUser?._id, allUsers, user, currentUser]);
 
   useEffect(() => {
     if (!user || !allUsers || allUsers.length === 0) {
@@ -195,7 +194,7 @@ export default function UserProfile() {
         setUser(updatedUser);
       }
     }
-  }, [allUsers, user?._id]);
+  }, [allUsers, user?._id, user]);
 
 if (!user || userNotFound) {
   return (

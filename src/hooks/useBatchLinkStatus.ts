@@ -1,5 +1,5 @@
-import useSWR, { mutate } from "swr";
-import { useEffect } from "react";
+import useSWR from "swr";
+import { useEffect, useMemo } from "react";
 import { getBatchLinkStatus } from "@/utils/linkRequestApi";
 import { useUsers } from "./useUsers";
 import { LinkStatus } from "./useLinkStatus";
@@ -32,9 +32,11 @@ export function useBatchLinkStatus(
     .slice(0, 1000);
 
   const sortedIds = [...validUserIds].sort();
-  const cacheKey = enabled && sortedIds.length > 0
-    ? ["batch-link-status", currentUser?._id, sortedIds.join(",")] as const
-    : null;
+  const cacheKey = useMemo(() => {
+    return enabled && sortedIds.length > 0
+      ? ["batch-link-status", currentUser?._id, sortedIds.join(",")] as const
+      : null;
+  }, [enabled, sortedIds, currentUser?._id]);
 
   const { data, error, isLoading, mutate } = useSWR<BatchLinkStatusResult>(
     cacheKey,
@@ -55,6 +57,7 @@ export function useBatchLinkStatus(
   );
 
   const socket = useSocketStore((state) => state.socket);
+  const validUserIdsString = validUserIds.join(",");
 
   useEffect(() => {
     if (!socket || !currentUser || !cacheKey || validUserIds.length === 0) {
@@ -101,7 +104,7 @@ export function useBatchLinkStatus(
       socket.off("linkup:unlinked", handleLinkUpEvent);
       socket.off("global:linkup", handleLinkUpEvent);
     };
-  }, [socket, currentUser?._id, cacheKey, validUserIds.join(",")]);
+  }, [socket, currentUser?._id, cacheKey, validUserIdsString, currentUser, mutate, validUserIds]);
 
   const statusMap: BatchLinkStatusResult = {};
   validUserIds.forEach((userId) => {

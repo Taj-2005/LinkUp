@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { getUser } from "@/utils/api";
 import { INotification } from "@/models/Notification";
-import { mutate } from "swr";
 import { generateDeepLink } from "@/utils/deepLinks";
 
 interface LinkRequest {
@@ -65,7 +64,7 @@ export default function NotificationsPage() {
                                 };
                             }
                             return req;
-                        } catch{
+                        } catch {
                             // console.error("Failed to fetch requester:", error);
                             return req;
                         }
@@ -77,7 +76,7 @@ export default function NotificationsPage() {
             
             const unseen = requestsWithDetails.filter((r: LinkRequest) => !r.seen && r.status === "requested").length;
             setUnseenCount(unseen);
-        } catch{
+        } catch {
             // console.error("Failed to load requests:", error);
             setRequests([]);
             setUnseenCount(0);
@@ -211,7 +210,7 @@ export default function NotificationsPage() {
             mutateNotifications();
 
             toast.success("All notifications marked as read");
-        } catch (error) {
+        } catch {
             toast.error("Failed to mark all as read");
         }
     };
@@ -223,7 +222,7 @@ export default function NotificationsPage() {
             });
             mutateNotifications();
             toast.success("Read notifications cleared");
-        } catch (error) {
+        } catch {
             toast.error("Failed to clear notifications");
         }
     };
@@ -284,7 +283,7 @@ export default function NotificationsPage() {
         }
     }, [notifications]);
 
-    const filteredNotifications = notifications.filter((n) => {
+    const filteredNotifications = notifications.filter(() => {
         if (activeTab === "requests") return false;
         if (activeTab === "interactions") return true;
         return true;

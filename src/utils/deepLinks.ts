@@ -2,7 +2,8 @@ export function generateDeepLink(
   linkId: string,
   type: "comment" | "reply" | "like" | "save",
   commentId?: string,
-  replyId?: string
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _replyId?: string
 ): string {
   if (type === "comment" && commentId) {
     return `/livelinks?link=${linkId}#comment-${commentId}`;

@@ -12,7 +12,6 @@ import FullImageModal from "./FullImageModal";
 import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
 import { scrollToComment, scrollToReply } from "@/utils/deepLinks";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
-import { mutate } from "swr";
 import toast from "react-hot-toast";
 
 interface LinkWithUser extends ILink {
