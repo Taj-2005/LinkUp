@@ -1,11 +1,11 @@
 import Cookies from "js-cookie";
 import { lockRefresh } from "@/lib/refreshLock";
 
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 const API_BASE = `${SOCKET_SERVER_URL}/api/link-requests`;
 
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-    // Try readable cookie first, then fallback to regular cookie
+
     let token = Cookies.get("accessTokenReadable") || Cookies.get("accessToken");
 
     if (!token) {
@@ -21,11 +21,10 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
         },
     });
 
-    // Handle 401 - token expired, try to refresh
     if (response.status === 401) {
         try {
             let newToken: string | null = null;
-            
+
             await lockRefresh(async () => {
                 const refresh = await fetch("/api/auth/refresh", {
                     method: "POST",
@@ -37,18 +36,16 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
                     throw new Error(errorData.error || "Refresh failed");
                 }
 
-                // Get the new accessToken from response body
                 const refreshData = await refresh.json();
                 newToken = refreshData.accessToken || null;
             });
 
-            // Use the token from response, or try to get from readable cookie as fallback
             if (!newToken) {
-                // Fallback: try to read from readable cookie
+
                 newToken = Cookies.get("accessTokenReadable") || Cookies.get("accessToken") || null;
-                
+
                 if (!newToken) {
-                    // Wait a bit for cookie to be set and try again
+
                     await new Promise(resolve => setTimeout(resolve, 100));
                     newToken = Cookies.get("accessTokenReadable") || Cookies.get("accessToken") || null;
                 }
@@ -60,7 +57,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
             token = newToken;
 
-            // Retry request with new token
             response = await fetch(url, {
                 ...options,
                 headers: {
@@ -70,19 +66,17 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
                 },
             });
 
-            // If still 401 after refresh, authentication failed
             if (response.status === 401) {
                 throw new Error("Authentication failed after token refresh");
             }
 
-            // Update socket token if socket exists (dynamic import to avoid circular dependency)
             if (typeof window !== "undefined" && token) {
                 try {
                     const { useSocketStore } = await import("@/store/useSocketStore");
                     const socket = useSocketStore.getState().socket;
                     if (socket) {
                         socket.auth = { token };
-                        // Reconnect to apply new token
+
                         if (socket.connected) {
                             socket.disconnect();
                             socket.connect();
@@ -91,7 +85,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
                         }
                     }
                 } catch (error) {
-                    // Ignore if store not available
+
                     console.error("Failed to update socket token:", error);
                 }
             }
@@ -152,3 +146,20 @@ export async function markRequestAsSeen(requestId: string) {
     });
 }
 
+export async function getBatchLinkStatus(userIds: string[]): Promise<Record<string, { status: string; requestId?: string }>> {
+    if (!userIds || userIds.length === 0) {
+        return {};
+    }
+
+    const validUserIds = userIds.slice(0, 1000).filter(id => id && id.trim().length > 0);
+
+    if (validUserIds.length === 0) {
+        return {};
+    }
+
+    const idsParam = validUserIds.join(",");
+
+    return fetchWithAuth(`${API_BASE}/batch-status?ids=${encodeURIComponent(idsParam)}`, {
+        method: "GET",
+    });
+}

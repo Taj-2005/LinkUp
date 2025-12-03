@@ -8,16 +8,11 @@ import { motion } from "framer-motion";
 import { FiHeart, FiMessageCircle, FiBookmark } from "react-icons/fi";
 import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
+import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
+import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
+import { mutate } from "swr";
 import FullImageModal from "@/components/links/FullImageModal";
 import toast from "react-hot-toast";
-
-interface LinkWithUser extends ILink {
-  userInfo?: {
-    username?: string;
-    user_avatar?: string;
-    name?: string;
-  } | null;
-}
 
 interface LinkWithUser extends ILink {
   userInfo?: {
@@ -40,35 +35,10 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(link.likes.length);
   const [isLiking, setIsLiking] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isCheckingSaved, setIsCheckingSaved] = useState(false);
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
 
-  // Fetch saved status from API when component mounts or link changes
-  useEffect(() => {
-    const fetchSavedStatus = async () => {
-      if (!link?._id) return;
-
-      setIsCheckingSaved(true);
-      try {
-        const res = await fetch(`/api/links/${link._id}/saved-status`);
-        if (res.ok) {
-          const data = await res.json();
-          setIsSaved(data.saved === true);
-        } else {
-          setIsSaved(false);
-        }
-      } catch (error) {
-        console.error("Error fetching saved status:", error);
-        setIsSaved(false);
-      } finally {
-        setIsCheckingSaved(false);
-      }
-    };
-
-    fetchSavedStatus();
-  }, [link?._id]);
+  const isSaved = isLinkSaved(currentUser, link._id);
 
   useEffect(() => {
     const userId = currentUser?._id?.toString();
@@ -84,15 +54,22 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isLiking) return;
+    if (isLiking || !currentUser) return;
 
     setIsLiking(true);
     const previousLiked = isLiked;
     const previousCount = likesCount;
+    const userId = currentUser._id.toString();
 
-    // Optimistic update
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+    const newLiked = !isLiked;
+
+    requestAnimationFrame(() => {
+      setIsLiked(newLiked);
+      setLikesCount(newLiked ? likesCount + 1 : likesCount - 1);
+
+      optimisticToggleLike(link._id, userId, newLiked);
+      onLinkUpdated();
+    });
 
     try {
       const res = await fetch(`/api/links/${link._id}/like`, {
@@ -107,11 +84,16 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
       setIsLiked(data.isLiked);
       setLikesCount(data.likesCount);
-      onLinkUpdated();
+
+      await revalidateLinkCaches();
     } catch (error) {
-      // Revert optimistic update
+
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
+      optimisticToggleLike(link._id, userId, previousLiked);
+
+      await revalidateLinkCaches();
+
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle like"
       );
@@ -122,10 +104,16 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isSaving || isCheckingSaved) return;
+    if (isSaving || !currentUser) return;
 
-    const wasSaved = isSaved;
+    const previousSaved = isSaved;
     setIsSaving(true);
+
+    const { rollback } = optimisticToggleSaved(
+      mutateCurrentUser,
+      link._id,
+      previousSaved
+    );
 
     try {
       const res = await fetch(`/api/links/${link._id}/save`, {
@@ -139,35 +127,11 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         throw new Error(data.error || "Failed to toggle save");
       }
 
-      // Pessimistic update: only update UI after successful API response
-      const savedState = data.saved !== undefined ? data.saved : (data.isSaved !== undefined ? data.isSaved : false);
-      setIsSaved(savedState === true);
-      
-      // Refresh current user to update savedLinks in cache
       await mutateCurrentUser();
-      
-      // Show toast based on the action that was performed
-      if (data.action) {
-        toast.success(data.action === 'saved' ? "Link saved!" : "Link unsaved!");
-      } else {
-        if (wasSaved && !savedState) {
-          toast.success("Link unsaved!");
-        } else if (!wasSaved && savedState) {
-          toast.success("Link saved!");
-        }
-      }
     } catch (error) {
-      // On failure, re-fetch saved status from API to ensure UI matches DB
-      try {
-        const statusRes = await fetch(`/api/links/${link._id}/saved-status`);
-        if (statusRes.ok) {
-          const statusData = await statusRes.json();
-          setIsSaved(statusData.saved === true);
-        }
-      } catch (statusError) {
-        console.error("Error re-fetching saved status:", statusError);
-      }
-      
+
+      rollback();
+
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle save"
       );
@@ -188,7 +152,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
       transition={{ duration: 0.4 }}
       className="w-full max-w-2xl mx-auto bg-right-nav-light dark:bg-right-nav-dark rounded-2xl overflow-hidden shadow-lg border border-primary-light/20 dark:border-primary-dark/30 mb-6"
     >
-      {/* Header */}
+      {}
       <div className="flex items-center gap-3 p-4 pb-3">
         <div
           onClick={handleUserClick}
@@ -217,8 +181,8 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         </div>
       </div>
 
-      {/* Image */}
-      <div 
+      {}
+      <div
         className="relative w-full aspect-square bg-gray-200 dark:bg-gray-800 cursor-zoom-in"
         onClick={() => setFullImageModalOpen(true)}
       >
@@ -232,7 +196,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         />
       </div>
 
-      {/* Actions and Description */}
+      {}
       <div className="p-4 pt-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
@@ -259,17 +223,17 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </div>
           <button
             onClick={handleSave}
-            disabled={isSaving || isCheckingSaved}
+            disabled={isSaving}
             className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
               isSaved ? "text-violet-600" : ""
-            } ${(isSaving || isCheckingSaved) ? "opacity-50 cursor-not-allowed" : ""}`}
+            } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
             aria-label="Save Link"
           >
             <FiBookmark size={24} className={isSaved ? "fill-current" : ""} />
           </button>
         </div>
 
-        {/* Likes count */}
+        {}
         {likesCount > 0 && (
           <div className="mb-2">
             <span className="font-bold text-black dark:text-white text-sm">
@@ -278,7 +242,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </div>
         )}
 
-        {/* Description */}
+        {}
         {link.description && (
           <div className="space-y-1 mb-2">
             <div className="flex flex-col items-start gap-2 text-sm">
@@ -292,7 +256,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </div>
         )}
 
-        {/* Comments count */}
+        {}
         {link.comments.length > 0 && (
           <button
             onClick={(e) => {
@@ -306,7 +270,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         )}
       </div>
 
-      {/* Full Image Modal */}
+      {}
       <FullImageModal
         isOpen={fullImageModalOpen}
         imageUrl={link.imageUrl}
@@ -315,4 +279,3 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
     </motion.div>
   );
 }
-

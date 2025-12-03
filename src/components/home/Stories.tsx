@@ -15,9 +15,9 @@ export default function Stories() {
 
   if (!filteredUsers || filteredUsers.length === 0) {
     return (
-      <div 
-        className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar" 
-        style={{ 
+      <div
+        className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar"
+        style={{
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
@@ -54,9 +54,9 @@ export default function Stories() {
   }
 
   return (
-    <div 
-      className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar md:p-4" 
-      style={{ 
+    <div
+      className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap hide-scrollbar md:p-4"
+      style={{
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none'

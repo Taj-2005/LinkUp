@@ -13,7 +13,6 @@ export async function GET() {
   try {
     requireAuth(cookieStore);
 
-    // Get all links from all users, sorted by newest first
     const links = await Link.find()
       .sort({ createdAt: -1 })
       .lean();
@@ -22,15 +21,12 @@ export async function GET() {
       return NextResponse.json({ links: [] }, { status: 200 });
     }
 
-    // Get unique user IDs
     const userIds = [...new Set(links.map((link) => link.userId))];
-    
-    // Get user info for all users
+
     const users = await User.find({ _id: { $in: userIds } })
       .select("username user_avatar name")
       .lean();
 
-    // Create a map for quick lookup
     interface UserInfo {
       _id: unknown;
       username?: string;
@@ -42,7 +38,6 @@ export async function GET() {
       (users as UserInfo[]).map((u) => [String(u._id), u])
     );
 
-    // Add user info to each link
     interface LinkWithUserInfo {
       [key: string]: unknown;
       userInfo: {
@@ -74,4 +69,3 @@ export async function GET() {
     );
   }
 }
-

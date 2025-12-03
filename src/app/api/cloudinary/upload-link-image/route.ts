@@ -10,7 +10,7 @@ cloudinary.config({
 });
 
 export async function POST(req: Request) {
-  // Require authentication
+
   const cookieStore = await cookies();
   try {
     requireAuth(cookieStore);
@@ -25,7 +25,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No file received" }, { status: 400 });
     }
 
-    // Upload to Cloudinary with link-specific folder and transformations
     const uploadResult = await cloudinary.uploader.upload(file, {
       folder: "link_images",
       transformation: [
@@ -47,4 +46,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

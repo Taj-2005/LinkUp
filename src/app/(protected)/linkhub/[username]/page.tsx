@@ -9,6 +9,8 @@ import ProfileNavbar from "@/components/profile/ProfileNavbar";
 import { useUsers } from "@/hooks/useUsers";
 import { IUser } from "@/models/User";
 import { getUser } from "@/utils/api";
+import { useSocketStore } from "@/store/useSocketStore";
+import { mutate } from "swr";
 
 export default function UserProfile() {
   const params = useParams();
@@ -18,8 +20,9 @@ export default function UserProfile() {
   const [user, setUser] = useState<IUser | null>(null);
   const [userNotFound, setUserNotFound] = useState(false);
 
-  const { allUsers } = useUsers();
-  const users = allUsers; 
+  const { allUsers, currentUser } = useUsers();
+  const socket = useSocketStore((state) => state.socket);
+  const users = allUsers;
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -59,8 +62,8 @@ export default function UserProfile() {
       setUserNotFound(false);
       setUser(null);
 
-      const foundInStore = users?.find((u: IUser) => 
-        u.username?.toLowerCase() === decodedIdentifier || 
+      const foundInStore = users?.find((u: IUser) =>
+        u.username?.toLowerCase() === decodedIdentifier ||
         u.email?.toLowerCase() === decodedIdentifier
       );
 
@@ -124,6 +127,75 @@ export default function UserProfile() {
     };
   }, [decodedIdentifier, users]);
 
+  useEffect(() => {
+    if (!socket || !user || !currentUser) {
+      return;
+    }
+
+    const handleLinkUpEvent = async (data: { type: string; from: string; to: string }) => {
+      const { from, to } = data;
+      const profileUserId = user._id;
+
+      if (from === profileUserId || to === profileUserId) {
+
+        const updatedUser = allUsers?.find((u: IUser) => u._id === profileUserId);
+        if (updatedUser) {
+          setUser(updatedUser);
+        } else {
+
+          try {
+            const freshUser = await getUser(user.username || user.email || "");
+            if (freshUser) {
+              setUser(freshUser);
+            }
+          } catch{
+
+            // console.error("Failed to refresh profile on linkup event:", error);
+          }
+        }
+      }
+    };
+
+    socket.on("linkup", handleLinkUpEvent);
+    socket.on("linkup:requested", handleLinkUpEvent);
+    socket.on("linkup:accepted", handleLinkUpEvent);
+    socket.on("linkup:rejected", handleLinkUpEvent);
+    socket.on("linkup:unlinked", handleLinkUpEvent);
+    socket.on("global:linkup", handleLinkUpEvent);
+
+    return () => {
+      socket.off("linkup", handleLinkUpEvent);
+      socket.off("linkup:requested", handleLinkUpEvent);
+      socket.off("linkup:accepted", handleLinkUpEvent);
+      socket.off("linkup:rejected", handleLinkUpEvent);
+      socket.off("linkup:unlinked", handleLinkUpEvent);
+      socket.off("global:linkup", handleLinkUpEvent);
+    };
+  }, [socket, user?._id, currentUser?._id, allUsers]);
+
+  useEffect(() => {
+    if (!user || !allUsers || allUsers.length === 0) {
+      return;
+    }
+
+    const updatedUser = allUsers.find((u: IUser) =>
+      u._id === user._id ||
+      u.username?.toLowerCase() === user.username?.toLowerCase() ||
+      u.email?.toLowerCase() === user.email?.toLowerCase()
+    );
+
+    if (updatedUser && updatedUser._id === user._id) {
+
+      const hasChanged =
+        JSON.stringify(updatedUser.linked_to) !== JSON.stringify(user.linked_to) ||
+        JSON.stringify(updatedUser.linked_by) !== JSON.stringify(user.linked_by) ||
+        updatedUser.links?.length !== user.links?.length;
+
+      if (hasChanged) {
+        setUser(updatedUser);
+      }
+    }
+  }, [allUsers, user?._id]);
 
 if (!user || userNotFound) {
   return (
@@ -280,7 +352,6 @@ if (!user || userNotFound) {
   />
 </motion.div>
 
-
               )}
             </AnimatePresence>
 
@@ -291,15 +362,14 @@ if (!user || userNotFound) {
   );
 }
 
-
   return (
     <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
         <div className="w-full overflow-y-auto hide-scrollbar">
           <div className="flex flex-col gap-4 md:gap-8 items-center p-2 md:p-2">
             <div className="p-4"></div>
-            <ProfileCard 
-              user={user} 
+            <ProfileCard
+              user={user}
               onImageClick={() => openModal(user.user_avatar || "")}
             />
 

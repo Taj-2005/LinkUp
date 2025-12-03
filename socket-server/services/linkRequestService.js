@@ -5,7 +5,6 @@ class LinkRequestService {
     async sendRequest(requesterId, receiverId) {
         await dbConnect();
 
-        // Check if request already exists
         const existingRequest = await LinkRequest.findOne({
             $or: [
                 { requesterId, receiverId, status: "requested" },
@@ -17,7 +16,6 @@ class LinkRequestService {
             throw new Error("Request already exists");
         }
 
-        // Create new request
         const linkRequest = new LinkRequest({
             requesterId,
             receiverId,
@@ -49,9 +47,6 @@ class LinkRequestService {
         request.seen = true;
         await request.save();
 
-        // Update user arrays in the main database
-        // This will be handled by the Next.js API or we can use mongoose directly
-        // For now, we'll return the request and let the API handle user updates
         return request;
     }
 
@@ -117,71 +112,195 @@ class LinkRequestService {
     async getRequestStatus(requesterId, receiverId) {
         await dbConnect();
 
-        // FIRST: Check for existing pending request where current user is the requester
-        // This is the most important check - if user sent a request, show "requested"
+        if (!requesterId || !receiverId || requesterId === receiverId) {
+            return { status: "none" };
+        }
+
+        const mongoose = require("mongoose");
+
+        if (mongoose.connection.readyState !== 1) {
+            await dbConnect();
+        }
+
+        const requesterObjectId = new mongoose.Types.ObjectId(requesterId);
+        const receiverObjectId = new mongoose.Types.ObjectId(receiverId);
+
+        const requester = await mongoose.connection.db.collection("users").findOne({
+            _id: requesterObjectId
+        });
+
+        if (!requester) {
+            return { status: "none" };
+        }
+
+        const receiverIdStr = receiverId.toString();
+        const requesterIdStr = requesterId.toString();
+
+        const linkedTo = requester.linked_to || [];
+        const linkedBy = requester.linked_by || [];
+
+        const isLinkedTo = Array.isArray(linkedTo) && linkedTo.some(id => {
+            const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+            return idStr === receiverIdStr;
+        });
+
+        const isLinkedBy = Array.isArray(linkedBy) && linkedBy.some(id => {
+            const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+            return idStr === receiverIdStr;
+        });
+
+        if (isLinkedTo) {
+            return { status: "linked" };
+        }
+
+        if (isLinkedBy) {
+            return { status: "linked-by" };
+        }
+
         const pendingRequest = await LinkRequest.findOne({
-            requesterId: requesterId,
-            receiverId: receiverId,
+            requesterId: requesterIdStr,
+            receiverId: receiverIdStr,
             status: "requested",
         });
 
         if (pendingRequest) {
-            return "requested";
+            return {
+                status: "requested",
+                requestId: pendingRequest._id.toString()
+            };
         }
 
-        // SECOND: Check if users are already linked by querying User collection directly
-        // Since we can't require TypeScript models, we use mongoose to query the collection
-        const mongoose = require("mongoose");
-        
-        // Ensure connection is ready
-        if (mongoose.connection.readyState !== 1) {
-            await dbConnect();
-        }
-        
-        const requester = await mongoose.connection.db.collection("users").findOne({
-            _id: new mongoose.Types.ObjectId(requesterId)
-        });
-        
-        if (requester) {
-            // Convert receiverId to string for comparison (MongoDB stores as ObjectId)
-            const receiverIdStr = receiverId.toString();
-            
-            // If requester has receiverId in linked_to, they are linked (requester sees "Linked")
-            const linkedTo = requester.linked_to || [];
-            if (Array.isArray(linkedTo) && linkedTo.some(id => {
-                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
-                return idStr === receiverIdStr;
-            })) {
-                return "linked";
-            }
-            // If requester has receiverId in linked_by, they are already linked (receiver sent request)
-            // In this case, they're linked, so don't show "requested"
-            const linkedBy = requester.linked_by || [];
-            if (Array.isArray(linkedBy) && linkedBy.some(id => {
-                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
-                return idStr === receiverIdStr;
-            })) {
-                return "none";
-            }
-        }
-
-        // THIRD: Check for any other pending requests (e.g., receiver sent request to requester)
-        // This is less common but should be checked
         const reverseRequest = await LinkRequest.findOne({
-            requesterId: receiverId,
-            receiverId: requesterId,
+            requesterId: receiverIdStr,
+            receiverId: requesterIdStr,
             status: "requested",
         });
 
         if (reverseRequest) {
-            // If receiver sent request to requester, requester should see "LinkUp" (not "requested")
-            // The "requested" status is only shown when the current user is the requester
-            return "none";
+            return {
+                status: "pending",
+                requestId: reverseRequest._id.toString()
+            };
         }
 
-        return "none";
+        return { status: "none" };
+    }
+
+    async getBatchRequestStatus(requesterId, targetUserIds) {
+        await dbConnect();
+
+        if (!requesterId || !Array.isArray(targetUserIds) || targetUserIds.length === 0) {
+            return {};
+        }
+
+        const userIds = targetUserIds.slice(0, 1000);
+
+        const validUserIds = userIds.filter(id => id && id !== requesterId);
+
+        if (validUserIds.length === 0) {
+            return {};
+        }
+
+        const mongoose = require("mongoose");
+
+        if (mongoose.connection.readyState !== 1) {
+            await dbConnect();
+        }
+
+        const requesterObjectId = new mongoose.Types.ObjectId(requesterId);
+
+        const requester = await mongoose.connection.db.collection("users").findOne({
+            _id: requesterObjectId
+        });
+
+        if (!requester) {
+
+            return validUserIds.reduce((acc, id) => {
+                acc[id] = { status: "none" };
+                return acc;
+            }, {});
+        }
+
+        const requesterIdStr = requesterId.toString();
+        const linkedTo = requester.linked_to || [];
+        const linkedBy = requester.linked_by || [];
+
+        const targetObjectIds = validUserIds.map(id => new mongoose.Types.ObjectId(id));
+        const targetIdStrings = validUserIds.map(id => id.toString());
+
+        const allRequests = await LinkRequest.find({
+            $or: [
+
+                {
+                    requesterId: requesterIdStr,
+                    receiverId: { $in: targetIdStrings },
+                    status: "requested",
+                },
+
+                {
+                    requesterId: { $in: targetIdStrings },
+                    receiverId: requesterIdStr,
+                    status: "requested",
+                },
+            ],
+        }).lean();
+
+        const statusMap = {};
+        validUserIds.forEach(id => {
+            statusMap[id] = { status: "none" };
+        });
+
+        targetIdStrings.forEach(targetIdStr => {
+
+            const isLinkedTo = Array.isArray(linkedTo) && linkedTo.some(id => {
+                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+                return idStr === targetIdStr;
+            });
+
+            const isLinkedBy = Array.isArray(linkedBy) && linkedBy.some(id => {
+                const idStr = id instanceof mongoose.Types.ObjectId ? id.toString() : String(id);
+                return idStr === targetIdStr;
+            });
+
+            if (isLinkedTo) {
+                statusMap[targetIdStr] = { status: "linked" };
+            } else if (isLinkedBy) {
+                statusMap[targetIdStr] = { status: "linked-by" };
+            }
+        });
+
+        allRequests.forEach(request => {
+            const requestRequesterId = request.requesterId.toString();
+            const requestReceiverId = request.receiverId.toString();
+            const requestId = request._id.toString();
+
+            if (requestRequesterId === requesterIdStr && targetIdStrings.includes(requestReceiverId)) {
+                statusMap[requestReceiverId] = {
+                    status: "requested",
+                    requestId: requestId,
+                };
+            }
+
+            else if (requestReceiverId === requesterIdStr && targetIdStrings.includes(requestRequesterId)) {
+                statusMap[requestRequesterId] = {
+                    status: "pending",
+                    requestId: requestId,
+                };
+            }
+        });
+
+        const result = {};
+        validUserIds.forEach(id => {
+            const idStr = id.toString();
+            if (statusMap[idStr]) {
+                result[idStr] = statusMap[idStr];
+            } else {
+                result[idStr] = { status: "none" };
+            }
+        });
+
+        return result;
     }
 }
 
 module.exports = new LinkRequestService();
-

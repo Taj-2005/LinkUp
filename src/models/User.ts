@@ -25,8 +25,8 @@ export interface IUser extends Document {
     verificationTokenExpiry?: Date;
     createdAt: Date;
     updatedAt: Date;
-    refreshToken?: string; // Legacy field for backward compatibility
-    refreshTokens?: RefreshToken[]; // New: Array of refresh tokens for multi-device support
+    refreshToken?: string;
+    refreshTokens?: RefreshToken[];
 
     resetToken?: string;
     resetTokenExpiry?: number;
@@ -70,7 +70,7 @@ const UserSchema: Schema = new Schema<IUser>(
         verificationToken: { type: String },
         verificationTokenExpiry: { type: Date },
 
-        refreshToken: { type: String }, // Legacy field for backward compatibility
+        refreshToken: { type: String },
         refreshTokens: [{
             token: { type: String, required: true },
             deviceId: { type: String, required: true },

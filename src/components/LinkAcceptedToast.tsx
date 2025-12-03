@@ -93,4 +93,3 @@ export default function LinkAcceptedToast({ receiver, onClose }: LinkAcceptedToa
         </motion.div>
     );
 }
-

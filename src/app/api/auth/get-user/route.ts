@@ -13,15 +13,14 @@ export async function POST(req: Request) {
 
   let user;
 
-  // Check if identifier is a valid MongoDB ObjectId
   if (mongoose.Types.ObjectId.isValid(identifier)) {
-    // Search by _id
+
     user = await User.findById(identifier).select("-password -__v");
   } else {
-    // Search by username or email
+
     user = await User.findOne({
     $or: [
-      { email: identifier.toLowerCase() }, 
+      { email: identifier.toLowerCase() },
       { username: identifier.toLowerCase() }
     ]
   }).select("-password -__v");

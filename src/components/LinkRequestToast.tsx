@@ -30,7 +30,7 @@ export default function LinkRequestToast({ requester, onClose }: LinkRequestToas
     }, [onClose]);
 
     const handleClick = () => {
-        router.push("/linkupreqs");
+        router.push("/notifications");
         onClose();
     };
 
@@ -93,4 +93,3 @@ export default function LinkRequestToast({ requester, onClose }: LinkRequestToas
         </motion.div>
     );
 }
-

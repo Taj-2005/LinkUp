@@ -17,12 +17,10 @@ export async function GET(
     requireAuth(cookieStore);
     const { userId } = await params;
 
-    // Get all links for the user, sorted by newest first
     const links = await Link.find({ userId })
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get user info for the links
     const user = await User.findById(userId).select("username user_avatar name").lean();
 
     interface UserInfo {
@@ -31,7 +29,6 @@ export async function GET(
       name?: string;
     }
 
-    // Add user info to each link
     const linksWithUser = links.map((link) => ({
       ...link,
       userInfo: user && !Array.isArray(user) ? {
@@ -50,4 +47,3 @@ export async function GET(
     );
   }
 }
-

@@ -23,32 +23,27 @@ export async function GET(
       return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
     }
 
-    // Verify link exists
     const link = await Link.findById(linkId);
     if (!link) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    // Get user's savedLinks from database (definitive source)
     const user = await User.findById(userId).select("savedLinks").lean();
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const linkIdStr = linkId.toString();
-    
-    // Type guard for user with savedLinks property
+
     interface UserWithSavedLinks {
       savedLinks?: unknown[];
       [key: string]: unknown;
     }
-    
+
     const userWithSavedLinks = user as UserWithSavedLinks;
-    
-    // Ensure savedLinks is an array (handle case where field doesn't exist in DB for old users)
+
     const savedLinks = Array.isArray(userWithSavedLinks.savedLinks) ? userWithSavedLinks.savedLinks : [];
-    
-    // Convert all savedLinks to strings for consistent comparison
+
     const savedLinksStr = savedLinks.map((id: unknown) => String(id));
     const isSaved = savedLinksStr.includes(linkIdStr);
 
@@ -67,4 +62,3 @@ export async function GET(
     );
   }
 }
-

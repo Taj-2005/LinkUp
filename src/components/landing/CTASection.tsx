@@ -11,12 +11,12 @@ interface CTASectionProps {
 export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
   return (
     <section className="py-32 md:py-40 px-4 sm:px-6 relative overflow-hidden">
-      {/* Simplified background effects */}
+      {}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-full bg-gradient-to-b from-violet-500/10 via-purple-500/10 to-transparent blur-3xl opacity-20" />
       </div>
 
-      {/* Grid pattern overlay */}
+      {}
       <div className={`
         absolute inset-0
         ${isDark ? 'opacity-[0.02]' : 'opacity-[0.03]'}
@@ -34,7 +34,7 @@ export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
             backdrop-blur-sm
           `}
         >
-          {/* Decorative elements */}
+          {}
           <div className="absolute top-0 right-0 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
@@ -56,7 +56,7 @@ export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
               ${isDark ? 'text-gray-300' : 'text-gray-700'}
               mb-12 max-w-2xl mx-auto leading-relaxed font-light
             `}>
-              Join thousands of users experiencing real-time social networking. 
+              Join thousands of users experiencing real-time social networking.
               Connect, share, and build meaningful relationships today.
             </p>
 
@@ -70,7 +70,7 @@ export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
                   w-full sm:w-auto
                   backdrop-blur-sm
                 `}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.03,
                   y: -2,
                 }}
@@ -87,8 +87,8 @@ export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className={`
                   px-10 py-5 rounded-2xl font-semibold text-lg
-                  ${isDark 
-                    ? 'bg-white/5 border-2 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm' 
+                  ${isDark
+                    ? 'bg-white/5 border-2 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm'
                     : 'bg-gray-50 border-2 border-gray-200 text-gray-900 hover:bg-gray-100'
                   }
                   transition-all duration-200
@@ -103,7 +103,7 @@ export default function CTASection({ isDark, onSignUp }: CTASectionProps) {
               </motion.button>
             </div>
 
-            {/* Premium trust indicators */}
+            {}
             <div className="flex flex-wrap items-center justify-center gap-8 text-sm md:text-base">
               {[
                 'Free to join',

@@ -23,11 +23,11 @@ export interface IReply extends Document {
 
 export interface ILink extends Document {
   _id: string;
-  userId: string; // Creator of the link
-  imageUrl: string; // Cloudinary URL
+  userId: string;
+  imageUrl: string;
   description?: string;
   location?: string;
-  likes: string[]; // Array of user IDs who liked
+  likes: string[];
   comments: IComment[];
   createdAt: Date;
   updatedAt: Date;
@@ -66,9 +66,7 @@ const LinkSchema: Schema = new Schema<ILink>(
   { timestamps: true }
 );
 
-// Index for efficient queries
 LinkSchema.index({ userId: 1, createdAt: -1 });
 
 export const Link =
   mongoose.models.Link || mongoose.model<ILink>("Link", LinkSchema);
-

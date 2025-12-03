@@ -68,7 +68,7 @@ export default function SettingsPanel() {
   const handleCropDone = async (url: string) => {
     try {
       await updateProfile({ user_avatar: url });
-      // Refresh user data via SWR mutate (industry standard)
+
       await mutateCurrentUser();
     } catch {}
     setUploadingAvatar(false);
@@ -78,7 +78,7 @@ export default function SettingsPanel() {
   const handleRemoveAvatar = async () => {
     try {
       await updateProfile({ user_avatar: "" });
-      // Refresh user data via SWR mutate (industry standard)
+
       await mutateCurrentUser();
     } catch {}
   };
@@ -118,7 +118,7 @@ export default function SettingsPanel() {
         location,
         sex,
       });
-      // Refresh user data via SWR mutate (industry standard)
+
       await mutateCurrentUser();
     } catch {}
     setSaving(false);
@@ -146,11 +146,11 @@ export default function SettingsPanel() {
         className="
             w-full max-w-3xl
             h-full
-            p-3 md:p-6 pb-24 md:pb-6 rounded-2xl 
+            p-3 md:p-6 pb-24 md:pb-6 rounded-2xl
             bg-right-nav-light dark:bg-right-nav-dark
             border border-[#d7d7d7] dark:border-white/10
             shadow-xl
-            flex flex-col    
+            flex flex-col
             overflow-y-auto hide-scrollbar
         "
         >
@@ -320,8 +320,8 @@ export default function SettingsPanel() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.7 }}
               className="
-                bg-white/10 dark:bg-black/20 
-                border border-white/20 p-4 md:p-6 
+                bg-white/10 dark:bg-black/20
+                border border-white/20 p-4 md:p-6
                 rounded-2xl w-[90%] max-w-80 backdrop-blur-xl mx-4
               "
             >
@@ -338,7 +338,7 @@ export default function SettingsPanel() {
                   className="
                     w-full py-2.5 md:py-2 rounded-xl text-sm md:text-base
                     bg-primary-light text-black
-                    dark:bg-primary-dark dark:text-white 
+                    dark:bg-primary-dark dark:text-white
                     font-semibold
                   "
                 >

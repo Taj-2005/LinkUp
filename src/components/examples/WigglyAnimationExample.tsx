@@ -40,7 +40,7 @@ export default function WigglyAnimationExample() {
 
       <section className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-bold">Skeleton Loaders</h2>
-        
+
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <SkeletonCircle size={40} className="sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px]" />
@@ -83,4 +83,3 @@ export default function WigglyAnimationExample() {
     </div>
   );
 }
-

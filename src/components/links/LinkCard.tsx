@@ -27,8 +27,8 @@ export default function LinkCard({ link, onClick }: LinkCardProps) {
         className="object-cover"
         sizes="(max-width: 768px) 50vw, 33vw"
       />
-      
-      {/* Overlay on hover */}
+
+      {}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-4 text-white">
           <div className="flex items-center gap-1">
@@ -44,4 +44,3 @@ export default function LinkCard({ link, onClick }: LinkCardProps) {
     </motion.div>
   );
 }
-

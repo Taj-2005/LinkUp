@@ -23,7 +23,6 @@ export default function ImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  // Sync previewUrl with initialImageUrl prop changes (e.g., when form is reset)
   useEffect(() => {
     setPreviewUrl(initialImageUrl || null);
     if (!initialImageUrl) {
@@ -59,13 +58,12 @@ export default function ImageUploader({
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
-    // Validate file type
+
     if (!file.type.startsWith("image/")) {
       setError("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setError("Image size must be less than 10MB");
       return;
@@ -75,11 +73,10 @@ export default function ImageUploader({
     setUploading(true);
 
     try {
-      // Show preview immediately
+
       const preview = await fileToDataURL(file);
       setPreviewUrl(preview);
 
-      // Upload to Cloudinary
       const cloudinaryUrl = await uploadToCloudinary(file);
       setPreviewUrl(cloudinaryUrl);
       onImageUploaded(cloudinaryUrl);
@@ -119,7 +116,7 @@ export default function ImageUploader({
     if (file) {
       handleFile(file);
     }
-    // Reset input
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -235,4 +232,3 @@ export default function ImageUploader({
     </div>
   );
 }
-

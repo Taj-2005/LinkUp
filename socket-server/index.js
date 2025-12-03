@@ -12,25 +12,21 @@ const { setupVerificationSockets, emitEmailVerified } = require("./sockets/verif
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Express Middleware
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: [process.env.CORS_ORIGIN || "http://localhost:3000", "https://admin.socket.io"],
     credentials: true,
 }));
 app.use(express.json());
 
-// Express Routes
 app.use("/api/link-requests", linkRequestRoutes);
 
-// Email verification endpoint (called from Next.js API route)
 app.post("/api/verification/email-verified", (req, res) => {
     const { email } = req.body;
-    
+
     if (!email) {
         return res.status(400).json({ error: "Email is required" });
     }
-    
-    // Emit socket event to verification namespace
+
     if (io) {
         const verificationNamespace = io.of("/verification");
         emitEmailVerified(verificationNamespace, email);
@@ -40,75 +36,45 @@ app.post("/api/verification/email-verified", (req, res) => {
     }
 });
 
-// Link accepted notification endpoint (called from Next.js API route)
-app.post("/api/link-requests/link-accepted-notify", (req, res) => {
-    const { requesterId, receiverId, requestId } = req.body;
-    
+app.post("/api/link-requests/link-accepted-notify", async (req, res) => {
+    const { requesterId, receiverId } = req.body;
+
     if (!requesterId || !receiverId) {
         return res.status(400).json({ error: "Requester ID and Receiver ID are required" });
     }
-    
-    // Emit socket events to both users for real-time updates
+
     if (io) {
         const authenticatedNamespace = io.of("/");
-        
-        // Notify requester (who sent the request)
-        authenticatedNamespace.to(`user:${requesterId}`).emit("linkRequestAccepted", {
-            requestId: requestId || null,
-            requesterId: requesterId,
-            receiverId: receiverId,
-            timestamp: new Date().toISOString(),
-        });
-        
-        // Notify receiver (who accepted the request)
-        authenticatedNamespace.to(`user:${receiverId}`).emit("linkRequestAccepted", {
-            requestId: requestId || null,
-            requesterId: requesterId,
-            receiverId: receiverId,
-            timestamp: new Date().toISOString(),
-        });
-        
-        // Emit userUpdated events to trigger user list refresh for both users
-        authenticatedNamespace.to(`user:${requesterId}`).emit("userUpdated", {
-            userId: requesterId,
-        });
-        authenticatedNamespace.to(`user:${receiverId}`).emit("userUpdated", {
-            userId: receiverId,
-        });
-        
-        console.log(`Emitted link accepted events to users: ${requesterId} and ${receiverId}`);
+        const { emitLinkUpEvent } = require("./utils/emitLinkUpEvent");
+
+        await emitLinkUpEvent(authenticatedNamespace, "accepted", requesterId, receiverId, true);
+
         res.json({ success: true, message: "Link accepted events emitted" });
     } else {
         res.status(503).json({ error: "Socket.IO not initialized" });
     }
 });
 
-// Profile updated notification endpoint (called from Next.js API route)
 app.post("/api/users/profile-updated-notify", (req, res) => {
     const { userId } = req.body;
-    
+
     if (!userId) {
         return res.status(400).json({ error: "User ID is required" });
     }
-    
-    // Emit socket events to notify all connected clients about profile update
+
     if (io) {
         const authenticatedNamespace = io.of("/");
-        
-        // Emit userUpdated event to the specific user who was updated
-        // This ensures their current user data refreshes immediately
+
         authenticatedNamespace.to(`user:${userId}`).emit("userUpdated", {
             userId: userId,
             timestamp: new Date().toISOString(),
         });
-        
-        // Also emit to all users to refresh the all users list
-        // This ensures everyone sees the updated profile information
+
         authenticatedNamespace.emit("userUpdated", {
             userId: userId,
             timestamp: new Date().toISOString(),
         });
-        
+
         console.log(`Emitted profile updated event for user: ${userId}`);
         res.json({ success: true, message: "Profile updated event emitted" });
     } else {
@@ -116,96 +82,151 @@ app.post("/api/users/profile-updated-notify", (req, res) => {
     }
 });
 
-// Unlink notification endpoint (called from Next.js API route)
-app.post("/api/link-requests/unlink-notify", (req, res) => {
+app.post("/api/link-requests/unlink-notify", async (req, res) => {
     const { currentUserId, otherUserId } = req.body;
-    
+
     if (!currentUserId || !otherUserId) {
         return res.status(400).json({ error: "User IDs are required" });
     }
-    
-    // Emit socket events to both users for real-time updates
+
     if (io) {
         const authenticatedNamespace = io.of("/");
-        
-        // Notify current user (who performed the unlink)
-        authenticatedNamespace.to(`user:${currentUserId}`).emit("userUnlinked", {
-            userId: otherUserId,
-            timestamp: new Date().toISOString(),
-        });
-        
-        // Notify other user (who was unlinked)
-        authenticatedNamespace.to(`user:${otherUserId}`).emit("userUnlinked", {
-            userId: currentUserId,
-            timestamp: new Date().toISOString(),
-        });
-        
-        // Emit userUpdated events to trigger user list refresh for both users
-        authenticatedNamespace.to(`user:${currentUserId}`).emit("userUpdated", {
-            userId: currentUserId,
-        });
-        authenticatedNamespace.to(`user:${otherUserId}`).emit("userUpdated", {
-            userId: otherUserId,
-        });
-        
-        console.log(`Emitted unlink events to users: ${currentUserId} and ${otherUserId}`);
+        const { emitLinkUpEvent } = require("./utils/emitLinkUpEvent");
+
+        await emitLinkUpEvent(authenticatedNamespace, "unlinked", currentUserId, otherUserId, true);
+
         res.json({ success: true, message: "Unlink events emitted" });
     } else {
         res.status(503).json({ error: "Socket.IO not initialized" });
     }
 });
 
-// Health check
+app.post("/api/notifications/interaction-notify", async (req, res) => {
+    const { userId, actorId, linkId, type, actor, commentId, deepLink } = req.body;
+
+    if (!userId || !actorId || !linkId || !type) {
+        return res.status(400).json({ error: "User ID, Actor ID, Link ID, and Type are required" });
+    }
+
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        const { emitNotificationUpdate } = require("./utils/emitNotificationUpdate");
+
+        authenticatedNamespace.to(`user:${userId}`).emit("notification:new", {
+            type,
+            linkId,
+            actorId,
+            timestamp: new Date().toISOString(),
+        });
+
+        if (actor && deepLink) {
+            authenticatedNamespace.to(`user:${userId}`).emit("interaction:link", {
+                type,
+                linkId,
+                linkOwnerId: userId,
+                actor: {
+                    _id: actor._id || actorId,
+                    username: actor.username || "Unknown",
+                    avatar: actor.avatar || actor.user_avatar || null,
+                },
+                commentId: commentId || undefined,
+                deepLink: deepLink,
+            });
+
+            console.log(`Emitted interaction:link event to user: ${userId} for ${type} by ${actor.username || actorId}`);
+        }
+
+        await emitNotificationUpdate(authenticatedNamespace, userId, "create");
+
+        console.log(`Emitted notification:new event to user: ${userId} for ${type} by ${actorId}`);
+        res.json({ success: true, message: "Notification event emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
+app.post("/api/notifications/update-notify", async (req, res) => {
+    const { userId, action, notificationId } = req.body;
+
+    if (!userId || !action) {
+        return res.status(400).json({ error: "User ID and Action are required" });
+    }
+
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        const { emitNotificationUpdate } = require("./utils/emitNotificationUpdate");
+
+        await emitNotificationUpdate(authenticatedNamespace, userId, action, notificationId);
+
+        console.log(`Emitted notification:update event to user: ${userId} for action: ${action}`);
+        res.json({ success: true, message: "Notification update event emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
 app.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Create server using Express's listen (returns HTTP server)
-// Note: Socket.IO requires an HTTP server, which Express provides internally
 let server;
 let io;
 
-// Connect to database and start server
 async function startServer() {
     try {
         await dbConnect();
         console.log("✓ Connected to MongoDB");
 
-        // Start Express server and get the HTTP server instance
         server = app.listen(PORT, () => {
             console.log(`✓ Express server running on port ${PORT}`);
-            console.log(`✓ CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:3000"}`);
         })
-        
-        // Initialize Socket.IO with Express's HTTP server
+
         io = new Server(server, {
             cors: {
-                origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+                origin: [process.env.CORS_ORIGIN || "http://localhost:3000", "https://admin.socket.io"],
                 methods: ["GET", "POST"],
                 credentials: true,
             },
             path: "/socket.io",
         });
 
-        // Store io instance for use in controllers
+        if (process.env.REDIS_URL) {
+            try {
+                const { createAdapter } = require("@socket.io/redis-adapter");
+                const { createClient } = require("redis");
+
+                const pubClient = createClient({ url: process.env.REDIS_URL });
+                const subClient = pubClient.duplicate();
+
+                Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+                    io.adapter(createAdapter(pubClient, subClient));
+                    console.log("✓ Redis adapter enabled for Socket.IO clustering (horizontal scalability)");
+                }).catch((error) => {
+                    console.error("Failed to connect to Redis:", error);
+                    console.log("⚠ Socket.IO will run in single-server mode");
+                });
+            } catch (error) {
+                console.error("Redis adapter not available:", error.message);
+                console.log("⚠ Install @socket.io/redis-adapter and redis packages for clustering support");
+                console.log("  npm install @socket.io/redis-adapter redis");
+            }
+        } else {
+            console.log("ℹ Redis URL not provided - Socket.IO running in single-server mode");
+            console.log("  Set REDIS_URL environment variable for horizontal scalability");
+        }
+
         app.set("io", io);
 
-        // Create a namespace for authenticated connections (link requests, etc.)
         const authenticatedNamespace = io.of("/");
-        
-        // Apply auth middleware only to authenticated namespace
+
         authenticatedNamespace.use(socketAuthMiddleware);
 
-        // Setup authenticated socket handlers (link requests)
         setupLinkRequestSockets(authenticatedNamespace);
 
-        // Create a separate namespace for verification (no auth required)
         const verificationNamespace = io.of("/verification");
-        
-        // Setup verification sockets (no auth required - user not logged in yet)
+
         setupVerificationSockets(verificationNamespace);
 
-        // Setup Socket.IO Admin UI (with authentication)
         if (process.env.ADMIN_UI_USERNAME && process.env.ADMIN_UI_PASSWORD) {
             instrument(io, {
                 auth: {
@@ -231,7 +252,6 @@ async function startServer() {
 
 startServer();
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
     console.log("SIGTERM signal received: closing server");
     if (server) {
@@ -241,4 +261,3 @@ process.on("SIGTERM", () => {
         });
     }
 });
-

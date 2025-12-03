@@ -51,4 +51,3 @@ export default function UnlinkModal({ onConfirm, onCancel }: UnlinkModalProps) {
         </AnimatePresence>
     );
 }
-

@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://link-up-web.vercel.app';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://link-up-web.vercel.app'
 const appName = 'LinkUp';
 const appDescription = 'LinkUp - Modern Social Connection Platform. Connect, discover, and communicate seamlessly with real-time notifications, instant link requests, and a beautiful user experience.';
 
 export default function StructuredData() {
   useEffect(() => {
-    // Organization Schema
+
     const organizationSchema = {
       '@context': 'https://schema.org',
       '@type': 'Organization',
@@ -17,14 +17,10 @@ export default function StructuredData() {
       logo: `${appUrl}/logo.png`,
       description: appDescription,
       sameAs: [
-        // Add your social media links here
-        // 'https://twitter.com/linkup',
-        // 'https://github.com/linkup',
-        // 'https://linkedin.com/company/linkup',
+
       ],
     };
 
-    // WebApplication Schema
     const webApplicationSchema = {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
@@ -47,7 +43,6 @@ export default function StructuredData() {
       ],
     };
 
-    // SoftwareApplication Schema
     const softwareApplicationSchema = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
@@ -67,7 +62,6 @@ export default function StructuredData() {
       },
     };
 
-    // Add scripts to document head
     const addStructuredData = (schema: object, id: string) => {
       const script = document.createElement('script');
       script.type = 'application/ld+json';
@@ -76,7 +70,6 @@ export default function StructuredData() {
       document.head.appendChild(script);
     };
 
-    // Remove existing structured data if any
     const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
     existingScripts.forEach((script) => {
       if (script.id?.startsWith('linkup-schema-')) {
@@ -84,13 +77,12 @@ export default function StructuredData() {
       }
     });
 
-    // Add new structured data
     addStructuredData(organizationSchema, 'linkup-schema-organization');
     addStructuredData(webApplicationSchema, 'linkup-schema-webapp');
     addStructuredData(softwareApplicationSchema, 'linkup-schema-software');
 
     return () => {
-      // Cleanup on unmount
+
       const scripts = document.querySelectorAll('script[id^="linkup-schema-"]');
       scripts.forEach((script) => script.remove());
     };
@@ -98,4 +90,3 @@ export default function StructuredData() {
 
   return null;
 }
-

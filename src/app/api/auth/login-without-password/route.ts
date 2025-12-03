@@ -17,11 +17,9 @@ export async function POST(req: Request) {
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
 
-    // Generate device ID from user agent
     const userAgent = req.headers.get("user-agent") || "";
     const deviceId = generateDeviceId(userAgent);
 
-    // Add token to array (supports multiple devices)
     await addRefreshToken(user._id.toString(), refreshToken, deviceId);
 
     const res = NextResponse.json({ ok: true, user });

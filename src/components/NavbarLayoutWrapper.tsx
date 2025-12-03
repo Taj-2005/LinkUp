@@ -18,47 +18,36 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
 
   const shouldFetchAuth = !PUBLIC_ROUTES.includes(pathname);
 
-  // Handle authentication errors via SWR onError (handled in useUsers hook)
-  // Router redirects are handled in individual components as needed
-
-  // Listen for socket events to update users list (replaces polling)
   const { socket, isConnected } = useSocketStore();
 
   useEffect(() => {
     if (!shouldFetchAuth || !socket || !isConnected) return;
 
-    // Listen for user updates from socket server
     const handleUserUpdate = (data?: { userId?: string }) => {
       const updatedUserId = data?.userId;
       const currentUserId = currentUser?._id;
-      
-      // Always refresh all users list when any user is updated
+
       mutateAllUsers();
-      
-      // If the updated user is the current user, also refresh their data
-      // This ensures linked_by, linked_to, and other counts update immediately
+
       if (updatedUserId && currentUserId && updatedUserId === currentUserId) {
         mutateCurrentUser();
       }
     };
 
-    // Handle link acceptance - refresh both current user and all users
     const handleLinkRequestAccepted = () => {
-      // Refresh current user data (in case their linked_to or linked_by changed)
+
       mutateCurrentUser();
-      // Refresh all users list
+
       mutateAllUsers();
     };
 
-    // Handle unlink events - refresh both current user and all users
     const handleUserUnlinked = () => {
-      // Refresh current user data (in case their linked_to or linked_by changed)
+
       mutateCurrentUser();
-      // Refresh all users list
+
       mutateAllUsers();
     };
 
-    // Listen for profile updates, link changes, etc.
     socket.on("userUpdated", handleUserUpdate);
     socket.on("linkRequestReceived", handleUserUpdate);
     socket.on("linkRequestAccepted", handleLinkRequestAccepted);
@@ -95,7 +84,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     if (current === "livelinks") setSelectedItem("livelinks");
     else if (current === "linkfinder") setSelectedItem("linkfinder");
     else if (current === "linkups") setSelectedItem("linkups");
-    else if (current === "linkupreqs") {
+    else if (current === "notifications") {
       setSelectedItem(isMobile ? "linkhub" : "settings");
     }
     else if (current === "newlink") setSelectedItem("newlink");
@@ -118,7 +107,7 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
   return (
       <div className="flex flex-row h-screen md:h-screen bg-primary-light dark:bg-primary-dark overflow-hidden">
         <Navbar selectedItem={selectedItem} setSelectedItem={setSelectedItem} hideOnMobile={hideNavbarOnMobile} />
-        <div className="flex-1 overflow-hidden" style={{ 
+        <div className="flex-1 overflow-hidden" style={{
           paddingBottom: hideNavbarOnMobile ? '0' : 'calc(4rem + env(safe-area-inset-bottom, 0px))',
         }}>
           {children}

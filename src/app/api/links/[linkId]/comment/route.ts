@@ -4,7 +4,10 @@ import { requireAuth } from "@/lib/auth";
 import { Link, IComment } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
+import { createNotification } from "@/utils/notifications";
 import mongoose from "mongoose";
+
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(
   req: Request,
@@ -40,7 +43,6 @@ export async function POST(
       return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
     }
 
-    // Get user info for the comment
     const user = await User.findById(userId).select("username user_avatar");
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -51,7 +53,6 @@ export async function POST(
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    // Add comment
     const newComment: Partial<IComment> = {
       userId: userId.toString(),
       username: user.username || "Unknown",
@@ -63,8 +64,43 @@ export async function POST(
     link.comments.push(newComment as IComment);
     await link.save();
 
-    // Get the newly created comment (last one in array)
     const savedComment = link.comments[link.comments.length - 1];
+
+    const { generateDeepLink } = await import("@/utils/deepLinks");
+    const deepLink = generateDeepLink(linkId, "comment", savedComment._id.toString());
+
+    await createNotification({
+      userId: link.userId,
+      actorId: userId.toString(),
+      linkId: linkId,
+      type: "comment",
+      commentId: savedComment._id.toString(),
+    });
+
+    try {
+      await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: link.userId,
+          actorId: userId.toString(),
+          linkId: linkId,
+          type: "comment",
+          commentId: savedComment._id.toString(),
+          deepLink: deepLink,
+          actor: {
+            _id: user._id.toString(),
+            username: user.username || "Unknown",
+            avatar: user.user_avatar || null,
+          },
+        }),
+      }).catch(() => {
+
+      });
+    } catch (socketError) {
+
+      console.error("Socket notification error (non-critical):", socketError);
+    }
 
     return NextResponse.json(
       {
@@ -79,6 +115,19 @@ export async function POST(
           createdAt: savedComment.createdAt,
           updatedAt: savedComment.updatedAt,
         },
+        link: {
+          _id: link._id.toString(),
+          comments: link.comments.map((c: IComment) => ({
+            _id: c._id.toString(),
+            userId: c.userId,
+            username: c.username,
+            user_avatar: c.user_avatar,
+            text: c.text,
+            replies: c.replies || [],
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          })),
+        },
       },
       { status: 201 }
     );
@@ -90,4 +139,3 @@ export async function POST(
     );
   }
 }
-

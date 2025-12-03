@@ -53,9 +53,6 @@ export default function CropModal({
     setZoom(initialZoom);
   }, []);
 
-
-
-
   const getCroppedImg = async (imageSrc: string, pixelCrop: Area): Promise<Blob> => {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = document.createElement("img");
@@ -114,10 +111,9 @@ export default function CropModal({
     }
   };
 
-
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-xl bg-black/40">
-      <div className="w-[92%] max-w-3xl rounded-3xl p-[2px] bg-gradient-to-br 
+      <div className="w-[92%] max-w-3xl rounded-3xl p-[2px] bg-gradient-to-br
         from-white/20 to-white/5 dark:from-white/10 dark:to-white/5 shadow-xl">
 
         <div className="rounded-3xl p-6 bg-white/10 dark:bg-black/20 border border-white/20">
@@ -173,7 +169,7 @@ export default function CropModal({
           <div className="mt-6 flex justify-end gap-4">
             <button
               onClick={onClose}
-              className="px-5 py-2 rounded-xl text-black dark:text-white 
+              className="px-5 py-2 rounded-xl text-black dark:text-white
                 bg-white/20 dark:bg-white/10 border border-white/20"
             >
               Cancel
@@ -182,7 +178,7 @@ export default function CropModal({
             <button
               onClick={handleApply}
               disabled={loading}
-              className={`px-6 py-2 rounded-xl font-semibold shadow-lg 
+              className={`px-6 py-2 rounded-xl font-semibold shadow-lg
                 bg-primary-light text-black
                 dark:bg-primary-dark dark:text-white
                 ${loading ? "opacity-50 cursor-not-allowed" : ""}

@@ -15,7 +15,7 @@ function verifyToken(token) {
 }
 
 function socketAuthMiddleware(socket, next) {
-    const token = socket.handshake.auth.token || 
+    const token = socket.handshake.auth.token ||
                   socket.handshake.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
@@ -32,4 +32,3 @@ function socketAuthMiddleware(socket, next) {
 }
 
 module.exports = { verifyToken, socketAuthMiddleware };
-

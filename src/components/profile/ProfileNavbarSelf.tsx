@@ -24,15 +24,15 @@ const ProfileNavbarSelf = ({ selected: externalSelected, onSelectedChange }: Pro
             <div className='flex justify-center items-center gap-8 md:gap-12 w-full transition-all duration-300'>
                 <button onClick={() => handleSelect('links')}>
                 {
-                    selected === 'links' ? 
-                        <FaTh 
-                            size={36} 
-                            className='cursor-pointer text-violet-600 border-b-2 border-violet-600 pb-2' 
-                        /> 
-                        : 
-                        <FaTh 
-                            size={36} 
-                            className='cursor-pointer text-primary-light/70 dark:text-white/70 pb-2 hover:text-violet-500 transition-colors' 
+                    selected === 'links' ?
+                        <FaTh
+                            size={36}
+                            className='cursor-pointer text-violet-600 border-b-2 border-violet-600 pb-2'
+                        />
+                        :
+                        <FaTh
+                            size={36}
+                            className='cursor-pointer text-primary-light/70 dark:text-white/70 pb-2 hover:text-violet-500 transition-colors'
                         />
                 }
                 </button>

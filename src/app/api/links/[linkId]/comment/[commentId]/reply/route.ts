@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
-import { Link, IReply } from "@/models/Link";
+import { Link, IComment, IReply } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
+import { createNotification } from "@/utils/notifications";
 import mongoose from "mongoose";
+
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(
   req: Request,
@@ -47,7 +50,6 @@ export async function POST(
       );
     }
 
-    // Get user info for the reply
     const user = await User.findById(userId).select("username user_avatar");
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -58,7 +60,6 @@ export async function POST(
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    // Find the comment
     const comment = link.comments.id(commentId);
     if (!comment) {
       return NextResponse.json(
@@ -67,7 +68,6 @@ export async function POST(
       );
     }
 
-    // Add reply to the comment
     const newReply: Partial<IReply> = {
       userId: userId.toString(),
       username: user.username || "Unknown",
@@ -78,8 +78,44 @@ export async function POST(
     comment.replies.push(newReply as IReply);
     await link.save();
 
-    // Get the newly created reply (last one in array)
     const savedReply = comment.replies[comment.replies.length - 1];
+
+    const { generateDeepLink } = await import("@/utils/deepLinks");
+    const deepLink = generateDeepLink(linkId, "reply", commentId, savedReply._id.toString());
+
+    await createNotification({
+      userId: link.userId,
+      actorId: userId.toString(),
+      linkId: linkId,
+      type: "reply",
+      commentId: commentId,
+      replyId: savedReply._id.toString(),
+    });
+
+    try {
+      await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: link.userId,
+          actorId: userId.toString(),
+          linkId: linkId,
+          type: "reply",
+          commentId: commentId,
+          deepLink: deepLink,
+          actor: {
+            _id: user._id.toString(),
+            username: user.username || "Unknown",
+            avatar: user.user_avatar || null,
+          },
+        }),
+      }).catch(() => {
+
+      });
+    } catch (socketError) {
+
+      console.error("Socket notification error (non-critical):", socketError);
+    }
 
     return NextResponse.json(
       {
@@ -93,6 +129,27 @@ export async function POST(
           createdAt: savedReply.createdAt,
           updatedAt: savedReply.updatedAt,
         },
+        link: {
+          _id: link._id.toString(),
+          comments: link.comments.map((c: IComment) => ({
+            _id: c._id.toString(),
+            userId: c.userId,
+            username: c.username,
+            user_avatar: c.user_avatar,
+            text: c.text,
+            replies: c.replies.map((r: IReply) => ({
+              _id: r._id.toString(),
+              userId: r.userId,
+              username: r.username,
+              user_avatar: r.user_avatar,
+              text: r.text,
+              createdAt: r.createdAt,
+              updatedAt: r.updatedAt,
+            })),
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+          })),
+        },
       },
       { status: 201 }
     );
@@ -104,4 +161,3 @@ export async function POST(
     );
   }
 }
-

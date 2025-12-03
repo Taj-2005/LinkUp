@@ -73,10 +73,10 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
         className="
-          p-5 rounded-xl 
-          bg-[#f5f5f5] dark:bg-black/20  
+          p-5 rounded-xl
+          bg-[#f5f5f5] dark:bg-black/20
           border border-[#d7d7d7] dark:border-white/10
-          shadow-sm 
+          shadow-sm
           cursor-not-allowed
         "
       >
@@ -105,7 +105,7 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
                 }
               }}
               className={`
-                flex items-center justify-between 
+                flex items-center justify-between
                 px-4 py-3 rounded-lg cursor-pointer select-none
                 transition-all shadow-sm
                 ${
@@ -124,8 +124,8 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-xs px-2 py-1 rounded-md 
-                             bg-[#e1e1e1] text-[#3E434C] 
+                  className="text-xs px-2 py-1 rounded-md
+                             bg-[#e1e1e1] text-[#3E434C]
                              dark:bg-white/10 dark:text-white/70"
                 >
                   Soon
@@ -141,7 +141,7 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
           whileHover={{ scale: 1.02 }}
           onClick={handleThemeToggle}
           className="
-            flex items-center justify-between 
+            flex items-center justify-between
             px-4 py-3 rounded-lg cursor-pointer select-none
             transition-all shadow-sm
             bg-[#ffffff] dark:bg-[#181818] border border-[#dcdcdc] dark:border-white/10
@@ -160,10 +160,10 @@ export default function SettingsSidebar({ onItemClick }: SettingsSidebarProps) {
           whileHover={{ scale: 1.02 }}
           onClick={handleSignout}
           className="
-            flex items-center justify-between 
+            flex items-center justify-between
             px-4 py-3 rounded-lg cursor-pointer select-none
             transition-all shadow-sm
-            bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 
+            bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600
             dark:bg-pink-600 dark:text-white
           "
         >

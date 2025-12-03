@@ -18,7 +18,7 @@ export default function VerificationPendingPage() {
 function AnimatedFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d0f] relative overflow-hidden">
-      
+
       <motion.div
         className="absolute top-20 left-10 w-64 h-64 rounded-full blur-[120px]"
         style={{ background: "rgba(139, 92, 246, 0.15)" }}

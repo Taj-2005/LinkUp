@@ -19,27 +19,23 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Type guard for user with savedLinks property
     interface UserWithSavedLinks {
       savedLinks?: unknown[];
       [key: string]: unknown;
     }
-    
+
     const userWithSavedLinks = user as UserWithSavedLinks;
 
-    // Ensure savedLinkIds is always an array, never null or undefined
     const savedLinkIds = Array.isArray(userWithSavedLinks.savedLinks) ? userWithSavedLinks.savedLinks : [];
-    
+
     if (savedLinkIds.length === 0) {
       return NextResponse.json({ links: [] }, { status: 200 });
     }
 
-    // Get all saved links with user info
     const links = await Link.find({ _id: { $in: savedLinkIds } })
       .sort({ createdAt: -1 })
       .lean();
 
-    // Get user info for each link
     const userIds = [...new Set(links.map((link) => link.userId))];
     const users = await User.find({ _id: { $in: userIds } })
       .select("username user_avatar name")
@@ -56,7 +52,6 @@ export async function GET() {
       (users as UserInfo[]).map((u) => [String(u._id), u])
     );
 
-    // Add user info to each link
     interface LinkWithUserInfo {
       [key: string]: unknown;
       userInfo: {
@@ -88,4 +83,3 @@ export async function GET() {
     );
   }
 }
-

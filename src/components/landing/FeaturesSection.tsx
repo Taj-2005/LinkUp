@@ -83,7 +83,7 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
 
   return (
     <section id="features" className="py-32 md:py-40 px-4 sm:px-6 relative">
-      {/* Subtle background pattern */}
+      {}
       <div className={`
         absolute inset-0
         ${isDark ? 'opacity-[0.02]' : 'opacity-[0.03]'}
@@ -153,12 +153,12 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
               `}
               style={{ willChange: 'transform' }}
             >
-              {/* Gradient overlay on hover */}
+              {}
               <motion.div
                 className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
               />
 
-              {/* Icon */}
+              {}
               <div className="relative z-10 mb-6">
                 <motion.div
                   className={`
@@ -173,7 +173,7 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
                 </motion.div>
               </div>
 
-              {/* Content */}
+              {}
               <div className="relative z-10">
                 <h3 className={`
                   text-xl font-bold mb-3
@@ -190,14 +190,14 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
                 </p>
               </div>
 
-              {/* Shine effect */}
+              {}
               <motion.div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 initial={false}
               >
               </motion.div>
 
-              {/* Corner accent */}
+              {}
               <div className={`
                 absolute top-0 right-0 w-32 h-32
                 bg-gradient-to-br ${feature.gradient}

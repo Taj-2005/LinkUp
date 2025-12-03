@@ -1,11 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSend } from "react-icons/fi";
 import Image from "next/image";
 import { IComment, IReply } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
+import { optimisticAddComment, optimisticAddReply, revalidateLinkCaches } from "@/utils/linkInteractions";
+import {
+  createOptimisticComment,
+  createOptimisticReply,
+  addCommentOptimistically,
+  addReplyOptimistically,
+  replaceTempComment,
+  replaceTempReply,
+} from "@/utils/commentOptimistic";
+import CommentItem from "./CommentItem";
 import toast from "react-hot-toast";
 
 interface CommentSectionProps {
@@ -17,7 +27,7 @@ interface CommentSectionProps {
 
 export default function CommentSection({
   linkId,
-  comments,
+  comments: propsComments,
   onCommentAdded,
   onReplyAdded,
 }: CommentSectionProps) {
@@ -27,17 +37,126 @@ export default function CommentSection({
   const [replyText, setReplyText] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [submittingReply, setSubmittingReply] = useState<string | null>(null);
+  const commentsContainerRef = useRef<HTMLDivElement>(null);
+  const scrollToCommentRef = useRef<string | null>(null);
+  const lastScrollHeightRef = useRef<number>(0);
+
+  const [localComments, setLocalComments] = useState<IComment[]>(propsComments);
+  const rollbackRef = useRef<(() => IComment[]) | null>(null);
+
+  const prevPropsLengthRef = useRef(propsComments.length);
+  useEffect(() => {
+    if (rollbackRef.current === null && prevPropsLengthRef.current !== propsComments.length) {
+
+      setLocalComments(propsComments);
+      prevPropsLengthRef.current = propsComments.length;
+    }
+  }, [propsComments.length, propsComments]);
+
+  const comments = useMemo(() => localComments, [localComments]);
+
+  const scrollToLatest = React.useCallback(() => {
+    if (!commentsContainerRef.current) return;
+
+    const container = commentsContainerRef.current;
+    const targetId = scrollToCommentRef.current;
+
+    if (!targetId) {
+
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      });
+      return;
+    }
+
+    const attemptScroll = (retries = 3) => {
+      if (retries === 0) {
+
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+        scrollToCommentRef.current = null;
+        return;
+      }
+
+      const element = container.querySelector(
+        `[data-comment-id="${targetId}"], [data-reply-id="${targetId}"]`
+      ) as HTMLElement;
+
+      if (element) {
+
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        const scrollTop = container.scrollTop +
+          (elementRect.top - containerRect.top) -
+          (containerRect.height / 2) +
+          (elementRect.height / 2);
+
+        container.scrollTo({
+          top: Math.max(0, scrollTop),
+          behavior: "smooth",
+        });
+
+        element.classList.add("comment-highlight");
+        setTimeout(() => {
+          element.classList.remove("comment-highlight");
+        }, 2000);
+
+        scrollToCommentRef.current = null;
+      } else {
+
+        setTimeout(() => attemptScroll(retries - 1), 50);
+      }
+    };
+
+    requestAnimationFrame(() => {
+      attemptScroll();
+    });
+  }, []);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || submittingComment) return;
+    if (!newComment.trim() || submittingComment || !currentUser) return;
+
+    const text = newComment.trim();
+    setNewComment("");
+
+    const optimisticComment = createOptimisticComment(
+      currentUser._id,
+      currentUser.username || "Unknown",
+      currentUser.user_avatar || "",
+      text
+    );
+
+    setLocalComments((prevComments) => {
+      const { newComments, rollback } = addCommentOptimistically(prevComments, optimisticComment);
+      rollbackRef.current = rollback;
+      return newComments;
+    });
+
+    scrollToCommentRef.current = optimisticComment._id;
+
+    optimisticAddComment(linkId, optimisticComment);
+    onCommentAdded();
+
+    requestAnimationFrame(() => {
+      scrollToLatest();
+    });
 
     setSubmittingComment(true);
+
     try {
       const res = await fetch(`/api/links/${linkId}/comment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: newComment.trim() }),
+        body: JSON.stringify({ text }),
       });
 
       const data = await res.json();
@@ -46,10 +165,37 @@ export default function CommentSection({
         throw new Error(data.error || "Failed to add comment");
       }
 
-      setNewComment("");
-      onCommentAdded();
-      toast.success("Comment added!");
+      if (data.comment) {
+        const serverComment: IComment = {
+          _id: data.comment._id,
+          userId: data.comment.userId,
+          username: data.comment.username,
+          user_avatar: data.comment.user_avatar,
+          text: data.comment.text,
+          replies: data.comment.replies || [],
+          createdAt: new Date(data.comment.createdAt),
+          updatedAt: new Date(data.comment.updatedAt),
+        } as IComment;
+
+        setLocalComments((prev) => replaceTempComment(prev, optimisticComment._id, serverComment));
+        scrollToCommentRef.current = serverComment._id.toString();
+
+        requestAnimationFrame(() => {
+          scrollToLatest();
+        });
+      }
+
+      await revalidateLinkCaches();
+      rollbackRef.current = null;
     } catch (error) {
+
+      if (rollbackRef.current) {
+        setLocalComments(rollbackRef.current());
+        rollbackRef.current = null;
+      }
+
+      await revalidateLinkCaches();
+
       toast.error(
         error instanceof Error ? error.message : "Failed to add comment"
       );
@@ -59,16 +205,44 @@ export default function CommentSection({
   };
 
   const handleAddReply = async (commentId: string) => {
-    if (!replyText.trim() || submittingReply) return;
+    if (!replyText.trim() || submittingReply || !currentUser) return;
+
+    const text = replyText.trim();
+
+    const optimisticReply = createOptimisticReply(
+      currentUser._id,
+      currentUser.username || "Unknown",
+      currentUser.user_avatar || "",
+      text
+    );
+
+    setReplyText("");
+    setReplyingTo(null);
+
+    setLocalComments((prevComments) => {
+      const { newComments, rollback } = addReplyOptimistically(prevComments, commentId, optimisticReply);
+      rollbackRef.current = rollback;
+      return newComments;
+    });
+
+    scrollToCommentRef.current = optimisticReply._id;
+
+    optimisticAddReply(linkId, commentId, optimisticReply);
+    onReplyAdded();
+
+    requestAnimationFrame(() => {
+      scrollToLatest();
+    });
 
     setSubmittingReply(commentId);
+
     try {
       const res = await fetch(
         `/api/links/${linkId}/comment/${commentId}/reply`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: replyText.trim() }),
+          body: JSON.stringify({ text }),
         }
       );
 
@@ -78,11 +252,36 @@ export default function CommentSection({
         throw new Error(data.error || "Failed to add reply");
       }
 
-      setReplyText("");
-      setReplyingTo(null);
-      onReplyAdded();
-      toast.success("Reply added!");
+      if (data.reply) {
+        const serverReply: IReply = {
+          _id: data.reply._id,
+          userId: data.reply.userId,
+          username: data.reply.username,
+          user_avatar: data.reply.user_avatar,
+          text: data.reply.text,
+          createdAt: new Date(data.reply.createdAt),
+          updatedAt: new Date(data.reply.updatedAt),
+        } as IReply;
+
+        setLocalComments((prev) => replaceTempReply(prev, commentId, optimisticReply._id, serverReply));
+        scrollToCommentRef.current = serverReply._id.toString();
+
+        requestAnimationFrame(() => {
+          scrollToLatest();
+        });
+      }
+
+      await revalidateLinkCaches();
+      rollbackRef.current = null;
     } catch (error) {
+
+      if (rollbackRef.current) {
+        setLocalComments(rollbackRef.current());
+        rollbackRef.current = null;
+      }
+
+      await revalidateLinkCaches();
+
       toast.error(
         error instanceof Error ? error.message : "Failed to add reply"
       );
@@ -91,28 +290,55 @@ export default function CommentSection({
     }
   };
 
-  const getAvatarSrc = (userAvatar?: string) => {
+  const getAvatarSrc = useCallback((userAvatar?: string) => {
     if (userAvatar) return userAvatar;
     return "/dark-profile.png";
-  };
+  }, []);
+
+  const handleReplyClick = useCallback((commentId: string) => {
+    setReplyingTo((prev) => prev === commentId ? null : commentId);
+  }, []);
+
+  const handleReplyTextChange = useCallback((text: string) => {
+    setReplyText(text);
+  }, []);
+
+  const handleReplySubmit = useCallback((commentId: string) => {
+    handleAddReply(commentId);
+  }, []);
+
+  useEffect(() => {
+    if (scrollToCommentRef.current && commentsContainerRef.current) {
+
+      requestAnimationFrame(() => {
+        scrollToLatest();
+      });
+    }
+  }, [comments.length, scrollToLatest]);
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Comments List */}
-      <div className="flex-1 overflow-y-auto space-y-4 p-4 overscroll-contain hide-scrollbar min-h-0">
+      {}
+      <div
+        ref={commentsContainerRef}
+        data-comment-section
+        className="flex-1 overflow-y-auto space-y-4 p-4 overscroll-contain hide-scrollbar min-h-0"
+      >
         {comments.length === 0 ? (
           <div className="text-center text-gray-400 dark:text-gray-500 py-8">
             No comments yet. Be the first to comment!
           </div>
         ) : (
-          comments.map((comment) => (
+          comments.map((comment, index) => (
             <motion.div
               key={comment._id.toString()}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: index * 0.02 }}
               className="space-y-2"
+              data-comment-id={comment._id.toString()}
             >
-              {/* Comment */}
+              {}
               <div className="flex gap-3">
                 <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                   <Image
@@ -145,7 +371,7 @@ export default function CommentSection({
                 </div>
               </div>
 
-              {/* Replies */}
+              {}
               <AnimatePresence>
                 {comment.replies && comment.replies.length > 0 && (
                   <motion.div
@@ -155,7 +381,7 @@ export default function CommentSection({
                     className="ml-11 space-y-2"
                   >
                     {comment.replies.map((reply: IReply) => (
-                      <div key={reply._id.toString()} className="flex gap-3">
+                      <div key={reply._id.toString()} className="flex gap-3" data-reply-id={reply._id.toString()}>
                         <div className="relative w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
                           <Image
                             src={getAvatarSrc(reply.user_avatar)}
@@ -181,7 +407,7 @@ export default function CommentSection({
                 )}
               </AnimatePresence>
 
-              {/* Reply Input */}
+              {}
               {replyingTo === comment._id.toString() && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -229,7 +455,7 @@ export default function CommentSection({
         )}
       </div>
 
-      {/* Add Comment Input */}
+      {}
       <div className="border-t border-gray-200 dark:border-gray-700 p-3 md:p-4 flex-shrink-0  bg-right-nav-light dark:bg-left-nav-dark z-10">
         <form onSubmit={handleAddComment} className="flex gap-2">
           <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
@@ -261,4 +487,3 @@ export default function CommentSection({
     </div>
   );
 }
-

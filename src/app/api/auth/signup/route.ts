@@ -19,8 +19,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const existing = await User.findOne({ 
-      $or: [{ email }, { username }] 
+    const existing = await User.findOne({
+      $or: [{ email }, { username }]
     });
 
     if (existing) {
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-    
+
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 

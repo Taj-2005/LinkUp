@@ -17,7 +17,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { imageUrl, description, location } = body;
 
-    // Validation
     if (!imageUrl || typeof imageUrl !== "string") {
       return NextResponse.json(
         { error: "Image URL is required" },
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create the link
     const link = new Link({
       userId,
       imageUrl,
@@ -51,13 +49,12 @@ export async function POST(req: Request) {
 
     await link.save();
 
-    // Add link _id to user's links array
     const user = await User.findById(userId);
     if (user) {
       if (!user.links) {
         user.links = [];
       }
-      // Only add if not already in array (prevent duplicates)
+
       if (!user.links.includes(link._id.toString())) {
         user.links.push(link._id.toString());
         await user.save();
@@ -89,4 +86,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

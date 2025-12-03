@@ -25,8 +25,6 @@ const linkRequestSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Index to ensure one active request per pair
 linkRequestSchema.index({ requesterId: 1, receiverId: 1, status: 1 });
 
 module.exports = mongoose.models.LinkRequest || mongoose.model("LinkRequest", linkRequestSchema);
-

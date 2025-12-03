@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
 
-const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(req: Request) {
     await dbConnect();
@@ -19,7 +19,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Request ID and Requester ID are required" }, { status: 400 });
         }
 
-        // Update user arrays
         await User.findByIdAndUpdate(payload.userId, {
             $addToSet: { linked_by: requesterId },
         });
@@ -28,21 +27,20 @@ export async function POST(req: Request) {
             $addToSet: { linked_to: payload.userId },
         });
 
-        // Notify Socket.IO server to emit real-time updates for both users
         try {
             await fetch(`${SOCKET_SERVER_URL}/api/link-requests/link-accepted-notify`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     requesterId: requesterId,
                     receiverId: payload.userId,
                     requestId: requestId
                 }),
             }).catch(() => {
-                // Silently fail - link still succeeded
+
             });
         } catch (socketError) {
-            // Silently fail - link still succeeded, socket notification is optional
+
             console.error("Socket notification error (non-critical):", socketError);
         }
 
@@ -54,4 +52,3 @@ export async function POST(req: Request) {
         );
     }
 }
-

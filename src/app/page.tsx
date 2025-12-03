@@ -28,7 +28,7 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    // Optimized scroll handler with requestAnimationFrame
+
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -40,28 +40,27 @@ export default function LandingPage() {
       }
     };
 
-    // Use passive listener for better scroll performance
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     const html = document.documentElement;
     const body = document.body;
-    
+
     html.classList.add('landing-page');
     body.classList.add('landing-page');
     body.classList.remove('h-full');
-    
+
     html.style.setProperty('height', 'auto', 'important');
     html.style.setProperty('overflow-y', 'auto', 'important');
     body.style.setProperty('height', 'auto', 'important');
     body.style.setProperty('overflow-y', 'auto', 'important');
     body.style.setProperty('overflow-x', 'hidden', 'important');
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       html.classList.remove('landing-page');
       body.classList.remove('landing-page');
       body.classList.add('h-full');
-      
+
       html.style.removeProperty('height');
       html.style.removeProperty('overflow-y');
       body.style.removeProperty('height');
@@ -71,8 +70,8 @@ export default function LandingPage() {
   }, []);
 
   const bgColor = isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50';
-  const navBg = isDark 
-    ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5' 
+  const navBg = isDark
+    ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5'
     : 'bg-white/90 backdrop-blur-2xl border-b border-gray-200/50';
   const textPrimary = isDark ? 'text-white' : 'text-gray-900';
 
@@ -80,8 +79,8 @@ export default function LandingPage() {
     <div className={`min-h-screen ${bgColor} ${textPrimary} transition-colors duration-300`}>
       <StructuredData />
       <ScrollProgress />
-      
-      {/* Navigation */}
+
+      {}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -92,7 +91,7 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo */}
+            {}
             <motion.a
               href={process.env.NEXT_PUBLIC_APP_URL || '/'}
               whileHover={{ scale: 1.05 }}
@@ -109,8 +108,8 @@ export default function LandingPage() {
                 className="h-8 sm:h-10 md:h-12 w-auto"
                 />
             </motion.a>
-            
-            {/* Desktop Navigation */}
+
+            {}
             <div className="hidden md:flex items-center space-x-6">
               <motion.button
                 onClick={() => setIsDark(!isDark)}
@@ -134,8 +133,8 @@ export default function LandingPage() {
               onClick={handleSignin}
                 className={`
                   px-6 py-2 rounded-lg font-medium
-                  ${isDark 
-                    ? 'text-gray-300 hover:text-white hover:bg-white/5' 
+                  ${isDark
+                    ? 'text-gray-300 hover:text-white hover:bg-white/5'
                     : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                   }
                   transition-all
@@ -162,7 +161,7 @@ export default function LandingPage() {
               </motion.button>
             </div>
 
-            {/* Mobile Menu Button */}
+            {}
             <div className="md:hidden flex items-center space-x-2">
               <motion.button
                 onClick={() => setIsDark(!isDark)}
@@ -199,7 +198,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -247,7 +246,7 @@ export default function LandingPage() {
         </AnimatePresence>
       </motion.nav>
 
-      {/* Main Content */}
+      {}
       <main>
         <HeroSection isDark={isDark} onSignUp={handleSignUp} onSignIn={handleSignin} />
         <FeaturesSection isDark={isDark} />
@@ -255,7 +254,7 @@ export default function LandingPage() {
         <CTASection isDark={isDark} onSignUp={handleSignUp} />
       </main>
 
-      {/* Footer */}
+      {}
       <Footer isDark={isDark} />
     </div>
   );

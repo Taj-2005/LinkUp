@@ -16,7 +16,7 @@ export default function Home() {
   const router = useRouter();
   const setSelectedItem = useNavbarStore((state) => state.setSelectedItem);
   const unseenCount = useSocketStore((state) => state.unseenCount);
-  
+
   return (
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
@@ -24,7 +24,7 @@ export default function Home() {
           <button
             onClick={() => {
               setSelectedItem("linkhub");
-              router.push("/linkupreqs");
+              router.push("/notifications");
             }}
             className="md:hidden absolute top-2 right-2 z-10 text-black dark:text-white hover:opacity-75 transition-opacity"
             aria-label="Notifications"
@@ -46,14 +46,16 @@ export default function Home() {
             <button
               onClick={() => {
                 setSelectedItem("settings");
-                router.push("/linkupreqs");
+                router.push("/notifications");
               }}
               className="text-black dark:text-white hover:opacity-75 transition-opacity flex justify-end items-end relative"
               aria-label="Notifications"
             >
               <FiBell size={30} />
               {unseenCount > 0 && (
-              <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark"></span>
+              <span className="absolute top-0 right-0 min-w-[20px] h-5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark flex items-center justify-center px-1 text-xs font-bold text-white">
+                {unseenCount > 99 ? '99+' : unseenCount}
+              </span>
               )}
             </button>
           </div>

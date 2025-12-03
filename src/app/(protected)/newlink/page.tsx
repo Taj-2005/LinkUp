@@ -50,14 +50,11 @@ export default function NewLinkPage() {
       }
 
       toast.success("Link created successfully!");
-      
-      // Reset form
+
       setImageUrl(null);
       setDescription("");
       setLocation("");
 
-      // Optionally redirect to livelinks or stay on page
-      // router.push("/livelinks");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to create link");
     } finally {
@@ -79,7 +76,7 @@ export default function NewLinkPage() {
             </h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Image Uploader */}
+              {}
               <div>
                 <label className="block text-sm md:text-base font-semibold text-primary-dark dark:text-primary-light mb-2">
                   Image *
@@ -91,7 +88,7 @@ export default function NewLinkPage() {
                 />
               </div>
 
-              {/* Description */}
+              {}
               <div>
                 <label
                   htmlFor="description"
@@ -114,7 +111,7 @@ export default function NewLinkPage() {
                 </p>
               </div>
 
-              {/* Location */}
+              {}
         <div>
                 <label
                   htmlFor="location"
@@ -134,7 +131,7 @@ export default function NewLinkPage() {
                 />
               </div>
 
-              {/* Submit Button */}
+              {}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   type="button"

@@ -31,7 +31,6 @@ export async function POST(req: Request) {
   if (!user)
     return NextResponse.json({ error: "User not found" }, { status: 401 });
 
-  // Find the refresh token in the array (supports multiple devices)
   const tokenData = await findRefreshToken(payload.userId, token);
   if (!tokenData) {
     return NextResponse.json(
@@ -50,14 +49,13 @@ export async function POST(req: Request) {
     username: user.username,
   });
 
-  // Replace old token with new one (token rotation)
   const userAgent = req.headers.get("user-agent") || "";
   const deviceId = tokenData.deviceId || generateDeviceId(userAgent);
   await replaceRefreshToken(payload.userId, token, newRefreshToken, deviceId);
 
-  const res = NextResponse.json({ 
-    ok: true, 
-    accessToken: newAccessToken // Return token for standalone backend use
+  const res = NextResponse.json({
+    ok: true,
+    accessToken: newAccessToken
   });
 
   setAuthCookies(res, newAccessToken, newRefreshToken);

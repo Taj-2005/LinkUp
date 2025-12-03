@@ -22,7 +22,7 @@ export default function ProfileCard({ user, onImageClick }: ProfileCardProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8" 
+            className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8"
           >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -107,7 +107,7 @@ export default function ProfileCard({ user, onImageClick }: ProfileCardProps) {
 
   return (
     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-      
+
       <div
         onClick={onImageClick}
         onContextMenu={(e) => {

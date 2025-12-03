@@ -348,7 +348,7 @@ linkup/
 │   │   │   ├── livelinks/page.tsx
 │   │   │   ├── linkfinder/page.tsx
 │   │   │   ├── linkhub/[username]/page.tsx
-│   │   │   └── linkupreqs/page.tsx
+│   │   │   └── notifications/page.tsx
 │   │   ├── verification-pending/
 │   │   │   └── VerificationPendingContent.tsx  # Socket.IO verification
 │   │   └── layout.tsx

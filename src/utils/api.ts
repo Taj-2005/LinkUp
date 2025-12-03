@@ -143,11 +143,9 @@ export async function signout(): Promise<APIJson<null>> {
   }
 }
 
-
 export function getCurrentUser(): Promise<{ user: IUser }> {
   return authFetch("/api/protected/me") as Promise<{ user: IUser }>;
 }
-
 
 export function getAllUsers(): Promise<IUser[]> {
   return authFetch("/api/protected/users") as Promise<IUser[]>;
@@ -171,7 +169,7 @@ export async function getUser(identifier: string) {
   const json = await res.json();
 
     if (!res.ok) {
-      // Don't throw for 404 - user might not exist, just return null
+
       if (res.status === 404) {
         return null;
       }

@@ -11,7 +11,7 @@ export default function FeedLinkSkeleton() {
       transition={{ duration: 0.4 }}
       className="w-full max-w-2xl mx-auto bg-right-nav-light dark:bg-right-nav-dark rounded-2xl overflow-hidden shadow-lg border border-primary-light/20 dark:border-primary-dark/30 mb-6"
     >
-      {/* Header Skeleton */}
+      {}
       <div className="flex items-center gap-3 p-4 pb-3">
         <motion.div
           className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex-shrink-0"
@@ -51,7 +51,7 @@ export default function FeedLinkSkeleton() {
         </div>
       </div>
 
-      {/* Image Skeleton */}
+      {}
       <motion.div
         className="relative w-full aspect-square bg-gray-200 dark:bg-gray-700"
         animate={{
@@ -76,7 +76,7 @@ export default function FeedLinkSkeleton() {
         />
       </motion.div>
 
-      {/* Actions Skeleton */}
+      {}
       <div className="p-4 pt-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
@@ -145,4 +145,3 @@ export default function FeedLinkSkeleton() {
     </motion.div>
   );
 }
-

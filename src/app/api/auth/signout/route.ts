@@ -16,7 +16,7 @@ export async function POST() {
     const token = cookieStore.get("refreshToken")?.value;
 
     if (token) {
-      // Find user by token (check both array and legacy field)
+
       const user = await User.findOne({
         $or: [
           { refreshToken: token },
@@ -25,7 +25,7 @@ export async function POST() {
       });
 
       if (user) {
-        // Remove the specific token (supports multi-device logout)
+
         await removeRefreshToken(user._id.toString(), token);
       }
     }

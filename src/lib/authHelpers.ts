@@ -31,7 +31,6 @@ export async function validateAndRefreshTokens(refreshToken: string): Promise<Re
       return { success: false, error: "User not found" };
     }
 
-    // Find the refresh token in the array (supports multiple devices)
     const tokenData = await findRefreshToken(user._id.toString(), refreshToken);
     if (!tokenData) {
       console.log("❌ Refresh token mismatch!");
@@ -53,7 +52,6 @@ export async function validateAndRefreshTokens(refreshToken: string): Promise<Re
     console.log("New access token generated");
     console.log("New refresh token generated (trimmed):", newRefreshToken.slice(0, 12));
 
-    // Replace old token with new one (token rotation)
     await replaceRefreshToken(
       user._id.toString(),
       refreshToken,

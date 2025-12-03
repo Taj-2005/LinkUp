@@ -3,42 +3,41 @@
 import { useEffect } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUsers } from "@/hooks/useUsers";
-import { getUnseenRequestCount } from "@/utils/linkRequestApi";
+import { getCombinedUnreadCount } from "@/utils/notificationBadge";
+import { setupLinkSocketHandlers } from "@/utils/socketHandlers";
+import { mutate } from "swr";
 import Cookies from "js-cookie";
 
 export default function SocketInitializer({ children }: { children: React.ReactNode }) {
-    const { initializeSocket, disconnectSocket, setUnseenCount } = useSocketStore();
+    const { initializeSocket, disconnectSocket, setUnseenCount, socket } = useSocketStore();
     const { currentUser } = useUsers();
     const user = currentUser;
 
     useEffect(() => {
-        // Initialize socket when user is logged in
+
         if (user) {
             initializeSocket();
-            
-            // Fetch initial count via API
-            const fetchCount = async () => {
+
+            const fetchInitialCount = async () => {
                 try {
-                    // Try readable cookie first, then fallback to regular cookie
+
                     const token = Cookies.get("accessTokenReadable") || Cookies.get("accessToken");
                     if (token) {
-                        const data = await getUnseenRequestCount();
-                        const validCount = typeof data.count === "number" && data.count > 0 ? data.count : 0;
+                        const count = await getCombinedUnreadCount();
+                        const validCount = typeof count === "number" && count > 0 ? count : 0;
                         setUnseenCount(validCount);
                     }
-                } catch (error) {
-                    console.error("Failed to fetch initial count:", error);
+                } catch{
                     setUnseenCount(0);
                 }
             };
-            
-            fetchCount();
+
+            fetchInitialCount();
         } else {
             disconnectSocket();
             setUnseenCount(0);
         }
 
-        // Cleanup on unmount
         return () => {
             if (!user) {
                 disconnectSocket();
@@ -46,6 +45,59 @@ export default function SocketInitializer({ children }: { children: React.ReactN
         };
     }, [user, initializeSocket, disconnectSocket, setUnseenCount]);
 
+    useEffect(() => {
+        if (!socket || !currentUser?._id) return;
+
+        const cleanup = setupLinkSocketHandlers(socket, currentUser._id);
+
+        return cleanup;
+    }, [socket, currentUser?._id]);
+
+    useEffect(() => {
+        if (!socket || !currentUser?._id) return;
+
+        const handleNewNotification = () => {
+
+            mutate("notifications");
+
+        };
+
+        const handleNotificationUpdate = (data: {
+            unseenCount: number;
+            action: string;
+            notificationId?: string;
+        }) => {
+
+            mutate("notifications");
+
+        };
+
+        const handleUnseenCountUpdate = (data: {
+            unseenCount: number;
+            notificationCount?: number;
+            linkRequestCount?: number;
+        }) => {
+
+            const validCount = typeof data.unseenCount === "number" && data.unseenCount >= 0
+                ? data.unseenCount
+                : 0;
+            setUnseenCount(validCount);
+
+            if (typeof data.notificationCount === "number") {
+                mutate("notifications");
+            }
+        };
+
+        socket.on("notification:new", handleNewNotification);
+        socket.on("notification:update", handleNotificationUpdate);
+        socket.on("unseenCount:update", handleUnseenCountUpdate);
+
+        return () => {
+            socket.off("notification:new", handleNewNotification);
+            socket.off("notification:update", handleNotificationUpdate);
+            socket.off("unseenCount:update", handleUnseenCountUpdate);
+        };
+    }, [socket, currentUser?._id, setUnseenCount]);
+
     return <>{children}</>;
 }
-

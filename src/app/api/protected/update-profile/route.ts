@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import { User } from "@/models/User";
 import { cookies } from "next/headers";
 
-const SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 type UpdatableUserFields = {
   username?: string;
@@ -51,19 +51,18 @@ export async function PATCH(req: Request) {
 
     const updatedUser = await User.findById(userId).select("-password -__v");
 
-    // Notify Socket.IO server to emit real-time updates
     try {
         await fetch(`${SOCKET_SERVER_URL}/api/users/profile-updated-notify`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 userId: userId
             }),
         }).catch(() => {
-            // Silently fail - profile update still succeeded
+
         });
     } catch (socketError) {
-        // Silently fail - profile update still succeeded, socket notification is optional
+
         console.error("Socket notification error (non-critical):", socketError);
     }
 

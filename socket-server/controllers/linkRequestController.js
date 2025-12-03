@@ -1,4 +1,6 @@
 const linkRequestService = require("../services/linkRequestService");
+const { emitLinkUpEvent } = require("../utils/emitLinkUpEvent");
+const { emitCombinedUnseenCount } = require("../utils/emitNotificationUpdate");
 
 class LinkRequestController {
     async sendRequest(req, res) {
@@ -12,20 +14,14 @@ class LinkRequestController {
 
             const request = await linkRequestService.sendRequest(requesterId, receiverId);
 
-            // Emit socket event to notify receiver
             const io = req.app.get("io");
             if (io) {
-                // Get requester info from main database (we'll need to fetch this)
-                // For now, emit with basic info
-                io.to(`user:${receiverId}`).emit("linkRequestReceived", {
-                    requestId: request._id.toString(),
-                    requesterId: requesterId,
-                    status: "requested",
-                });
+                const authenticatedNamespace = io.of("/");
 
-                // Update unseen count
-                const unseenCount = await linkRequestService.getUnseenRequestCount(receiverId);
-                io.to(`user:${receiverId}`).emit("unseenRequestCount", unseenCount);
+                await emitLinkUpEvent(authenticatedNamespace, "requested", requesterId, receiverId, false);
+
+                const unseenRequestCount = await linkRequestService.getUnseenRequestCount(receiverId);
+                await emitCombinedUnseenCount(authenticatedNamespace, receiverId, unseenRequestCount);
             }
 
             res.json({ success: true, request });
@@ -45,24 +41,16 @@ class LinkRequestController {
 
             const request = await linkRequestService.acceptRequest(requestId, userId);
 
-            // Emit socket events
             const io = req.app.get("io");
             if (io) {
-                // Notify requester
-                io.to(`user:${request.requesterId}`).emit("linkRequestAccepted", {
-                    requestId: request._id.toString(),
-                    receiverId: request.receiverId,
-                });
+                const authenticatedNamespace = io.of("/");
+                const requesterId = request.requesterId.toString();
+                const receiverId = request.receiverId.toString();
 
-                // Notify receiver
-                io.to(`user:${request.receiverId}`).emit("linkRequestAccepted", {
-                    requestId: request._id.toString(),
-                    receiverId: request.receiverId,
-                });
+                await emitLinkUpEvent(authenticatedNamespace, "accepted", requesterId, receiverId, true);
 
-                // Update unseen count
-                const unseenCount = await linkRequestService.getUnseenRequestCount(userId);
-                io.to(`user:${userId}`).emit("unseenRequestCount", unseenCount);
+                const unseenRequestCount = await linkRequestService.getUnseenRequestCount(userId);
+                await emitCombinedUnseenCount(authenticatedNamespace, userId, unseenRequestCount);
             }
 
             res.json({ success: true, request });
@@ -82,38 +70,16 @@ class LinkRequestController {
 
             const request = await linkRequestService.rejectRequest(requestId, userId);
 
-            // Emit socket events
             const io = req.app.get("io");
             if (io) {
                 const authenticatedNamespace = io.of("/");
-                
-                // Notify requester (who sent the request) that it was rejected
-                authenticatedNamespace.to(`user:${request.requesterId}`).emit("linkRequestRejected", {
-                    requestId: request._id.toString(),
-                    requesterId: request.requesterId,
-                    receiverId: request.receiverId,
-                    timestamp: new Date().toISOString(),
-                });
-                
-                // Notify receiver (who rejected the request)
-                authenticatedNamespace.to(`user:${request.receiverId}`).emit("linkRequestRejected", {
-                    requestId: request._id.toString(),
-                    requesterId: request.requesterId,
-                    receiverId: request.receiverId,
-                    timestamp: new Date().toISOString(),
-                });
-                
-                // Emit userUpdated events to trigger user list refresh for both users
-                authenticatedNamespace.to(`user:${request.requesterId}`).emit("userUpdated", {
-                    userId: request.requesterId,
-                });
-                authenticatedNamespace.to(`user:${request.receiverId}`).emit("userUpdated", {
-                    userId: request.receiverId,
-                });
+                const requesterId = request.requesterId.toString();
+                const receiverId = request.receiverId.toString();
 
-                // Update unseen count
-                const unseenCount = await linkRequestService.getUnseenRequestCount(userId);
-                io.to(`user:${userId}`).emit("unseenRequestCount", unseenCount);
+                await emitLinkUpEvent(authenticatedNamespace, "rejected", requesterId, receiverId, false);
+
+                const unseenRequestCount = await linkRequestService.getUnseenRequestCount(userId);
+                await emitCombinedUnseenCount(authenticatedNamespace, userId, unseenRequestCount);
             }
 
             res.json({ success: true, request });
@@ -142,8 +108,9 @@ class LinkRequestController {
                 return res.status(400).json({ error: "Receiver ID is required" });
             }
 
-            const status = await linkRequestService.getRequestStatus(requesterId, receiverId);
-            res.json({ status });
+            const statusResult = await linkRequestService.getRequestStatus(requesterId, receiverId);
+
+            res.json(statusResult);
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
@@ -170,11 +137,11 @@ class LinkRequestController {
 
             await linkRequestService.markRequestAsSeen(requestId, userId);
 
-            // Update unseen count
             const io = req.app.get("io");
             if (io) {
-                const unseenCount = await linkRequestService.getUnseenRequestCount(userId);
-                io.to(`user:${userId}`).emit("unseenRequestCount", unseenCount);
+                const authenticatedNamespace = io.of("/");
+                const unseenRequestCount = await linkRequestService.getUnseenRequestCount(userId);
+                await emitCombinedUnseenCount(authenticatedNamespace, userId, unseenRequestCount);
             }
 
             res.json({ success: true });
@@ -182,7 +149,37 @@ class LinkRequestController {
             res.status(400).json({ error: error.message });
         }
     }
+
+    async getBatchStatus(req, res) {
+        try {
+            const userId = req.user.userId;
+            const idsParam = req.query.ids;
+
+            if (!idsParam || typeof idsParam !== "string") {
+                return res.status(400).json({ error: "ids query parameter is required (comma-separated)" });
+            }
+
+            const targetUserIds = idsParam
+                .split(",")
+                .map(id => id.trim())
+                .filter(id => id.length > 0);
+
+            if (targetUserIds.length === 0) {
+                return res.json({});
+            }
+
+            if (targetUserIds.length > 1000) {
+                return res.status(400).json({ error: "Maximum 1000 user IDs allowed per batch" });
+            }
+
+            const statusMap = await linkRequestService.getBatchRequestStatus(userId, targetUserIds);
+
+            res.json(statusMap);
+        } catch (error) {
+            console.error("Error fetching batch link statuses:", error);
+            res.status(400).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = new LinkRequestController();
-

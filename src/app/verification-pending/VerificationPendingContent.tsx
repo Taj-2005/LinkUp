@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { io, Socket } from "socket.io-client";
 import { mutate } from "swr";
 
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL || "http://localhost:3001";
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export default function VerificationPendingContent() {
   const router = useRouter();
@@ -22,14 +22,12 @@ export default function VerificationPendingContent() {
   const [resent, setResent] = useState(false);
   const [darkMode] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
-  
+
   const verificationSocketRef = useRef<Socket | null>(null);
 
-  // Socket.IO real-time verification listener (replaces SWR polling)
   useEffect(() => {
     if (!userEmail) return;
 
-    // Connect to verification namespace (no auth required)
     const verificationNamespace = `${SOCKET_SERVER_URL}/verification`;
     const socket = io(verificationNamespace, {
       transports: ["websocket", "polling"],
@@ -41,19 +39,17 @@ export default function VerificationPendingContent() {
     verificationSocketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("Verification socket connected");
-      // Join verification room for this email
+
       socket.emit("joinVerificationRoom", { email: userEmail });
     });
 
     socket.on("connect_error", (error) => {
       console.error("Verification socket connection error:", error);
-      // Fallback: Use polling if socket fails (optional)
+
     });
 
-    // Listen for email verification event from socket server
     const handleEmailVerified = async (data: { email: string; timestamp?: string }) => {
-      // Verify the email matches
+
       if (data.email.toLowerCase() !== userEmail?.toLowerCase()) {
         return;
       }
@@ -62,7 +58,7 @@ export default function VerificationPendingContent() {
       toast.success("✅ Email verified! Logging you in...");
 
       try {
-        // Auto-login after verification
+
         const res = await fetch("/api/auth/login-without-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,20 +68,18 @@ export default function VerificationPendingContent() {
         const responseData = await res.json();
 
         if (responseData.ok) {
-          // Refresh SWR cache with new user data (industry standard)
+
           await mutate("current-user");
           await mutate("all-users");
-          
-          // Initialize main socket with new auth token
+
           const { initializeSocket } = useSocketStore.getState();
           initializeSocket();
-          
+
             router.push("/livelinks");
         } else {
           toast.error("Failed to log in. Please try signing in manually.");
         }
-      } catch (error) {
-        console.error("Login error:", error);
+      } catch {
         toast.error("Failed to log in. Please try signing in manually.");
       } finally {
         setIsVerifying(false);
@@ -94,7 +88,6 @@ export default function VerificationPendingContent() {
 
     socket.on("email-verified", handleEmailVerified);
 
-    // Cleanup on unmount
     return () => {
       socket.off("email-verified", handleEmailVerified);
       socket.emit("leaveVerificationRoom", { email: userEmail });
@@ -240,7 +233,7 @@ export default function VerificationPendingContent() {
           </div>
 
           <div className={`${theme.cardBg} ${theme.border} border rounded-3xl shadow-2xl w-full max-w-md relative z-10 p-8`}>
-            
+
             <div className="text-center mb-6 flex flex-col items-center">
               <Image
                 src={darkMode ? "/logo.png" : "/dark-logo.png"}

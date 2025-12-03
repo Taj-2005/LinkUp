@@ -27,7 +27,6 @@ export default function TechItem({
 }: TechItemProps) {
   const [isHoveredItem, setIsHoveredItem] = useState(false);
 
-  // Optimized transforms with better performance
   const baseX = useTransform(mouseX, (latestX) => position.x + latestX * 0.04);
   const baseY = useTransform(mouseY, (latestY) => position.y + latestY * 0.04);
   const hoverX = useTransform(mouseX, (latestX) => position.x + latestX * 0.15);
@@ -79,7 +78,7 @@ export default function TechItem({
         }}
         style={{ willChange: 'transform' }}
       >
-        {/* Always render shimmer but control visibility with opacity */}
+        {}
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
           animate={{
@@ -117,12 +116,12 @@ export default function TechItem({
           }}
         />
 
-        {/* Hover glow - optimized */}
+        {}
         <motion.div
           className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-500/30 to-pink-500/30 opacity-0 group-hover:opacity-100 blur-2xl -z-10 transition-opacity duration-300"
         />
 
-        {/* Always render particles but control visibility */}
+        {}
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(8)].map((_, i) => (
             <motion.div

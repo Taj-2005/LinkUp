@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import {IUser} from "@/models/User"
 import Image from "next/image";
 import LinkUpButton from "../LinkUpButton";
+import { LinkStatus } from "@/hooks/useLinkStatus";
 
 interface UserProps {
-    user: IUser | null
+    user: IUser | null;
+    linkStatus?: LinkStatus;
+    isLoadingStatus?: boolean;
 }
-export default function User({user} : UserProps) {
+export default function User({user, linkStatus, isLoadingStatus}: UserProps) {
     const { resolvedTheme } = useTheme();
     const router = useRouter();
 
@@ -18,7 +21,7 @@ export default function User({user} : UserProps) {
         return
     }
   return (
-    <div 
+    <div
     onClick={() => handleClick()}
     className="flex justify-between px-8 py-2 hover:scale-103 hover:shadow-lg transition-all duration-300 rounded-2xl items-center">
             <div className="flex gap-2 ">
@@ -36,7 +39,11 @@ export default function User({user} : UserProps) {
                     <div className="text-gray-500">{user?.name}</div>
                 </div>
             </div>
-            <LinkUpButton receiverId={user?._id || ""} />
+            <LinkUpButton
+                receiverId={user?._id || ""}
+                status={linkStatus}
+                isLoading={isLoadingStatus}
+            />
         </div>
     )
 }

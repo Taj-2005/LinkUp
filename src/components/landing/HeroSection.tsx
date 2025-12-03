@@ -17,8 +17,6 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
     offset: ['start start', 'end start'],
   });
 
-  // Fix: Only start fading after significant scroll (0.7 instead of 0.5)
-  // This keeps hero visible longer
   const opacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.98]);
   const y = useTransform(scrollYProgress, [0, 0.8], [0, 30]);
@@ -54,12 +52,12 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
   ];
 
   return (
-    <section 
+    <section
       ref={containerRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-32 px-4 sm:px-6"
       style={{ willChange: 'scroll-position' }}
     >
-      {/* Optimized animated background with GPU acceleration */}
+      {}
       <div className="absolute inset-0 overflow-hidden" style={{ willChange: 'transform' }}>
         <motion.div
           className="absolute top-1/4 left-1/4 w-[700px] h-[700px] bg-violet-500/8 rounded-full blur-3xl"
@@ -104,7 +102,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
         />
       </div>
 
-      {/* Grid pattern overlay */}
+      {}
       <div className={`
         absolute inset-0 pointer-events-none
         ${isDark ? 'opacity-[0.015]' : 'opacity-[0.02]'}
@@ -113,9 +111,9 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
       `} />
 
       <motion.div
-        style={{ 
-          opacity, 
-          scale, 
+        style={{
+          opacity,
+          scale,
           y,
           willChange: 'transform, opacity',
         }}
@@ -127,13 +125,13 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
           animate="visible"
           className="text-center"
         >
-          {/* Premium badge */}
+          {}
           <motion.div variants={itemVariants} className="mb-10">
             <motion.div
               className={`
                 inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-sm font-medium
-                ${isDark 
-                  ? 'bg-violet-500/10 border border-violet-500/20 text-violet-300 backdrop-blur-md' 
+                ${isDark
+                  ? 'bg-violet-500/10 border border-violet-500/20 text-violet-300 backdrop-blur-md'
                   : 'bg-violet-50 border border-violet-200 text-violet-700'
                 }
                 shadow-lg
@@ -153,7 +151,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
             </motion.div>
           </motion.div>
 
-          {/* Main heading with refined typography */}
+          {}
           <motion.h1
             variants={itemVariants}
             className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold mb-8 leading-[1.05] tracking-tight"
@@ -171,7 +169,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
             </span>
           </motion.h1>
 
-          {/* Subheading with better spacing */}
+          {}
           <motion.p
             variants={itemVariants}
             className={`
@@ -194,7 +192,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
             Powered by Socket.IO, Next.js, and MongoDB for enterprise-grade performance
           </motion.p>
 
-          {/* Premium CTA Buttons */}
+          {}
           <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24"
@@ -208,7 +206,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
                 overflow-hidden
                 backdrop-blur-sm
               `}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.03,
                 y: -2,
               }}
@@ -225,8 +223,8 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
               onClick={onSignIn}
               className={`
                 px-10 py-5 rounded-2xl font-semibold text-lg
-                ${isDark 
-                  ? 'bg-white/5 border-2 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm' 
+                ${isDark
+                  ? 'bg-white/5 border-2 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm'
                   : 'bg-gray-50 border-2 border-gray-200 text-gray-900 hover:bg-gray-100'
                 }
                 transition-all duration-300
@@ -240,7 +238,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
             </motion.button>
           </motion.div>
 
-          {/* Premium Metrics Grid with Animated Charts */}
+          {}
           <motion.div
             variants={itemVariants}
             className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto"
@@ -256,19 +254,19 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
                 whileHover={{ scale: 1.03, y: -4 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 0.5, 
-                  delay: 0.3 + index * 0.08, 
-                  ease: 'easeOut' 
+                transition={{
+                  duration: 0.5,
+                  delay: 0.3 + index * 0.08,
+                  ease: 'easeOut'
                 }}
                 style={{ willChange: 'transform' }}
               >
-                {/* Gradient background on hover */}
+                {}
                 <motion.div
                   className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
                 />
 
-                {/* Icon */}
+                {}
                 <div className={`
                   mb-4 inline-flex p-2.5 rounded-xl bg-gradient-to-br ${metric.color}
                   text-white shadow-lg
@@ -276,7 +274,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
                   {metric.icon}
                 </div>
 
-                {/* Value */}
+                {}
                 <div className={`
                   text-3xl md:text-4xl font-bold mb-2
                   ${isDark ? 'text-white' : 'text-gray-900'}
@@ -284,7 +282,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
                   {metric.value}
                 </div>
 
-                {/* Label */}
+                {}
                 <div className={`
                   text-sm md:text-base
                   ${isDark ? 'text-gray-400' : 'text-gray-600'}
@@ -292,7 +290,7 @@ export default function HeroSection({ isDark, onSignUp, onSignIn }: HeroSectionP
                   {metric.label}
                 </div>
 
-                {/* Animated progress bar */}
+                {}
                 <motion.div
                   className={`
                     absolute bottom-0 left-0 right-0 h-1

@@ -17,7 +17,7 @@ export default function Chats({ setUser }: ChatsProps) {
   if (!filteredUsers || filteredUsers.length === 0)
     return (
       <div className="flex flex-col items-center justify-center h-full mt-6 sm:mt-10 select-none px-4">
-        <div 
+        <div
           className="animate-wiggle text-primary-light dark:text-primary-light/70"
           style={{ transformOrigin: "center center" }}
           aria-hidden="true"
@@ -48,7 +48,6 @@ export default function Chats({ setUser }: ChatsProps) {
         </p>
       </div>
     );
-
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto max-h-[720px] hide-scrollbar pr-2">

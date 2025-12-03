@@ -5,6 +5,7 @@ import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
 import useDebounce from "@/hooks/useDebounce";
 import { useUsers } from "@/hooks/useUsers";
+import { useBatchLinkStatus } from "@/hooks/useBatchLinkStatus";
 
 export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -13,15 +14,23 @@ export default function SearchBar() {
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  
-  const usersWithoutCurrent = useMemo(() => 
+
+  const usersWithoutCurrent = useMemo(() =>
     allUsers?.filter((u) => u._id !== currentUser?._id) || [],
     [allUsers, currentUser]
   );
 
+  const userIds = useMemo(() =>
+    usersWithoutCurrent.map((u) => u._id),
+    [usersWithoutCurrent]
+  );
+
+  const { statusMap, isLoading: isLoadingStatuses } = useBatchLinkStatus(userIds, {
+    enabled: usersWithoutCurrent.length > 0,
+  });
+
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  // Use useMemo for filteredUsers to avoid infinite loops
   const filteredUsers = useMemo(() => {
     if (!debouncedQuery.trim()) {
       return usersWithoutCurrent;
@@ -52,8 +61,8 @@ export default function SearchBar() {
 
       <div
         className="
-          sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark 
-          border-b border-primary-light/30 dark:border-primary-dark/30 
+          sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark
+          border-b border-primary-light/30 dark:border-primary-dark/30
           p-3 md:p-5 flex items-center rounded-t-xl
         "
       >
@@ -66,16 +75,21 @@ export default function SearchBar() {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           className="
-            w-full rounded-md border border-gray-300 dark:border-gray-600 
-            bg-white dark:bg-right-nav-dark px-3 md:px-4 py-2 md:py-3 text-sm md:text-base text-gray-900 dark:text-gray-100 
-            placeholder-gray-400 focus:outline-none focus:ring-2 
+            w-full rounded-md border border-gray-300 dark:border-gray-600
+            bg-white dark:bg-right-nav-dark px-3 md:px-4 py-2 md:py-3 text-sm md:text-base text-gray-900 dark:text-gray-100
+            placeholder-gray-400 focus:outline-none focus:ring-2
             focus:ring-gray-500 transition
           "
         />
       </div>
 
       {!isFocused && searchQuery.trim() === "" && (
-        <Suggestions users={usersWithoutCurrent} currentUser={currentUser} />
+        <Suggestions
+          users={usersWithoutCurrent}
+          currentUser={currentUser}
+          linkStatusMap={statusMap}
+          isLoadingStatuses={isLoadingStatuses}
+        />
       )}
 
       {(isFocused || searchQuery.trim() !== "") && (
@@ -115,7 +129,12 @@ export default function SearchBar() {
             </div>
           ) : filteredUsers.length > 0 ? (
             filteredUsers.map((u) => (
-              <User key={u._id} user={u} />
+              <User
+                key={u._id}
+                user={u}
+                linkStatus={statusMap[u._id]?.status}
+                isLoadingStatus={isLoadingStatuses}
+              />
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-16 select-none text-center">

@@ -4,7 +4,10 @@ import { requireAuth } from "@/lib/auth";
 import { User } from "@/models/User";
 import { Link } from "@/models/Link";
 import { dbConnect } from "@/lib/dbConnect";
+import { createNotification } from "@/utils/notifications";
 import mongoose from "mongoose";
+
+const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(
   req: Request,
@@ -23,34 +26,29 @@ export async function POST(
       return NextResponse.json({ error: "Invalid link ID" }, { status: 400 });
     }
 
-    // Verify link exists
     const link = await Link.findById(linkId);
     if (!link) {
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    // First check current state using lean query
     const currentUser = await User.findById(userId).lean();
     if (!currentUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const linkIdStr = linkId.toString();
-    
-    // Type guard for user with savedLinks property
+
     interface UserWithSavedLinks {
       savedLinks?: unknown[];
       [key: string]: unknown;
     }
-    
+
     const userWithSavedLinks = currentUser as UserWithSavedLinks;
-    
-    // Get current savedLinks array (handle case where field doesn't exist)
+
     const currentSavedLinks = Array.isArray(userWithSavedLinks.savedLinks) ? userWithSavedLinks.savedLinks : [];
     const savedLinksStr = currentSavedLinks.map((id: unknown) => String(id));
     const wasSaved = savedLinksStr.includes(linkIdStr);
 
-    // Use native MongoDB collection to bypass Mongoose schema issues
     const db = mongoose.connection.db;
     if (!db) {
       return NextResponse.json(
@@ -61,21 +59,59 @@ export async function POST(
     const usersCollection = db.collection('users');
     const userIdObjectId = new mongoose.Types.ObjectId(userId);
 
-    // Use MongoDB array operators for reliable updates - these work even if field doesn't exist
     let updateResult;
     if (wasSaved) {
-      // Unsave: remove linkId from savedLinks array using $pull
+
       updateResult = await usersCollection.updateOne(
         { _id: userIdObjectId },
         { $pull: { savedLinks: linkIdStr } } as unknown as mongoose.mongo.UpdateFilter<mongoose.mongo.Document>
       );
     } else {
-      // Save: add linkId to savedLinks array using $addToSet (prevents duplicates)
-      // If field doesn't exist, MongoDB will create it automatically
+
       updateResult = await usersCollection.updateOne(
         { _id: userIdObjectId },
         { $addToSet: { savedLinks: linkIdStr } } as unknown as mongoose.mongo.UpdateFilter<mongoose.mongo.Document>
       );
+
+      let actorUser: { username?: string; user_avatar?: string } | null = currentUser as { username?: string; user_avatar?: string } | null;
+      if (!actorUser) {
+        const fetchedUser = await User.findById(userId).select("username user_avatar").lean() as { username?: string; user_avatar?: string } | null;
+        actorUser = fetchedUser;
+      }
+
+      const { generateDeepLink } = await import("@/utils/deepLinks");
+      const deepLink = generateDeepLink(linkId, "save");
+
+      await createNotification({
+        userId: link.userId,
+        actorId: userId.toString(),
+        linkId: linkId,
+        type: "save",
+      });
+
+      try {
+        await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: link.userId,
+            actorId: userId.toString(),
+            linkId: linkId,
+            type: "save",
+            deepLink: deepLink,
+            actor: {
+              _id: userId.toString(),
+              username: actorUser?.username || "Unknown",
+              avatar: actorUser?.user_avatar || null,
+            },
+          }),
+        }).catch(() => {
+
+        });
+      } catch (socketError) {
+
+        console.error("Socket notification error (non-critical):", socketError);
+      }
     }
 
     if (updateResult.matchedCount === 0) {
@@ -85,26 +121,18 @@ export async function POST(
       );
     }
 
-    if (updateResult.modifiedCount === 0 && !wasSaved) {
-      // If we tried to save but nothing was modified, the link might already be there
-      console.warn('Update reported 0 modifications but we expected to save');
-    }
-    
-    // Wait a tiny bit to ensure write is committed, then verify
     await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Get the updated user using native collection to verify
+
     const updatedUserDoc = await usersCollection.findOne(
       { _id: userIdObjectId },
       { projection: { savedLinks: 1 } }
     );
-    
-    // Convert to format expected by rest of code
+
     const updatedUser = updatedUserDoc ? {
       _id: updatedUserDoc._id.toString(),
       savedLinks: updatedUserDoc.savedLinks || []
     } : null;
-    
+
     if (!updatedUser) {
       return NextResponse.json(
         { error: "Failed to retrieve updated user" },
@@ -112,27 +140,11 @@ export async function POST(
       );
     }
 
-    // Log for debugging
-    console.log('Save operation:', {
-      userId: userId.toString(),
-      linkId: linkIdStr,
-      wasSaved,
-      action: wasSaved ? 'unsaved' : 'saved',
-      updateResult: {
-        matchedCount: updateResult.matchedCount,
-        modifiedCount: updateResult.modifiedCount
-      },
-      currentSavedLinksBefore: currentSavedLinks.length,
-      updatedUserSavedLinks: updatedUser.savedLinks?.length || 0,
-      updatedUserSavedLinksArray: updatedUser.savedLinks
-    });
-
-    // Verify the save was successful by querying DB again using native collection (definitive check)
     const verifyUserDoc = await usersCollection.findOne(
       { _id: userIdObjectId },
       { projection: { savedLinks: 1 } }
     );
-    
+
     if (!verifyUserDoc) {
       return NextResponse.json(
         { error: "Failed to verify save" },
@@ -140,54 +152,17 @@ export async function POST(
       );
     }
 
-    // Ensure we have an array (handle case where field doesn't exist in DB)
-    const verifySavedLinks = Array.isArray(verifyUserDoc.savedLinks) 
+    const verifySavedLinks = Array.isArray(verifyUserDoc.savedLinks)
       ? verifyUserDoc.savedLinks.map((id: unknown) => String(id))
       : [];
     const isNowSaved = verifySavedLinks.includes(linkIdStr);
-    
-    // Log verification for debugging
-    console.log('Verification:', {
-      userId: userId.toString(),
-      linkId: linkIdStr,
-      verifySavedLinksCount: verifySavedLinks.length,
-      isNowSaved,
-      verifySavedLinks: verifySavedLinks,
-      verifyUserRaw: verifyUserDoc.savedLinks,
-      expectedSaved: !wasSaved,
-      updateResult: {
-        matchedCount: updateResult.matchedCount,
-        modifiedCount: updateResult.modifiedCount
-      }
-    });
-    
-    // Double-check: if verification doesn't match expected state, log error
-    if (wasSaved && isNowSaved) {
-      console.error('ERROR: Link should be unsaved but verification shows it as saved!');
-    } else if (!wasSaved && !isNowSaved) {
-      console.error('ERROR: Link should be saved but verification shows it as unsaved!');
-      console.error('Debug info:', {
-        wasSaved,
-        isNowSaved,
-        verifySavedLinks,
-        currentSavedLinksBefore: currentSavedLinks,
-        updatedUserSavedLinks: updatedUser?.savedLinks,
-        verifyUserSavedLinks: verifyUserDoc.savedLinks,
-        updateResult: {
-          matchedCount: updateResult.matchedCount,
-          modifiedCount: updateResult.modifiedCount
-        },
-        verifyUserDocRaw: verifyUserDoc
-      });
-    }
 
-    // Return the new state and the action that was performed
     return NextResponse.json(
       {
         success: true,
         saved: isNowSaved,
-        isSaved: isNowSaved, // Keep both for backward compatibility
-        action: wasSaved ? 'unsaved' : 'saved', // Track the action performed
+        isSaved: isNowSaved,
+        action: wasSaved ? 'unsaved' : 'saved',
       },
       { status: 200 }
     );
@@ -199,4 +174,3 @@ export async function POST(
     );
   }
 }
-

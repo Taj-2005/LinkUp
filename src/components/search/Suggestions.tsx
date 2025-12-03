@@ -3,18 +3,21 @@
 import { useState, useMemo } from "react";
 import User from "@/components/search/User";
 import { IUser } from "@/models/User";
+import { LinkStatus } from "@/hooks/useLinkStatus";
 
 interface SuggestionsProps {
   users: IUser[];
   currentUser: IUser | null;
+  linkStatusMap?: Record<string, { status: LinkStatus; requestId?: string }>;
+  isLoadingStatuses?: boolean;
 }
 
-export default function Suggestions({ users, currentUser }: SuggestionsProps) {
+export default function Suggestions({ users, currentUser, linkStatusMap, isLoadingStatuses }: SuggestionsProps) {
   const [showAll, setShowAll] = useState(false);
 
   const sortedUsers = useMemo(() => {
     const filteredUsers = users.filter((u) => u._id !== currentUser?._id);
-    
+
     if (!filteredUsers.length) return [];
 
     return [...filteredUsers].sort((a, b) => {
@@ -59,7 +62,7 @@ export default function Suggestions({ users, currentUser }: SuggestionsProps) {
 
       return 0;
     });
-  }, [users, currentUser]); 
+  }, [users, currentUser]);
 
   const displayed = useMemo(
     () => (showAll ? sortedUsers : sortedUsers.slice(0, 5)),
@@ -102,7 +105,6 @@ export default function Suggestions({ users, currentUser }: SuggestionsProps) {
       </div>
     );
 
-
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="w-full p-4 md:p-10 flex justify-between flex-shrink-0">
@@ -118,7 +120,12 @@ export default function Suggestions({ users, currentUser }: SuggestionsProps) {
 
       <div className="flex-1 overflow-y-auto hide-scrollbar min-h-0 pb-20 md:pb-4">
         {displayed.map((u) => (
-          <User key={u._id} user={u} />
+          <User
+            key={u._id}
+            user={u}
+            linkStatus={linkStatusMap?.[u._id]?.status}
+            isLoadingStatus={isLoadingStatuses}
+          />
         ))}
       </div>
     </div>

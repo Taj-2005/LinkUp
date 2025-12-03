@@ -32,17 +32,15 @@ function NavItem({ Icon, size, label, mobileLabel, text, isActive, onClick, isMo
   const { currentUser } = useUsers();
   const [mounted, setMounted] = useState(false);
 
-  // Prevent hydration mismatch by only using resolvedTheme after mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Use default theme during SSR to match server render
   const theme = mounted ? resolvedTheme : "dark";
-  const profileImageSrc = currentUser?.user_avatar 
-    ? currentUser.user_avatar 
-    : theme === "dark" 
-      ? "/dark-profile.png" 
+  const profileImageSrc = currentUser?.user_avatar
+    ? currentUser.user_avatar
+    : theme === "dark"
+      ? "/dark-profile.png"
       : "/light-profile.png";
 
   if (isMobile) {

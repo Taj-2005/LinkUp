@@ -57,9 +57,9 @@ interface TechStackProps {
 export default function TechStack({ isDark }: TechStackProps) {
   return (
     <section id="tech" className="py-32 md:py-40 px-4 sm:px-6 relative overflow-hidden">
-      {/* Subtle background gradient */}
+      {}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-500/2 to-transparent" />
-      
+
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -82,7 +82,7 @@ export default function TechStack({ isDark }: TechStackProps) {
               My Skills
             </span>
           </motion.div>
-          
+
           <h2 className={`
             text-5xl md:text-6xl lg:text-7xl font-bold mb-6
             ${isDark ? 'text-white' : 'text-gray-900'}
@@ -102,7 +102,7 @@ export default function TechStack({ isDark }: TechStackProps) {
           </p>
         </motion.div>
 
-        {/* Single Row Layout - Optimized */}
+        {}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -116,12 +116,12 @@ export default function TechStack({ isDark }: TechStackProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ 
-                duration: 0.4, 
+              transition={{
+                duration: 0.4,
                 delay: index * 0.05,
                 ease: 'easeOut'
               }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.08,
                 transition: { duration: 0.15, ease: 'easeOut' }
               }}
@@ -129,8 +129,8 @@ export default function TechStack({ isDark }: TechStackProps) {
                 group relative
                 w-16 h-16 md:w-20 md:h-20
                 rounded-xl md:rounded-2xl
-                ${isDark 
-                  ? 'bg-white/5 border border-white/10 backdrop-blur-sm' 
+                ${isDark
+                  ? 'bg-white/5 border border-white/10 backdrop-blur-sm'
                   : 'bg-white border border-gray-200 shadow-md'
                 }
                 p-3 md:p-4
@@ -139,7 +139,7 @@ export default function TechStack({ isDark }: TechStackProps) {
                 cursor-pointer
               `}
             >
-              {/* Animated Popup Tooltip */}
+              {}
               <div
                 className={`
                   absolute -top-14 left-1/2 -translate-x-1/2
@@ -157,14 +157,14 @@ export default function TechStack({ isDark }: TechStackProps) {
                 `}
               >
                 {tech.name}
-                {/* Arrow pointing down */}
+                {}
                 <div className={`
                   absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45
                   ${isDark ? 'bg-gray-800 border-r border-b border-white/10' : 'bg-gray-900 border-r border-b border-gray-700'}
                 `} />
               </div>
 
-              {/* Logo */}
+              {}
               <div className="relative z-10 w-full h-full flex items-center justify-center">
                 <Image
                   src={tech.logo}
@@ -188,7 +188,7 @@ export default function TechStack({ isDark }: TechStackProps) {
                 />
               </div>
 
-              {/* Subtle hover border glow */}
+              {}
               <div className={`
                 absolute inset-0 rounded-xl md:rounded-2xl
                 border-2 border-transparent
@@ -200,7 +200,7 @@ export default function TechStack({ isDark }: TechStackProps) {
           ))}
         </motion.div>
 
-        {/* Horizontal scaling badge */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

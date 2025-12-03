@@ -59,7 +59,7 @@ async function verifyTransporterIfNeeded(): Promise<void> {
 
   const transporter = getTransporter();
   const startTime = Date.now();
-  
+
   try {
     await transporter.verify();
     transporterVerified = true;
@@ -84,7 +84,7 @@ export async function sendVerificationEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}/verify-email?token=${token}&email=${email}`;
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL!}`
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`,
@@ -191,7 +191,7 @@ h2 {
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png"
+      <img src="https:
            alt="LinkUp Logo" class="logo" />
       <div class="header-title">Verify Your Email</div>
       <div class="subtitle">Welcome to LinkUp — We're Glad You're Here.</div>
@@ -200,14 +200,14 @@ h2 {
       <h2>Hi ${username} 👋</h2>
 
       <p>
-        Thanks for signing up for <strong>LinkUp</strong>!  
-        We're building the next generation social platform where you can  
+        Thanks for signing up for <strong>LinkUp</strong>!
+        We're building the next generation social platform where you can
         connect, explore, and grow with people worldwide.
       </p>
 
       <p>
-        You're almost done — verify your email to activate your account  
-        and unlock <strong>LinkHub</strong>, <strong>LiveLinks</strong>,  
+        You're almost done — verify your email to activate your account
+        and unlock <strong>LinkHub</strong>, <strong>LiveLinks</strong>,
         and all the LinkUp features 🚀
       </p>
 
@@ -219,13 +219,13 @@ h2 {
       <p class="link">${verificationUrl}</p>
 
       <p class="note">
-        This link is valid for 24 hours. If you did not create this account,  
+        This link is valid for 24 hours. If you did not create this account,
         simply ignore this email.
       </p>
     </div>
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br />
-      <a href="https://link-up-web.vercel.app">Visit LinkUp</a>
+      <a href="https:
     </div>
 
   </div>
@@ -236,12 +236,12 @@ h2 {
 
   try {
     await verifyTransporterIfNeeded();
-    
+
     const sendStartTime = Date.now();
     const info = await transporter.sendMail(mailOptions);
     const sendDuration = Date.now() - sendStartTime;
     const totalDuration = Date.now() - startTime;
-    
+
     console.log(`[EMAIL] Verification email sent successfully`, {
       to: email,
       messageId: info.messageId,
@@ -249,13 +249,13 @@ h2 {
       totalDuration: `${totalDuration}ms`,
       timestamp: new Date().toISOString(),
     });
-    
+
     return info;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorStack = error instanceof Error ? error.stack : undefined;
     const duration = Date.now() - startTime;
-    
+
     console.error("[EMAIL] Failed to send verification email:", {
       to: email,
       error: errorMessage,
@@ -274,7 +274,7 @@ export async function sendPasswordResetEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL!}`
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
@@ -312,7 +312,7 @@ export async function sendPasswordResetEmail(
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png" alt="LinkUp Logo" class="logo" />
+      <img src="https:
       <div class="header-title">Reset your password</div>
       <div class="subtitle">Don't worry — it happens to the best of us.</div>
     </div>
@@ -344,7 +344,7 @@ export async function sendPasswordResetEmail(
 
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br/>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app"}" style="color:inherit; text-decoration:none;">Visit LinkUp</a>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL!}
     </div>
   </div>
 </body>
@@ -355,12 +355,12 @@ export async function sendPasswordResetEmail(
 
   try {
     await verifyTransporterIfNeeded();
-    
+
     const sendStartTime = Date.now();
     const info = await transporter.sendMail(mailOptions);
     const sendDuration = Date.now() - sendStartTime;
     const totalDuration = Date.now() - startTime;
-    
+
     console.log(`[EMAIL] Password reset email sent successfully`, {
       to: email,
       messageId: info.messageId,
@@ -368,13 +368,13 @@ export async function sendPasswordResetEmail(
       totalDuration: `${totalDuration}ms`,
       timestamp: new Date().toISOString(),
     });
-    
+
     return info;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorStack = error instanceof Error ? error.stack : undefined;
     const duration = Date.now() - startTime;
-    
+
     console.error("[EMAIL] Failed to send password reset email:", {
       to: email,
       error: errorMessage,
@@ -392,7 +392,7 @@ export async function sendEngagementEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
@@ -565,15 +565,15 @@ h3 {
     margin: 15px;
     border-radius: 12px;
   }
-  
+
   .header {
     padding: 30px 18px;
   }
-  
+
   .header-title {
     font-size: 24px;
   }
-  
+
   .content {
     padding: 24px 20px;
     font-size: 14px;
@@ -585,7 +585,7 @@ h3 {
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png"
+      <img src="https:
            alt="LinkUp - Real-Time Social Networking Platform" class="logo" />
       <div class="header-title">Real-Time Updates & Instant Connections! ⚡</div>
       <div class="subtitle">Experience seamless linkup request management</div>
@@ -594,16 +594,16 @@ h3 {
       <h2>Hi ${username} 👋</h2>
 
       <p>
-        We're thrilled to share exciting updates on <strong>LinkUp</strong>! 
-        We've enhanced your networking experience with <strong>real-time notifications</strong> 
-        and streamlined <strong>linkup request management</strong> — making it easier than ever 
+        We're thrilled to share exciting updates on <strong>LinkUp</strong>!
+        We've enhanced your networking experience with <strong>real-time notifications</strong>
+        and streamlined <strong>linkup request management</strong> — making it easier than ever
         to connect, engage, and grow your network.
       </p>
 
       <div class="highlight-box">
         <strong>🚀 What's New: Real-Time Notifications</strong>
-        Get instant updates the moment they happen! Our advanced real-time notification system 
-        ensures you never miss a connection opportunity, profile update, or network activity. 
+        Get instant updates the moment they happen! Our advanced real-time notification system
+        ensures you never miss a connection opportunity, profile update, or network activity.
         Everything syncs instantly across all your devices — no page refresh needed.
       </div>
 
@@ -611,35 +611,35 @@ h3 {
 
       <ul class="feature-list">
         <li>
-          <strong>Instant Accept:</strong> Accept linkup requests in real-time with a single click. 
+          <strong>Instant Accept:</strong> Accept linkup requests in real-time with a single click.
           Your network updates immediately, and both parties are notified instantly.
         </li>
         <li>
-          <strong>Quick Reject:</strong> Politely decline requests with our streamlined rejection flow. 
+          <strong>Quick Reject:</strong> Politely decline requests with our streamlined rejection flow.
           Your preferences are respected, and the process is smooth and intuitive.
         </li>
         <li>
-          <strong>Easy Unlink:</strong> Manage your connections effortlessly. Unlink from users 
+          <strong>Easy Unlink:</strong> Manage your connections effortlessly. Unlink from users
           anytime with our user-friendly interface, and changes reflect instantly across the platform.
         </li>
         <li>
-          <strong>Real-Time Sync:</strong> All linkup actions — accept, reject, or unlink — 
-          update in real-time. Your connection counts, linked_by, and linked_to lists refresh 
+          <strong>Real-Time Sync:</strong> All linkup actions — accept, reject, or unlink —
+          update in real-time. Your connection counts, linked_by, and linked_to lists refresh
           automatically without manual page refreshes.
         </li>
       </ul>
 
       <p>
-        <strong>Why This Matters:</strong> Our real-time infrastructure powered by Socket.IO 
-        ensures that every interaction is instant and seamless. Whether you're accepting a new 
-        connection, managing your network, or updating your profile, changes appear immediately 
+        <strong>Why This Matters:</strong> Our real-time infrastructure powered by Socket.IO
+        ensures that every interaction is instant and seamless. Whether you're accepting a new
+        connection, managing your network, or updating your profile, changes appear immediately
         for you and all affected users — creating a truly responsive and engaging social experience.
       </p>
 
       <p>
-        <strong>Ready to experience the difference?</strong> Visit LinkUp now and discover how 
-        real-time notifications and instant linkup management can transform your networking journey. 
-        Connect with confidence, manage relationships effortlessly, and build meaningful connections 
+        <strong>Ready to experience the difference?</strong> Visit LinkUp now and discover how
+        real-time notifications and instant linkup management can transform your networking journey.
+        Connect with confidence, manage relationships effortlessly, and build meaningful connections
         that matter.
       </p>
 
@@ -648,25 +648,25 @@ h3 {
       </center>
 
       <p class="note">
-        <strong>Pro Tip:</strong> Keep LinkUp open in your browser to receive real-time notifications 
-        as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date 
+        <strong>Pro Tip:</strong> Keep LinkUp open in your browser to receive real-time notifications
+        as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date
         automatically, providing you with the most current information at all times.
       </p>
 
       <p>
-        Thank you for being part of the LinkUp community. We're committed to providing you with 
-        the best social networking experience, and these updates are just the beginning. 
+        Thank you for being part of the LinkUp community. We're committed to providing you with
+        the best social networking experience, and these updates are just the beginning.
         We're excited to see the connections you'll make! 🌟
       </p>
 
       <p style="margin-top: 24px; font-size: 14px; color: #a78bfa !important;">
-        <strong>Questions or feedback?</strong> We'd love to hear from you! Your input helps us 
+        <strong>Questions or feedback?</strong> We'd love to hear from you! Your input helps us
         create a better platform for everyone.
       </p>
     </div>
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br />
-      <a href="${appUrl}">Visit LinkUp</a> · 
+      <a href="${appUrl}">Visit LinkUp</a> ·
       <a href="${appUrl}/settings">Manage Preferences</a>
     </div>
   </div>
@@ -678,12 +678,12 @@ h3 {
 
   try {
     await verifyTransporterIfNeeded();
-    
+
     const sendStartTime = Date.now();
     const info = await transporter.sendMail(mailOptions);
     const sendDuration = Date.now() - sendStartTime;
     const totalDuration = Date.now() - startTime;
-    
+
     console.log(`[EMAIL] Engagement email sent successfully`, {
       to: email,
       messageId: info.messageId,
@@ -691,13 +691,13 @@ h3 {
       totalDuration: `${totalDuration}ms`,
       timestamp: new Date().toISOString(),
     });
-    
+
     return info;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorStack = error instanceof Error ? error.stack : undefined;
     const duration = Date.now() - startTime;
-    
+
     console.error("[EMAIL] Failed to send engagement email:", {
       to: email,
       error: errorMessage,

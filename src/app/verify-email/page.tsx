@@ -18,7 +18,7 @@ export default function VerifyEmailPage() {
 function AnimatedVerifyFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d0f] relative overflow-hidden">
-      
+
       <motion.div
         className="absolute top-16 left-10 w-64 h-64 rounded-full blur-[110px]"
         style={{ background: "rgba(168, 85, 247, 0.12)" }}

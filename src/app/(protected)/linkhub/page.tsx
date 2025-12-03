@@ -22,7 +22,6 @@ export default function Home() {
   const [selectedLink, setSelectedLink] = useState<ILink | null>(null);
   const [selectedTab, setSelectedTab] = useState<"links" | "savedlinks">("links");
 
-  // Use SWR hooks for data fetching
   const {
     links: userLinks,
     isLoading: isLoadingUserLinks,
@@ -49,13 +48,13 @@ export default function Home() {
   };
 
   const handleLinkUpdated = () => {
-    // Refresh links when a link is updated (like, comment, etc.)
+
     if (selectedTab === "links") {
       mutateUserLinks();
     } else {
       mutateSavedLinks();
     }
-    // Refresh current user to get updated savedLinks
+
     mutateCurrentUser();
   };
 
@@ -64,7 +63,7 @@ export default function Home() {
       <div className="w-full m-0 md:m-2 h-full md:h-[98vh] rounded-none md:rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
         <div className="w-full overflow-y-auto hide-scrollbar pb-20 md:pb-0">
           <div className="flex flex-col gap-4 md:gap-8 items-center w-full p-2 md:p-2">
-            {/* Header with Settings */}
+            {}
             <div className="flex justify-end items-end w-full p-4">
               <button
                 onClick={() => router.push("/settings")}
@@ -77,13 +76,13 @@ export default function Home() {
 
             <ProfileCardSelf />
 
-            {/* Navbar */}
+            {}
             <ProfileNavbarSelf
               selected={selectedTab}
               onSelectedChange={(tab) => setSelectedTab(tab as "links" | "savedlinks")}
             />
 
-            {/* Links Grid */}
+            {}
             <div className="w-full max-w-4xl px-2 md:px-4 pb-4">
               {isLoading ? (
                 <LinksGridSkeleton />
@@ -119,7 +118,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Post Modal */}
+      {}
       <PostModal
         isOpen={isModalOpen}
         link={selectedLink}

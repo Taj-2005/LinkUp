@@ -130,4 +130,3 @@ export default function Post({ user, imageUrl }: PostProps) {
     </motion.div>
   );
 }
-

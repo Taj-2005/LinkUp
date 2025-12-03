@@ -40,7 +40,7 @@ export default function LinkRequestToastContainer() {
         if (!socket) return;
 
         const handleLinkRequestReceived = async (data: LinkRequest) => {
-            // Fetch requester details if not provided
+
             if (!data.requester && data.requesterId) {
                 try {
                     const requester = await getUser(data.requesterId);
@@ -69,14 +69,13 @@ export default function LinkRequestToastContainer() {
         };
 
         const handleLinkRequestAccepted = async (data: { requestId: string; receiverId: string | number | { toString(): string } }) => {
-            // Only show toast if current user is the requester (not the receiver)
-            // If receiverId is not the current user, then current user is the requester
+
             if (currentUser && currentUser._id) {
-                const receiverIdStr = typeof data.receiverId === 'string' 
-                    ? data.receiverId 
+                const receiverIdStr = typeof data.receiverId === 'string'
+                    ? data.receiverId
                     : String(data.receiverId);
-                const currentUserIdStr = typeof currentUser._id === 'string' 
-                    ? currentUser._id 
+                const currentUserIdStr = typeof currentUser._id === 'string'
+                    ? currentUser._id
                     : String(currentUser._id);
 
                 if (receiverIdStr !== currentUserIdStr) {
@@ -97,7 +96,6 @@ export default function LinkRequestToastContainer() {
                                 },
                             ]);
 
-                            // Refresh user data via SWR mutate (industry standard)
                             await Promise.all([
                                 mutateCurrentUser(),
                                 mutateAllUsers()
@@ -158,4 +156,3 @@ export default function LinkRequestToastContainer() {
         </div>
     );
 }
-

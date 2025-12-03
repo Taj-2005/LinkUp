@@ -1,12 +1,3 @@
-/**
- * Custom hook for accessing user data via SWR (Industry Standard Pattern)
- * 
- * This hook provides a centralized way to access current user and all users data
- * from SWR cache, following industry best practices for server state management.
- * 
- * @returns Object containing currentUser, allUsers, and their mutate functions
- */
-
 import useSWR from "swr";
 import { IUser } from "@/models/User";
 import { getCurrentUser, getAllUsers } from "@/utils/api";

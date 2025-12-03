@@ -18,7 +18,6 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState("");
 
-
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -70,9 +69,6 @@ export default function SignInPage() {
     }
   };
 
-
-
-
   const theme = darkMode
     ? {
         bg: "bg-[#3E434C]",
@@ -112,17 +108,7 @@ export default function SignInPage() {
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      {/* <button
-        onClick={() => setDarkMode(!darkMode)}
-        className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
-        aria-label="Toggle theme"
-      >
-        {darkMode ? (
-          <Sun className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-amber-400" />
-        ) : (
-          <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
-        )}
-      </button> */}
+      {}
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 md:p-4`}>
         <div className="p-4 xs:p-5 sm:p-6 md:p-8 pb-3 xs:pb-4 sm:pb-6 text-center">

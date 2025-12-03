@@ -24,7 +24,7 @@ const socialLinks = [
   {
     name: 'Portfolio',
     icon: <ExternalLink className="w-5 h-5" />,
-    href: 'https://shaik-tajuddin-portfolio.vercel.app/',
+    href: 'https://shaik-tajuddin-portfolio.vercel.app',
     color: 'hover:text-violet-400',
   },
   {
@@ -43,7 +43,7 @@ export default function Footer({ isDark }: FooterProps) {
     `}>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 mb-12">
-          {/* Brand Section */}
+          {}
           <div className="flex flex-col">
             <motion.a
               href={process.env.NEXT_PUBLIC_APP_URL || '/'}
@@ -71,7 +71,7 @@ export default function Footer({ isDark }: FooterProps) {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {}
           <div className="flex flex-col">
             <h3 className={`
               text-lg font-semibold mb-6
@@ -100,7 +100,7 @@ export default function Footer({ isDark }: FooterProps) {
             </div>
           </div>
 
-          {/* Personal Profile */}
+          {}
           <div className="flex flex-col">
             <h3 className={`
               text-lg font-semibold mb-6
@@ -167,7 +167,7 @@ export default function Footer({ isDark }: FooterProps) {
           </div>
         </div>
 
-        {/* Copyright */}
+        {}
         <div className={`
           pt-8 border-t
           ${isDark ? 'border-white/5' : 'border-gray-200'}

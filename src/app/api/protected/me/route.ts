@@ -18,7 +18,6 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Ensure savedLinks is always an array, never null or undefined
     const userObj = user.toObject();
     if (!Array.isArray(userObj.savedLinks)) {
       userObj.savedLinks = [];

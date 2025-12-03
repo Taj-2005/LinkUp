@@ -33,7 +33,6 @@ export default function SignUpPage() {
   const debouncedUsername = useDebounce(username, 600);
   const debouncedEmail = useDebounce(email, 600);
 
-
   const getPasswordStrength = () => {
     if (password.length === 0) return { strength: 0, label: "" };
     if (password.length < 6) return { strength: 1, label: "Weak" };
@@ -62,7 +61,6 @@ export default function SignUpPage() {
   const handleSkip = () => {
     handleSignup();
   };
-
 
   const handleSignup = async () => {
     if (!username || !firstName || !email || !password) {
@@ -98,7 +96,7 @@ export default function SignUpPage() {
 
       if (message.includes("User already exists")) {
         toast.error("⚠ User already exists! Try logging in.");
-      } 
+      }
       else if (message.includes("Missing required fields")) {
         toast.error("⚠ Please fill all required fields.");
       }
@@ -107,8 +105,6 @@ export default function SignUpPage() {
       }
     }
   };
-
-  
 
   const checkAvailability = async (value: string, type: "username" | "email") => {
     try {
@@ -147,8 +143,6 @@ export default function SignUpPage() {
     if (!debouncedEmail) return;
     checkAvailability(debouncedEmail, "email");
   }, [debouncedEmail]);
-
-
 
   const theme = darkMode
     ? {
@@ -204,17 +198,7 @@ export default function SignUpPage() {
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      {/* <button
-        onClick={() => setDarkMode(!darkMode)}
-        className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}
-        aria-label="Toggle theme"
-      >
-        {darkMode ? (
-          <Sun className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-amber-400" />
-        ) : (
-          <Moon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-slate-700" />
-        )}
-      </button> */}
+      {}
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 flex flex-col max-h-[98vh] xs:max-h-[95vh] sm:max-h-[90vh] md:p-4`}>
         <div className="p-3 xs:p-4 sm:p-6 md:p-8 pb-2 xs:pb-3 sm:pb-4 md:pb-6 text-center flex-shrink-0">
@@ -233,31 +217,31 @@ export default function SignUpPage() {
         </div>
 
         <div className="px-3 xs:px-4 sm:px-6 md:px-8 mb-3 xs:mb-4 sm:mb-6 flex-shrink-0">
-          {/* Enhanced Progress Bar */}
+          {}
           <div className={`h-2 ${theme.progress} rounded-full overflow-hidden shadow-inner`}>
-            <motion.div 
+            <motion.div
               className={`h-full ${theme.progressFill} transition-all duration-500 ease-out shadow-lg`}
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep + 1) / 3) * 100}%` }}
               transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
-          
-          {/* Premium Step Indicators */}
+
+          {}
           <div className="flex items-center justify-between mt-6 mb-2 relative">
             {steps.map((step, index) => {
               const isCompleted = index < currentStep;
               const isCurrent = index === currentStep;
-              
+
               return (
                 <div key={index} className="flex items-center flex-1 relative z-10">
-                  {/* Step Circle */}
+                  {}
                   <div className="flex flex-col items-center flex-1">
                     <motion.div
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center
-                        ${isCompleted 
-                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg' 
+                        ${isCompleted
+                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg'
                           : isCurrent
                           ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg ring-2 ring-violet-400/50'
                           : `${theme.progress} ${theme.textSecondary} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-400'}`
@@ -280,9 +264,9 @@ export default function SignUpPage() {
                         <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : ''}`}>{index + 1}</span>
                       )}
                     </motion.div>
-              <span 
+              <span
                       className={`text-xs mt-2 font-medium text-center transition-colors duration-300 ${
-                        isCompleted || isCurrent 
+                        isCompleted || isCurrent
                           ? darkMode ? 'text-violet-400' : 'text-violet-600'
                           : theme.textSecondary
                       }`}
@@ -290,13 +274,13 @@ export default function SignUpPage() {
                       {step.title}
               </span>
                   </div>
-                  
-                  {/* Connector Line */}
+
+                  {}
                   {index < steps.length - 1 && (
                     <div className={`
                       absolute left-[calc(50%+20px)] right-[calc(50%+20px)] h-0.5 top-5
-                      ${index < currentStep 
-                        ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600' 
+                      ${index < currentStep
+                        ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600'
                         : theme.progress
                       }
                       transition-colors duration-500
@@ -310,7 +294,7 @@ export default function SignUpPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto relative min-h-0">
-          <div 
+          <div
             className="px-3 xs:px-4 sm:px-6 md:px-8 pb-3 xs:pb-4 sm:pb-6 md:pb-8"
           >
             {currentStep === 0 && (
@@ -524,7 +508,6 @@ export default function SignUpPage() {
                   </AnimatePresence>
                 </div>
 
-
               </div>
             )}
 
@@ -581,7 +564,7 @@ export default function SignUpPage() {
                 <span className="hidden xs:inline">Back</span>
               </button>
             )}
-            
+
             {currentStep < 2 ? (
               <motion.button
                 type="button"

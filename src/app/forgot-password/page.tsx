@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-2 xs:p-3 sm:p-4 relative overflow-y-auto`}>
-      
+
       <button
         onClick={() => setDarkMode(!darkMode)}
         className={`fixed top-2 right-2 xs:top-4 xs:right-4 sm:top-6 sm:right-6 p-2 xs:p-2.5 sm:p-3 rounded-lg xs:rounded-xl ${theme.cardBg} ${theme.border} border shadow-lg hover:shadow-xl transition-all hover:scale-105 z-50`}

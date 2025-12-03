@@ -114,7 +114,7 @@ export default function ProfileCard() {
   };
 
   const onZoomOverlayClick = (e: React.MouseEvent) => {
-    // Close modal if clicking on the overlay itself
+
     if (e.target === zoomOverlayRef.current) {
       closeZoomModal();
     }
@@ -159,7 +159,6 @@ export default function ProfileCard() {
       if (Object.keys(changed).length > 0) {
         const result = await updateProfile(changed);
 
-        // Refresh user data via SWR mutate (industry standard)
         await mutateCurrentUser();
 
         setDisplayUser(result.user);
@@ -247,7 +246,7 @@ export default function ProfileCard() {
     if (isPhotoOnlyMode) {
       try {
         const result = await updateProfile({ user_avatar: url });
-        // Refresh user data via SWR mutate (industry standard)
+
         await mutateCurrentUser();
         setDisplayUser(result.user);
       } catch {
@@ -425,7 +424,6 @@ export default function ProfileCard() {
         </div>
       </div>
 
-
       <AnimatePresence>
         {editModal && !cropImageSrc && (
           <motion.div
@@ -598,7 +596,6 @@ export default function ProfileCard() {
                     try {
                       await updateProfile({ user_avatar: "" });
 
-                      // Refresh user data via SWR mutate (industry standard)
                       await mutateCurrentUser();
 
                       if (currentUser) {
@@ -641,7 +638,7 @@ export default function ProfileCard() {
           onClose={() => {
             setCropImageSrc(null);
             setUploadingAvatar(false);
-            // Reset isPhotoOnlyMode when user cancels crop
+
             setIsPhotoOnlyMode(false);
           }}
           uploadToCloudinary={uploadToCloudinary}
@@ -714,7 +711,7 @@ export default function ProfileCard() {
                 transition={{ type: "spring", stiffness: 200, damping: 18 }}
               />
 
-              <div 
+              <div
                 className="flex flex-col gap-2 md:gap-3 w-full max-w-md px-2 md:px-4 pb-2"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -722,7 +719,7 @@ export default function ProfileCard() {
                   onClick={() => {
                     setIsPhotoOnlyMode(true);
                     closeZoomModal();
-                    // Use setTimeout to ensure modal closes before file picker opens
+
                     setTimeout(() => {
                       fileInputRef.current?.click();
                     }, 100);
@@ -737,7 +734,6 @@ export default function ProfileCard() {
                     try {
                       await updateProfile({ user_avatar: "" });
 
-                      // Refresh user data via SWR mutate (industry standard)
                       await mutateCurrentUser();
 
                       if (currentUser) {

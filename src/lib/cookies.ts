@@ -26,7 +26,6 @@ export function setAccessTokenCookie(response: NextResponse, token: string): voi
   const expires = new Date();
   expires.setTime(expires.getTime() + COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE * 1000);
 
-  // Set HttpOnly cookie for Next.js API routes
   response.cookies.set("accessToken", token, {
     httpOnly: true,
     secure: isProd,
@@ -36,10 +35,8 @@ export function setAccessTokenCookie(response: NextResponse, token: string): voi
     expires,
   });
 
-  // Also set a readable cookie for standalone backend (non-HttpOnly)
-  // This allows JavaScript to read it for the Socket.IO server
   response.cookies.set("accessTokenReadable", token, {
-    httpOnly: false, // Allow JavaScript to read
+    httpOnly: false,
     secure: isProd,
     sameSite: "lax" as const,
     path: "/",
@@ -80,7 +77,6 @@ export function deleteAuthCookies(response: NextResponse): void {
     maxAge: 0,
   });
 
-  // Also delete readable cookie
   response.cookies.set("accessTokenReadable", "", {
     httpOnly: false,
     secure: isProd,

@@ -26,7 +26,7 @@ export default function Chat({ user, onBack }: ChatProps) {
               <ArrowLeft className="w-5 h-5 text-primary-dark dark:text-primary-light" />
             </button>
           )}
-          <User 
+          <User
             onClick={() => router.push(`/linkhub/${user?.username}`)}
             user={user}
           />
@@ -41,7 +41,7 @@ export default function Chat({ user, onBack }: ChatProps) {
         </p>
       </div>
 
-      <footer className="md:relative fixed bottom-0 left-2 right-2 md:left-auto md:right-auto md:bottom-auto px-2 md:p-4 py-2 md:py-4 border-t border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark md:rounded-b-xl shadow-inner z-20 rounded-t-xl md:rounded-t-none" style={{ 
+      <footer className="md:relative fixed bottom-0 left-2 right-2 md:left-auto md:right-auto md:bottom-auto px-2 md:p-4 py-2 md:py-4 border-t border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark md:rounded-b-xl shadow-inner z-20 rounded-t-xl md:rounded-t-none" style={{
         bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
       }}>
         <SendText />

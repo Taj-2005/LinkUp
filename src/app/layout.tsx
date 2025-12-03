@@ -36,7 +36,7 @@ const montserrat = Montserrat({
   subsets: ["latin"],
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://link-up-web.vercel.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL!
 const appName = "LinkUp";
 const appDescription = "LinkUp - Modern Social Connection Platform. Connect, discover, and communicate seamlessly with real-time notifications, instant link requests, and a beautiful user experience. Built with Next.js, Socket.IO, and MongoDB.";
 
@@ -107,10 +107,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Add your verification codes here when available
-    // google: "your-google-verification-code",
-    // yandex: "your-yandex-verification-code",
-    // bing: "your-bing-verification-code",
+
   },
   alternates: {
     canonical: appUrl,
@@ -131,10 +128,52 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${geistSans.variable} ${outfit.variable} ${inter.variable} ${dmSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased bg-primary-light dark:bg-primary-dark h-full overflow-x-hidden`}
       >
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: 'toast-wrapper',
+            duration: 4000,
+            style: {
+              background: 'var(--toast-bg, #ffffff)',
+              color: 'var(--toast-text, #3E434C)',
+              border: 'var(--toast-border, 1px solid rgba(96, 100, 104, 0.2))',
+              borderRadius: '0.75rem',
+              padding: '12px 16px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              fontSize: '14px',
+              fontWeight: '500',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#fff',
+              },
+              style: {
+                background: 'var(--toast-bg, #ffffff)',
+                color: 'var(--toast-text, #3E434C)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+              style: {
+                background: 'var(--toast-bg, #ffffff)',
+                color: 'var(--toast-text, #3E434C)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              },
+            },
+          }}
+          containerStyle={{
+            top: 20,
+            right: 20,
+          }}
+        />
 
         <ThemeProviderWrapper>
-          {children} 
+          {children}
         </ThemeProviderWrapper>
 
         <SpeedInsights />
