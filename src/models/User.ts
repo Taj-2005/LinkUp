@@ -83,5 +83,7 @@ const UserSchema: Schema = new Schema<IUser>(
     { timestamps: true }
 );
 
+UserSchema.index({ isVerified: 1, createdAt: 1 });
+
 export const User =
     mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

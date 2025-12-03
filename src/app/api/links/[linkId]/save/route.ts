@@ -37,14 +37,14 @@ export async function POST(
     }
 
     const linkIdStr = linkId.toString();
-
+    
     interface UserWithSavedLinks {
       savedLinks?: unknown[];
       [key: string]: unknown;
     }
-
+    
     const userWithSavedLinks = currentUser as UserWithSavedLinks;
-
+    
     const currentSavedLinks = Array.isArray(userWithSavedLinks.savedLinks) ? userWithSavedLinks.savedLinks : [];
     const savedLinksStr = currentSavedLinks.map((id: unknown) => String(id));
     const wasSaved = savedLinksStr.includes(linkIdStr);
@@ -120,19 +120,19 @@ export async function POST(
         { status: 404 }
       );
     }
-
+    
     await new Promise(resolve => setTimeout(resolve, 100));
-
+    
     const updatedUserDoc = await usersCollection.findOne(
       { _id: userIdObjectId },
       { projection: { savedLinks: 1 } }
     );
-
+    
     const updatedUser = updatedUserDoc ? {
       _id: updatedUserDoc._id.toString(),
       savedLinks: updatedUserDoc.savedLinks || []
     } : null;
-
+    
     if (!updatedUser) {
       return NextResponse.json(
         { error: "Failed to retrieve updated user" },
@@ -144,7 +144,7 @@ export async function POST(
       { _id: userIdObjectId },
       { projection: { savedLinks: 1 } }
     );
-
+    
     if (!verifyUserDoc) {
       return NextResponse.json(
         { error: "Failed to verify save" },
@@ -152,11 +152,11 @@ export async function POST(
       );
     }
 
-    const verifySavedLinks = Array.isArray(verifyUserDoc.savedLinks)
+    const verifySavedLinks = Array.isArray(verifyUserDoc.savedLinks) 
       ? verifyUserDoc.savedLinks.map((id: unknown) => String(id))
       : [];
     const isNowSaved = verifySavedLinks.includes(linkIdStr);
-
+    
     return NextResponse.json(
       {
         success: true,

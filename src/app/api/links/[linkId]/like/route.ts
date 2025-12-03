@@ -42,7 +42,7 @@ export async function POST(
 
       if (!link.likes.includes(userIdStr)) {
         link.likes.push(userIdStr);
-
+        
         const user = await User.findById(userId).select("username user_avatar").lean() as { username?: string; user_avatar?: string } | null;
 
         if (!user) {

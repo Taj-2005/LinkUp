@@ -33,7 +33,7 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
   const handleLinkUp = async (data: LinkUpEventData) => {
     const { type, from, to, fromUser, toUser, timestamp } = data;
-
+    
     if (from !== currentUserId && to !== currentUserId) {
       return;
     }
@@ -43,21 +43,21 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
       return;
     }
     processedEvents.add(eventId);
-
+    
     if (processedEvents.size > 100) {
       const oldest = Array.from(processedEvents).slice(0, 10);
       oldest.forEach(id => processedEvents.delete(id));
     }
 
     await invalidateGlobalLinkUpCaches(from, to);
-
+    
     const { default: toast } = await import("react-hot-toast");
-
+    
     if (type === "requested" && to === currentUserId && fromUser) {
 
       const displayName = fromUser.name || "User";
       const username = fromUser.username || "";
-      const message = username
+      const message = username 
         ? `${username} sent you a linkup request`
         : `${displayName} sent you a linkup request`;
       toast.success(message, { icon: "🔗" });
@@ -77,11 +77,11 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
     } else if (type === "canceled" && to === currentUserId && fromUser) {
       const displayName = fromUser.name || "User";
       const username = fromUser.username || "";
-
+      
       const message = username
         ? `@${username} canceled the linkup request`
         : `${displayName} canceled the linkup request`;
-
+      
       toast(message, { icon: "🚫" });
     } else if (type === "unlinked") {
 
@@ -90,7 +90,7 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
   const handleLinkupRequested = async (data: LinkUpLegacyEventData) => {
     const { from, to } = data;
-
+    
     if (from !== currentUserId && to !== currentUserId) {
       return;
     }
@@ -100,7 +100,7 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
   const handleLinkupAccepted = async (data: LinkUpLegacyEventData) => {
     const { from, to } = data;
-
+    
     if (from !== currentUserId && to !== currentUserId) {
       return;
     }
@@ -110,7 +110,7 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
   const handleLinkupRejected = async (data: LinkUpLegacyEventData) => {
     const { from, to } = data;
-
+    
     if (from !== currentUserId && to !== currentUserId) {
       return;
     }
@@ -122,9 +122,9 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
     const from = "from" in data ? data.from : ("initiator" in data ? data.initiator : null);
     const to = "to" in data ? data.to : ("target" in data ? data.target : null);
-
+    
     if (!from || !to) return;
-
+    
     if (from !== currentUserId && to !== currentUserId) {
       return;
     }
@@ -134,7 +134,7 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
   const handleGlobalLinkUp = async (data: { type: string; userA: string; userB: string }) => {
     const { userA, userB } = data;
-
+    
     if (userA !== currentUserId && userB !== currentUserId) {
       return;
     }
@@ -143,12 +143,12 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
   };
 
   socket.on("linkup", handleLinkUp);
-
+  
   socket.on("linkup:requested", handleLinkupRequested);
   socket.on("linkup:accepted", handleLinkupAccepted);
   socket.on("linkup:rejected", handleLinkupRejected);
   socket.on("linkup:unlinked", handleLinkupUnlinked);
-
+  
   socket.on("global:linkup", handleGlobalLinkUp);
 
   return () => {

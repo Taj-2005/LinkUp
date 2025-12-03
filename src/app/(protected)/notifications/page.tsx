@@ -74,7 +74,7 @@ export default function NotificationsPage() {
                 })
             );
             setRequests(requestsWithDetails);
-
+            
             const unseen = requestsWithDetails.filter((r: LinkRequest) => !r.seen && r.status === "requested").length;
             setUnseenCount(unseen);
         } catch{
@@ -134,7 +134,7 @@ export default function NotificationsPage() {
     const handleAccept = async (requestId: string, requesterId: string) => {
         const previousRequests = [...requests];
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
-
+        
         try {
             await acceptLinkRequest(requestId);
             await authFetch("/api/link-requests/accept-and-update", {
@@ -167,9 +167,9 @@ export default function NotificationsPage() {
 
         const request = requests.find((r) => r._id === requestId);
         const requesterId = request?.requesterId;
-
+        
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
-
+        
         try {
             await rejectLinkRequest(requestId);
             if (socket) {
@@ -258,12 +258,12 @@ export default function NotificationsPage() {
     };
 
     const [notificationActors, setNotificationActors] = useState<Record<string, { _id: string; username?: string; user_avatar?: string; name?: string } | null>>({});
-
+    
     useEffect(() => {
         const loadActors = async () => {
             const uniqueActorIds = [...new Set(notifications.map(n => n.actorId))];
             const actors: Record<string, { _id: string; username?: string; user_avatar?: string; name?: string } | null> = {};
-
+            
             await Promise.all(
                 uniqueActorIds.map(async (actorId) => {
                     try {
@@ -275,10 +275,10 @@ export default function NotificationsPage() {
                     }
                 })
             );
-
+            
             setNotificationActors(actors);
         };
-
+        
         if (notifications.length > 0) {
             loadActors();
         }

@@ -208,7 +208,7 @@ export default function CommentSection({
     if (!replyText.trim() || submittingReply || !currentUser) return;
 
     const text = replyText.trim();
-
+    
     const optimisticReply = createOptimisticReply(
       currentUser._id,
       currentUser.username || "Unknown",

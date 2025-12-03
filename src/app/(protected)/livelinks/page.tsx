@@ -48,7 +48,7 @@ function HomeContent() {
     if (linkId) {
 
       const link = links.find((l) => l._id === linkId);
-
+      
       if (link) {
 
         setSelectedLink(link);
@@ -106,7 +106,7 @@ function HomeContent() {
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
 
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
-
+        
         <div className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-hidden relative">
           <button
             onClick={() => {
@@ -125,12 +125,12 @@ function HomeContent() {
               )}
             </div>
           </button>
-
+          
           {}
           <div className="flex-shrink-0 pt-6 md:pt-0 pb-4 px-2">
             <Stories />
           </div>
-
+          
           {}
           <div className="flex-1 overflow-y-auto hide-scrollbar px-2 md:px-4 pb-20 md:pb-4">
             <div className="w-full flex flex-col items-center">
