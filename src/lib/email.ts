@@ -6,6 +6,11 @@ let transporterVerified = false;
 const VERIFY_CACHE_DURATION = 5 * 60 * 1000;
 let lastVerifyTime = 0;
 
+function getLogoUrl(): string {
+  // Use Cloudinary URL from environment variable, or fallback to default
+  return process.env.EMAIL_LOGO_URL || "https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png";
+}
+
 function getTransporter(): Transporter {
   if (transporterInstance) {
     return transporterInstance;
@@ -84,7 +89,8 @@ export async function sendVerificationEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL!}`
+  const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL!}/verify-email?token=${token}`;
+  const logoUrl = getLogoUrl();
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`,
@@ -191,8 +197,7 @@ h2 {
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https:
-           alt="LinkUp Logo" class="logo" />
+      <img src="${logoUrl}" alt="LinkUp Logo" class="logo" />
       <div class="header-title">Verify Your Email</div>
       <div class="subtitle">Welcome to LinkUp — We're Glad You're Here.</div>
     </div>
@@ -225,7 +230,7 @@ h2 {
     </div>
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br />
-      <a href="https:
+      <a href="${process.env.NEXT_PUBLIC_APP_URL!}">Visit LinkUp</a>
     </div>
 
   </div>
@@ -274,7 +279,8 @@ export async function sendPasswordResetEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL!}`
+  const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL!}/reset-password?token=${resetToken}`;
+  const logoUrl = getLogoUrl();
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
@@ -312,7 +318,7 @@ export async function sendPasswordResetEmail(
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https:
+      <img src="${logoUrl}" alt="LinkUp Logo" class="logo" />
       <div class="header-title">Reset your password</div>
       <div class="subtitle">Don't worry — it happens to the best of us.</div>
     </div>
@@ -344,7 +350,7 @@ export async function sendPasswordResetEmail(
 
     <div class="footer">
       © 2025 LinkUp · All rights reserved.<br/>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL!}
+      <a href="${process.env.NEXT_PUBLIC_APP_URL!}">Visit LinkUp</a>
     </div>
   </div>
 </body>
@@ -392,7 +398,8 @@ export async function sendEngagementEmail(
 ) {
   const startTime = Date.now();
   const transporter = getTransporter();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+  const logoUrl = getLogoUrl();
 
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
@@ -585,8 +592,7 @@ h3 {
 <body>
   <div class="wrapper">
     <div class="header">
-      <img src="https:
-           alt="LinkUp - Real-Time Social Networking Platform" class="logo" />
+      <img src="${logoUrl}" alt="LinkUp - Real-Time Social Networking Platform" class="logo" />
       <div class="header-title">Real-Time Updates & Instant Connections! ⚡</div>
       <div class="subtitle">Experience seamless linkup request management</div>
     </div>

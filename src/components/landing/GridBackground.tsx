@@ -13,8 +13,8 @@ export const GridBackground = () => {
     className="absolute inset-0 z-[1]"
     style={{
       backgroundImage: `
-        linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)
+        linear-gradient(rgba(255,255,255,0.07) 0.2px, transparent 0.2px),
+        linear-gradient(90deg, rgba(255,255,255,0.07) 0.2px, transparent 0.2px)
       `,
       backgroundSize: "60px 60px",
     }}

@@ -24,14 +24,7 @@ export async function POST(req: Request) {
         { error: "User does not exist" },
         { status: 404 }
       );
-
-    if (!user.isVerified) {
-      return NextResponse.json(
-        { error: "Please verify your email before signing in", needsVerification: true },
-        { status: 403 }
-      );
-    }
-
+      
     const valid = await bcrypt.compare(password, user.password);
 
     if (!valid)
@@ -39,6 +32,13 @@ export async function POST(req: Request) {
         { error: "Incorrect password" },
         { status: 401 }
       );
+    if (!user.isVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before signing in", needsVerification: true },
+        { status: 403 }
+      );
+    }
+
 
     const payload = { userId: user._id, username: user.username };
     const accessToken = signAccessToken(payload);
