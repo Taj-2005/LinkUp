@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,6 @@ import Footer from '@/components/landing/Footer';
 import StructuredData from '@/components/landing/StructuredData';
 
 export default function LandingPage() {
-  const [isDark, setIsDark] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -77,14 +76,8 @@ export default function LandingPage() {
   }, []);
   
 
-  const bgColor = isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50';
-  const navBg = isDark
-    ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5'
-    : 'bg-white/90 backdrop-blur-2xl border-b border-gray-200/50';
-  const textPrimary = isDark ? 'text-white' : 'text-gray-900';
-
   return (
-    <div className={`min-h-screen ${bgColor} ${textPrimary} transition-colors duration-300`}>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <StructuredData />
       <ScrollProgress />
 
@@ -94,7 +87,7 @@ export default function LandingPage() {
         animate={{ y: 0 }}
         transition={{ duration: 0.5 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? `${navBg} shadow-lg` : 'bg-transparent'
+          scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5 shadow-lg' : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +101,7 @@ export default function LandingPage() {
               transition={{ duration: 0.2, ease: 'easeOut' }}
             >
                 <Image
-                src={isDark ? '/logo.png' : '/dark-logo.png'}
+                src="/logo.png"
                     unoptimized
                 alt="LinkUp Logo"
                     width={533}
@@ -120,33 +113,8 @@ export default function LandingPage() {
             {}
             <div className="hidden md:flex items-center space-x-6">
               <motion.button
-                onClick={() => setIsDark(!isDark)}
-                className={`
-                  p-2 rounded-lg
-                  ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-100 hover:bg-gray-200'}
-                  transition-colors
-                `}
-                whileHover={{ scale: 1.1, rotate: 180 }}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Toggle theme"
-              >
-                {isDark ? (
-                  <Sun className="w-5 h-5 text-yellow-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-700" />
-                )}
-              </motion.button>
-
-              <motion.button
               onClick={handleSignin}
-                className={`
-                  px-6 py-2 rounded-lg font-medium
-                  ${isDark
-                    ? 'text-gray-300 hover:text-white hover:bg-white/5'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  }
-                  transition-all
-                `}
+                className="px-6 py-2 rounded-lg font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -172,27 +140,8 @@ export default function LandingPage() {
             {}
             <div className="md:hidden flex items-center space-x-2">
               <motion.button
-                onClick={() => setIsDark(!isDark)}
-                className={`
-                  p-2 rounded-lg
-                  ${isDark ? 'bg-white/5' : 'bg-gray-100'}
-                `}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Toggle theme"
-              >
-                {isDark ? (
-                  <Sun className="w-5 h-5 text-yellow-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-700" />
-                )}
-              </motion.button>
-
-              <motion.button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`
-                  p-2 rounded-lg
-                  ${isDark ? 'bg-white/5' : 'bg-gray-100'}
-                `}
+                className="p-2 rounded-lg bg-white/5"
                 whileTap={{ scale: 0.9 }}
                 aria-label="Toggle menu"
               >
@@ -214,10 +163,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className={`
-                md:hidden overflow-hidden
-                ${isDark ? 'bg-[#0a0a0a] border-t border-gray-900' : 'bg-white border-t border-gray-200'}
-              `}
+              className="md:hidden overflow-hidden bg-[#0a0a0a] border-t border-gray-900"
             >
               <div className="px-4 py-4 space-y-3">
                 <motion.button
@@ -225,11 +171,7 @@ export default function LandingPage() {
                     handleSignin();
                     setMobileMenuOpen(false);
                   }}
-                  className={`
-                    w-full px-4 py-2 rounded-lg font-medium text-left
-                    ${isDark ? 'text-gray-300 hover:bg-white/5' : 'text-gray-700 hover:bg-gray-100'}
-                    transition-colors
-                  `}
+                  className="w-full px-4 py-2 rounded-lg font-medium text-left text-gray-300 hover:bg-white/5 transition-colors"
                   whileTap={{ scale: 0.98 }}
                 >
                   Sign In
@@ -257,13 +199,13 @@ export default function LandingPage() {
       {}
       <main>
         <HeroSection onSignUp={handleSignUp} onSignIn={handleSignin} />
-        <FeaturesSection isDark={isDark} />
-        <TechStack isDark={isDark} />
-        <CTASection isDark={isDark} onSignUp={handleSignUp} />
+        <FeaturesSection />
+        <TechStack />
+        <CTASection onSignUp={handleSignUp} />
       </main>
 
       {}
-      <Footer isDark={isDark} />
+      <Footer />
     </div>
   );
 }

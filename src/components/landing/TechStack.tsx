@@ -50,11 +50,7 @@ const techStack = [
   },
 ];
 
-interface TechStackProps {
-  isDark: boolean;
-}
-
-export default function TechStack({ isDark }: TechStackProps) {
+export default function TechStack() {
   return (
     <section id="tech" className="py-32 md:py-40 px-4 sm:px-6 relative overflow-hidden">
       {}
@@ -75,29 +71,18 @@ export default function TechStack({ isDark }: TechStackProps) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="inline-block mb-6"
           >
-            <span className={`
-              text-xs font-semibold tracking-[0.2em] uppercase
-              ${isDark ? 'text-violet-400/80' : 'text-violet-600/80'}
-            `}>
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase text-violet-400/80">
               My Skills
             </span>
           </motion.div>
 
-          <h2 className={`
-            text-5xl md:text-6xl lg:text-7xl font-bold mb-6
-            ${isDark ? 'text-white' : 'text-gray-900'}
-            tracking-tight leading-[1.1]
-          `}>
-            <span className={isDark ? 'text-white' : 'text-gray-900'}>The Secret</span>{' '}
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tight leading-[1.1]">
+            <span className="text-white">The Secret</span>{' '}
             <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               Sauce
             </span>
           </h2>
-          <p className={`
-            text-xl md:text-2xl
-            ${isDark ? 'text-gray-400' : 'text-gray-600'}
-            max-w-2xl mx-auto leading-relaxed font-light
-          `}>
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
             Powered by industry-leading technologies for performance, reliability, and seamless user experience
           </p>
         </motion.div>
@@ -125,43 +110,13 @@ export default function TechStack({ isDark }: TechStackProps) {
                 scale: 1.08,
                 transition: { duration: 0.15, ease: 'easeOut' }
               }}
-              className={`
-                group relative
-                w-16 h-16 md:w-20 md:h-20
-                rounded-xl md:rounded-2xl
-                ${isDark
-                  ? 'bg-white/5 border border-white/10 backdrop-blur-sm'
-                  : 'bg-white border border-gray-200 shadow-md'
-                }
-                p-3 md:p-4
-                flex items-center justify-center
-                overflow-visible
-                cursor-pointer
-              `}
+              className="group relative w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-3 md:p-4 flex items-center justify-center overflow-visible cursor-pointer"
             >
               {}
-              <div
-                className={`
-                  absolute -top-14 left-1/2 -translate-x-1/2
-                  ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-900 text-white'}
-                  px-3 py-1.5 rounded-lg text-xs font-medium
-                  whitespace-nowrap
-                  pointer-events-none
-                  z-50
-                  shadow-lg
-                  border
-                  ${isDark ? 'border-white/10' : 'border-gray-700'}
-                  opacity-0 group-hover:opacity-100
-                  transition-all duration-200 ease-out
-                  transform translate-y-2 scale-90 group-hover:translate-y-0 group-hover:scale-100
-                `}
-              >
+              <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-50 shadow-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out transform translate-y-2 scale-90 group-hover:translate-y-0 group-hover:scale-100">
                 {tech.name}
                 {}
-                <div className={`
-                  absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45
-                  ${isDark ? 'bg-gray-800 border-r border-b border-white/10' : 'bg-gray-900 border-r border-b border-gray-700'}
-                `} />
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-gray-800 border-r border-b border-white/10" />
               </div>
 
               {}
@@ -209,11 +164,7 @@ export default function TechStack({ isDark }: TechStackProps) {
           className="text-center mt-16"
         >
           <motion.div
-            className={`
-              inline-flex items-center gap-3 px-6 py-3 rounded-full
-              ${isDark ? 'bg-violet-500/10 border border-violet-500/20' : 'bg-violet-50 border border-violet-200'}
-              backdrop-blur-sm
-            `}
+            className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-violet-500/10 border border-violet-500/20 backdrop-blur-sm"
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
           >
@@ -224,10 +175,7 @@ export default function TechStack({ isDark }: TechStackProps) {
             >
               ⚡
             </motion.span>
-            <span className={`
-              text-sm md:text-base font-medium
-              ${isDark ? 'text-violet-300' : 'text-violet-700'}
-            `}>
+            <span className="text-sm md:text-base font-medium text-violet-300">
               Horizontally Scalable Architecture
             </span>
           </motion.div>

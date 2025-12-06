@@ -109,7 +109,7 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              Watch Demo
+              Sign In
             </motion.button>
           </motion.div>
 

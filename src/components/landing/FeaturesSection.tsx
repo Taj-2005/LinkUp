@@ -3,10 +3,6 @@
 import { motion } from 'framer-motion';
 import { Zap, Users, Shield, Globe, MessageCircle, Heart, Bell, Link2 } from 'lucide-react';
 
-interface FeaturesSectionProps {
-  isDark: boolean;
-}
-
 const features = [
   {
     icon: <Zap className="w-6 h-6" />,
@@ -58,7 +54,7 @@ const features = [
   },
 ];
 
-export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
+export default function FeaturesSection() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -84,12 +80,7 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
   return (
     <section id="features" className="py-32 md:py-40 px-4 sm:px-6 relative">
       {}
-      <div className={`
-        absolute inset-0
-        ${isDark ? 'opacity-[0.02]' : 'opacity-[0.03]'}
-        bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]
-        bg-[size:24px_24px]
-      `} />
+      <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div
@@ -107,26 +98,15 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="inline-block mb-6"
           >
-            <span className={`
-              text-sm font-semibold tracking-wider uppercase
-              ${isDark ? 'text-violet-400' : 'text-violet-600'}
-            `}>
+            <span className="text-sm font-semibold tracking-wider uppercase text-violet-400">
               Features
             </span>
           </motion.div>
 
-          <h2 className={`
-            text-5xl md:text-6xl lg:text-7xl font-bold mb-6
-            ${isDark ? 'text-white' : 'text-gray-900'}
-            tracking-tight
-          `}>
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tight">
             Everything You Need
           </h2>
-          <p className={`
-            text-xl md:text-2xl
-            ${isDark ? 'text-gray-400' : 'text-gray-600'}
-            max-w-2xl mx-auto leading-relaxed font-light
-          `}>
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
             Powerful features designed for modern social networking
           </p>
         </motion.div>
@@ -144,13 +124,7 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
               variants={itemVariants}
               whileHover={{ y: -6, scale: 1.02 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className={`
-                group relative
-                ${isDark ? 'bg-white/5 border border-white/10 backdrop-blur-sm' : 'bg-white border border-gray-200 shadow-lg'}
-                rounded-3xl p-8
-                transition-all duration-300
-                overflow-hidden
-              `}
+              className="group relative bg-white/5 border border-white/10 backdrop-blur-sm rounded-3xl p-8 transition-all duration-300 overflow-hidden"
               style={{ willChange: 'transform' }}
             >
               {}
@@ -175,17 +149,10 @@ export default function FeaturesSection({ isDark }: FeaturesSectionProps) {
 
               {}
               <div className="relative z-10">
-                <h3 className={`
-                  text-xl font-bold mb-3
-                  ${isDark ? 'text-white' : 'text-gray-900'}
-                  group-hover:text-violet-400 transition-colors duration-300
-                `}>
+                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-violet-400 transition-colors duration-300">
                   {feature.title}
                 </h3>
-                <p className={`
-                  text-sm md:text-base leading-relaxed
-                  ${isDark ? 'text-gray-400' : 'text-gray-600'}
-                `}>
+                <p className="text-sm md:text-base leading-relaxed text-gray-400">
                   {feature.description}
                 </p>
               </div>
