@@ -78,7 +78,7 @@ export default function FeaturesSection() {
   };
 
   return (
-    <section id="features" className="py-32 md:py-40 px-4 sm:px-6 relative">
+    <section id="features" className="py-20 sm:py-24 md:py-32 lg:py-40 px-3 sm:px-4 md:px-6 relative">
       {}
       <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
 
@@ -88,7 +88,7 @@ export default function FeaturesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-16 md:mb-20"
           style={{ willChange: 'transform, opacity' }}
         >
           <motion.div
@@ -96,17 +96,17 @@ export default function FeaturesSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-block mb-6"
+            className="inline-block mb-4 sm:mb-6"
           >
-            <span className="text-sm font-semibold tracking-wider uppercase text-violet-400">
+            <span className="text-xs sm:text-sm font-semibold tracking-wider uppercase text-violet-400">
               Features
             </span>
           </motion.div>
 
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-white tracking-tight">
+          <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 text-white tracking-tight leading-tight px-2 sm:px-0">
             Everything You Need
           </h2>
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light px-2 sm:px-0">
             Powerful features designed for modern social networking
           </p>
         </motion.div>
@@ -116,7 +116,7 @@ export default function FeaturesSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8"
         >
           {features.map((feature, index) => (
             <motion.div
@@ -124,7 +124,7 @@ export default function FeaturesSection() {
               variants={itemVariants}
               whileHover={{ y: -6, scale: 1.02 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="group relative bg-white/5 border border-white/10 backdrop-blur-sm rounded-3xl p-8 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 transition-all duration-300 overflow-hidden"
               style={{ willChange: 'transform' }}
             >
               {}
@@ -133,13 +133,9 @@ export default function FeaturesSection() {
               />
 
               {}
-              <div className="relative z-10 mb-6">
+              <div className="relative z-10 mb-4 sm:mb-6">
                 <motion.div
-                  className={`
-                    w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient}
-                    flex items-center justify-center text-white
-                    shadow-lg
-                  `}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white shadow-lg`}
                   whileHover={{ scale: 1.08 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
                 >
@@ -149,10 +145,10 @@ export default function FeaturesSection() {
 
               {}
               <div className="relative z-10">
-                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-violet-400 transition-colors duration-300">
+                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-white group-hover:text-violet-400 transition-colors duration-300">
                   {feature.title}
                 </h3>
-                <p className="text-sm md:text-base leading-relaxed text-gray-400">
+                <p className="text-xs sm:text-sm md:text-base leading-relaxed text-gray-400">
                   {feature.description}
                 </p>
               </div>

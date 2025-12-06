@@ -90,8 +90,8 @@ export default function LandingPage() {
           scrolled ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5 shadow-lg' : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20">
             {}
             <motion.a
               href={process.env.NEXT_PUBLIC_APP_URL || '/'}
@@ -106,7 +106,7 @@ export default function LandingPage() {
                 alt="LinkUp Logo"
                     width={533}
                     height={191}
-                className="h-8 sm:h-10 md:h-12 w-auto"
+                className="h-7 xs:h-8 sm:h-10 md:h-12 w-auto"
                 />
             </motion.a>
 
@@ -138,17 +138,17 @@ export default function LandingPage() {
             </div>
 
             {}
-            <div className="md:hidden flex items-center space-x-2">
+            <div className="md:hidden flex items-center">
               <motion.button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg bg-white/5"
+                className="p-2 rounded-lg bg-white/5 active:bg-white/10"
                 whileTap={{ scale: 0.9 }}
                 aria-label="Toggle menu"
               >
                 {mobileMenuOpen ? (
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 ) : (
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
                 )}
               </motion.button>
             </div>
@@ -165,13 +165,13 @@ export default function LandingPage() {
               transition={{ duration: 0.3 }}
               className="md:hidden overflow-hidden bg-[#0a0a0a] border-t border-gray-900"
             >
-              <div className="px-4 py-4 space-y-3">
+              <div className="px-4 py-3 sm:py-4 space-y-2 sm:space-y-3">
                 <motion.button
                   onClick={() => {
                     handleSignin();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 rounded-lg font-medium text-left text-gray-300 hover:bg-white/5 transition-colors"
+                  className="w-full px-4 py-2.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base text-left text-gray-300 hover:bg-white/5 active:bg-white/10 transition-colors"
                   whileTap={{ scale: 0.98 }}
                 >
                   Sign In
@@ -181,11 +181,7 @@ export default function LandingPage() {
                     handleSignUp();
                     setMobileMenuOpen(false);
                   }}
-                  className={`
-                    w-full px-4 py-2 rounded-lg font-medium
-                    bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white
-                    transition-all
-                  `}
+                  className="w-full px-4 py-2.5 sm:py-2 rounded-lg font-medium text-sm sm:text-base bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white transition-all active:opacity-90"
                   whileTap={{ scale: 0.98 }}
                 >
                   Sign Up
