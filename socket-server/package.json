@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "echo \"No build step required for JavaScript\""
   },
   "dependencies": {
     "@socket.io/admin-ui": "^0.5.1",
