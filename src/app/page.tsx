@@ -69,6 +69,14 @@ export default function LandingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    document.body.style.background = "transparent";
+    return () => {
+      document.body.style.background = "";
+    };
+  }, []);
+  
+
   const bgColor = isDark ? 'bg-[#0a0a0a]' : 'bg-gray-50';
   const navBg = isDark
     ? 'bg-[#0a0a0a]/90 backdrop-blur-2xl border-b border-white/5'
@@ -248,7 +256,7 @@ export default function LandingPage() {
 
       {}
       <main>
-        <HeroSection isDark={isDark} onSignUp={handleSignUp} onSignIn={handleSignin} />
+        <HeroSection onSignUp={handleSignUp} onSignIn={handleSignin} />
         <FeaturesSection isDark={isDark} />
         <TechStack isDark={isDark} />
         <CTASection isDark={isDark} onSignUp={handleSignUp} />

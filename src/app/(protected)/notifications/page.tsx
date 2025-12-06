@@ -244,13 +244,12 @@ export default function NotificationsPage() {
 
     const getNotificationIcon = (type: INotification["type"]): string => {
         switch (type) {
-            case "comment":
-            case "reply":
-                return "💬";
             case "like":
                 return "❤️";
+            case "comment":
+            case "reply":
             case "save":
-                return "🔖";
+                return "";
             default:
                 return "🔔";
         }
@@ -312,21 +311,21 @@ export default function NotificationsPage() {
         <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
             <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
                 <div className="w-full overflow-y-auto hide-scrollbar p-4 md:p-6">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                         <h1 className="text-2xl md:text-3xl font-bold text-primary-dark dark:text-primary-light">
                             Notifications
                         </h1>
                         {notifications.length > 0 && (
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={handleMarkAllRead}
-                                    className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition"
+                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap"
                                 >
                                     Mark all read
                                 </button>
                                 <button
                                     onClick={handleClearRead}
-                                    className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition"
+                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap"
                                 >
                                     Clear read
                                 </button>
@@ -462,7 +461,9 @@ export default function NotificationsPage() {
                                         }`}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
+                                            {getNotificationIcon(notification.type) && (
+                                                <div className="text-2xl">{getNotificationIcon(notification.type)}</div>
+                                            )}
                                             <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden flex-shrink-0">
                                                 <Image
                                                     src={

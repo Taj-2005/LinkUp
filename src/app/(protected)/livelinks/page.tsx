@@ -107,13 +107,13 @@ function HomeContent() {
 
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
         
-        <div className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-hidden relative">
+        <div className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-y-auto hide-scrollbar relative">
           <button
             onClick={() => {
               setSelectedItem("linkhub");
               router.push("/notifications");
             }}
-            className="md:hidden absolute py-2 top-2 right-2 z-10 text-black dark:text-white hover:opacity-75 transition-opacity"
+            className="md:hidden sticky top-2 right-2 z-10 text-black dark:text-white hover:opacity-75 transition-opacity ml-auto mr-2"
             aria-label="Notifications"
           >
             <div className="relative">
@@ -127,12 +127,12 @@ function HomeContent() {
           </button>
           
           {}
-          <div className="flex-shrink-0 pt-6 md:pt-0 pb-4 px-2">
+          <div className="pt-6 md:pt-0 pb-4 px-2">
             <Stories />
           </div>
           
           {}
-          <div className="flex-1 overflow-y-auto hide-scrollbar px-2 md:px-4 pb-20 md:pb-4">
+          <div className="px-2 md:px-4 pb-20 md:pb-4">
             <div className="w-full flex flex-col items-center">
               {isLoading ? (
                 <>

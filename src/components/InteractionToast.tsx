@@ -53,13 +53,12 @@ export default function InteractionToast({ actor, type, deepLink, onClose }: Int
 
     const getIcon = (): string => {
         switch (type) {
-            case "comment":
-            case "reply":
-                return "💬";
             case "like":
                 return "❤️";
+            case "comment":
+            case "reply":
             case "save":
-                return "🔖";
+                return "";
             default:
                 return "🔔";
         }
@@ -93,7 +92,7 @@ export default function InteractionToast({ actor, type, deepLink, onClose }: Int
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <span className="text-xl">{getIcon()}</span>
+                            {getIcon() && <span className="text-xl">{getIcon()}</span>}
                             <p className="text-sm md:text-base font-semibold text-primary-light dark:text-primary-light truncate">
                                 {actor.username}
                             </p>
