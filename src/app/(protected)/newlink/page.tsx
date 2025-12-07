@@ -54,6 +54,7 @@ export default function NewLinkPage() {
       setImageUrl(null);
       setDescription("");
       setLocation("");
+      router.push(`/linkhub`);
 
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to create link");
@@ -76,7 +77,6 @@ export default function NewLinkPage() {
             </h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {}
               <div>
                 <label className="block text-sm md:text-base font-semibold text-primary-dark dark:text-primary-light mb-2">
                   Image *
@@ -88,7 +88,6 @@ export default function NewLinkPage() {
                 />
               </div>
 
-              {}
               <div>
                 <label
                   htmlFor="description"
@@ -111,8 +110,7 @@ export default function NewLinkPage() {
                 </p>
               </div>
 
-              {}
-        <div>
+              <div>
                 <label
                   htmlFor="location"
                   className="block text-sm md:text-base font-semibold text-primary-dark dark:text-primary-light mb-2"
@@ -131,7 +129,6 @@ export default function NewLinkPage() {
                 />
               </div>
 
-              {}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   type="button"

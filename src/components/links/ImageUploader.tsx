@@ -58,7 +58,6 @@ export default function ImageUploader({
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
-
     if (!file.type.startsWith("image/")) {
       setError("Please upload an image file");
       return;
@@ -70,19 +69,29 @@ export default function ImageUploader({
     }
 
     setError(null);
+    
+    // UI-FIRST: Show preview immediately using object URL (synchronous)
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    
+    // Start upload in background
     setUploading(true);
 
     try {
-
-      const preview = await fileToDataURL(file);
-      setPreviewUrl(preview);
-
+      // Upload to Cloudinary in background
       const cloudinaryUrl = await uploadToCloudinary(file);
+      
+      // Replace preview with Cloudinary URL once upload completes
       setPreviewUrl(cloudinaryUrl);
+      
+      // Clean up object URL to free memory
+      URL.revokeObjectURL(objectUrl);
+      
       onImageUploaded(cloudinaryUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
-      setPreviewUrl(null);
+      // Keep the preview URL (object URL) even if upload fails, so user can see what they selected
+      // Only clear if user explicitly removes it
     } finally {
       setUploading(false);
     }
@@ -123,6 +132,10 @@ export default function ImageUploader({
   };
 
   const handleRemove = () => {
+    // Clean up object URL if it exists
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setPreviewUrl(null);
     setError(null);
     onImageRemoved();
@@ -136,7 +149,7 @@ export default function ImageUploader({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         className={`
-          relative w-full rounded-2xl border-2 border-dashed transition-all duration-300
+          relative w-full aspect-square rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden
           ${
             isDragging
               ? "border-violet-500 bg-violet-50/50 dark:bg-violet-900/20"
@@ -152,20 +165,18 @@ export default function ImageUploader({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900"
+              className="relative w-full h-full rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900"
             >
-              <div className="relative w-full flex items-center justify-center" style={{ minHeight: '200px', maxHeight: '500px' }}>
+              <div className="relative w-full h-full">
                 {previewUrl && (
-                  <div className="relative w-full h-full max-h-[500px] md:max-h-[600px]">
-                    <Image
-                      src={previewUrl}
-                      alt="Link preview"
-                      fill
-                      className="object-contain rounded-xl"
-                      sizes="(max-width: 768px) 100vw, 800px"
-                      unoptimized
-                    />
-                  </div>
+                  <Image
+                    src={previewUrl}
+                    alt="Link preview"
+                    fill
+                    className="object-contain rounded-xl"
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    unoptimized
+                  />
                 )}
               </div>
               {uploading && (
@@ -186,7 +197,7 @@ export default function ImageUploader({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center text-center"
+              className="flex flex-col items-center justify-center text-center h-full w-full"
             >
               <input
                 ref={fileInputRef}

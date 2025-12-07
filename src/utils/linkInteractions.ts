@@ -1,5 +1,6 @@
 import { mutate } from "swr";
 import { ILink, IComment, IReply } from "@/models/Link";
+import { IUser } from "@/models/User";
 
 export interface LinkWithUser extends ILink {
   userInfo?: {
@@ -158,4 +159,105 @@ export async function revalidateLinkCaches() {
     (current: LinkWithUser[] | undefined) => current,
     { revalidate: false }
   );
+}
+
+/**
+ * Optimistically removes a link from all caches
+ * Returns a rollback function to restore previous state
+ */
+type MutateCurrentUser = (
+  data?: { user: IUser } | ((data: { user: IUser } | undefined) => { user: IUser } | undefined),
+  shouldRevalidate?: boolean
+) => Promise<{ user: IUser } | undefined>;
+
+export function optimisticDeleteLink(
+  linkId: string,
+  userId?: string,
+  mutateCurrentUser?: MutateCurrentUser
+): {
+  rollback: () => void;
+} {
+  // Capture previous states for rollback
+  const previousStates: {
+    feedLinks?: LinkWithUser[];
+    userLinks?: { [key: string]: ILink[] };
+    currentUser?: { user: IUser };
+    savedLinks?: LinkWithUser[];
+  } = {};
+
+  // Update feed-links - capture state in the updater
+  mutate(
+    "feed-links",
+    (links: LinkWithUser[] | undefined) => {
+      if (links) {
+        previousStates.feedLinks = [...links];
+        return links.filter((link) => link._id.toString() !== linkId.toString());
+      }
+      return links;
+    },
+    { revalidate: false }
+  );
+
+  // Update saved-links - capture state in the updater
+  mutate(
+    "saved-links",
+    (links: LinkWithUser[] | undefined) => {
+      if (links) {
+        previousStates.savedLinks = [...links];
+        return links.filter((link) => link._id.toString() !== linkId.toString());
+      }
+      return links;
+    },
+    { revalidate: false }
+  );
+
+  // Update all user-links caches
+  mutate(
+    (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+    (links: ILink[] | undefined) => {
+      if (links) {
+        return links.filter((link) => link._id.toString() !== linkId.toString());
+      }
+      return links;
+    },
+    { revalidate: false }
+  );
+
+  // Update current user's links array if mutateCurrentUser is provided
+  if (mutateCurrentUser && userId) {
+    mutateCurrentUser(
+      (data: { user: IUser } | undefined) => {
+        if (data?.user) {
+          previousStates.currentUser = { ...data };
+          const updatedLinks = (data.user.links || []).filter(
+            (id: string) => id.toString() !== linkId.toString()
+          );
+          return { 
+            ...data, 
+            user: { 
+              ...data.user, 
+              links: updatedLinks 
+            } as IUser 
+          };
+        }
+        return data;
+      },
+      false
+    );
+  }
+
+  // Rollback function
+  const rollback = () => {
+    if (previousStates.feedLinks) {
+      mutate("feed-links", previousStates.feedLinks, { revalidate: false });
+    }
+    if (previousStates.savedLinks) {
+      mutate("saved-links", previousStates.savedLinks, { revalidate: false });
+    }
+    if (previousStates.currentUser && mutateCurrentUser) {
+      mutateCurrentUser(previousStates.currentUser, false);
+    }
+  };
+
+  return { rollback };
 }

@@ -3,6 +3,7 @@ import { mutate } from "swr";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUsers } from "@/hooks/useUsers";
 import { ILink, IComment } from "@/models/Link";
+import { IUser } from "@/models/User";
 
 interface LinkWithUserInfo {
   _id: string;
@@ -197,6 +198,100 @@ export function useSocket() {
       
       // NO setTimeout revalidation - prevents skeleton flicker
       // Feed will update via optimistic mutations from interaction handlers
+    };
+
+    /**
+     * Handle link deletion
+     * Removes the deleted link from all caches
+     */
+    const handleLinkDeleted = (data: { linkId: string; ownerId: string; updatedOwner?: { _id: string; links: string[] }; timestamp?: string; eventId?: string }) => {
+      const eventId = getEventId("link:deleted", data);
+      
+      if (processedEvents.current.has(eventId)) {
+        return;
+      }
+      
+      processedEvents.current.add(eventId);
+      cleanupOldEvents();
+
+      const deletedLinkId = data.linkId;
+      const ownerId = data.ownerId;
+
+      // Remove from feed-links cache
+      mutate(
+        "feed-links",
+        (links: LinkWithUserInfo[] | undefined) => {
+          if (!links) return links;
+          return links.filter((link) => link._id.toString() !== deletedLinkId.toString());
+        },
+        { revalidate: false }
+      );
+
+      // Remove from saved-links cache (link might be saved by other users)
+      mutate(
+        "saved-links",
+        (links: LinkWithUserInfo[] | undefined) => {
+          if (!links) return links;
+          return links.filter((link) => link._id.toString() !== deletedLinkId.toString());
+        },
+        { revalidate: false }
+      );
+
+      // Remove from user-links cache for the owner
+      if (ownerId) {
+        mutate(
+          `user-links-${ownerId}`,
+          (links: Omit<LinkWithUserInfo, 'userInfo'>[] | undefined) => {
+            if (!links) return links;
+            return links.filter((link) => link._id.toString() !== deletedLinkId.toString());
+          },
+          { revalidate: false }
+        );
+      }
+
+      // Update current user's links array if they're the owner
+      if (data.updatedOwner && currentUserRef.current?._id?.toString() === ownerId) {
+        mutateCurrentUser(
+          (data: { user: IUser } | undefined) => {
+            if (!data?.user) return data;
+            const updatedLinks = (data.user.links || []).filter(
+              (id: string) => id.toString() !== deletedLinkId.toString()
+            );
+            return { ...data, user: { ...data.user, links: updatedLinks } as IUser };
+          },
+          { revalidate: false }
+        );
+      }
+
+      // Update all-users cache if owner info is provided
+      if (data.updatedOwner) {
+        mutate(
+          "all-users",
+          (users: UserPlain[] | undefined) => {
+            if (!users) return users;
+            return users.map((user) => {
+              if (user._id === ownerId) {
+                return {
+                  ...user,
+                  links: data.updatedOwner?.links || user.links,
+                };
+              }
+              return user;
+            });
+          },
+          { revalidate: false }
+        );
+      }
+
+      // Background revalidation for consistency
+      setTimeout(() => {
+        mutate("feed-links");
+        if (ownerId) {
+          mutate(`user-links-${ownerId}`);
+        }
+        mutateCurrentUser();
+        mutateAllUsers();
+      }, 100);
     };
 
     /**
@@ -526,6 +621,7 @@ export function useSocket() {
     socket.on("notification:update", handleNotificationUpdate);
     socket.on("feed:update", handleFeedUpdate);
     socket.on("link:update", handleLinkUpdate);
+    socket.on("link:deleted", handleLinkDeleted);
     socket.on("userUpdated", handleUserUpdate);
     socket.on("linkRequestReceived", handleLinkRequestReceived);
     socket.on("linkRequestAccepted", handleLinkRequestAccepted);
@@ -546,6 +642,7 @@ export function useSocket() {
       socket.off("notification:update", handleNotificationUpdate);
       socket.off("feed:update", handleFeedUpdate);
       socket.off("link:update", handleLinkUpdate);
+      socket.off("link:deleted", handleLinkDeleted);
       socket.off("userUpdated", handleUserUpdate);
       socket.off("linkRequestReceived", handleLinkRequestReceived);
       socket.off("linkRequestAccepted", handleLinkRequestAccepted);

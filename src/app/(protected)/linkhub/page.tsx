@@ -58,6 +58,16 @@ export default function Home() {
     mutateCurrentUser();
   };
 
+  const handleLinkDeleted = () => {
+    // Refresh links after deletion
+    if (selectedTab === "links") {
+      mutateUserLinks();
+    } else {
+      mutateSavedLinks();
+    }
+    mutateCurrentUser();
+  };
+
   return (
     <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
       <div className="w-full m-0 md:m-2 h-full md:h-[98vh] rounded-none md:rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
@@ -109,6 +119,7 @@ export default function Home() {
                       key={link._id.toString()}
                       link={link}
                       onClick={() => handleLinkClick(link)}
+                      onLinkDeleted={handleLinkDeleted}
                     />
                   ))}
                 </div>
@@ -118,7 +129,6 @@ export default function Home() {
         </div>
       </div>
 
-      {}
       <PostModal
         isOpen={isModalOpen}
         link={selectedLink}

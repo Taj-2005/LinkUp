@@ -132,3 +132,25 @@ export async function emitLinkUpdateEvent(updatedLink: LinkUpdatePayload): Promi
   }
 }
 
+interface LinkDeletedPayload {
+  linkId: string;
+  ownerId: string;
+  updatedOwner?: {
+    _id: string;
+    links: string[];
+  };
+  timestamp: string;
+}
+
+export async function emitLinkDeletedEvent(payload: LinkDeletedPayload): Promise<void> {
+  try {
+    await fetch(`${SOCKET_SERVER_URL}/api/links/link-deleted-notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error("Socket link deleted error (non-critical):", error);
+  }
+}
+

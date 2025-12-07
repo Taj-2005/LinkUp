@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiHeart, FiMessageCircle, FiMapPin, FiBookmark } from "react-icons/fi";
+import { FiX, FiHeart, FiMessageCircle, FiMapPin, FiBookmark, FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
@@ -10,9 +10,11 @@ import { useModalStore } from "@/store/useModalStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import CommentSection from "./CommentSection";
 import FullImageModal from "./FullImageModal";
-import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
+import DeletePostModal from "@/components/DeletePostModal";
+import { optimisticToggleLike, revalidateLinkCaches, optimisticDeleteLink } from "@/utils/linkInteractions";
 import { scrollToComment, scrollToReply } from "@/utils/deepLinks";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
+import { mutate } from "swr";
 import toast from "react-hot-toast";
 
 interface LinkWithUser extends ILink {
@@ -46,10 +48,10 @@ export default function PostModal({
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [linkData, setLinkData] = useState<LinkWithUser | null>(link as LinkWithUser | null);
-  // Removed isLiking state - no loading indicators needed
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
   const [showCommentsModalMobile, setShowCommentsModalMobile] = useState(false);
-  // Removed isSaving state - no loading indicators needed
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isSaved = isLinkSaved(currentUser, linkData?._id || "");
 
@@ -110,24 +112,20 @@ export default function PostModal({
     };
   }, [isOpen, setIsModalOpen]);
 
-  // Listen for real-time link updates (comments, likes, replies)
   useEffect(() => {
     if (!socket || !isConnected || !linkData) return;
 
     const handleLinkUpdate = (data: { link: ILink & { userInfo?: LinkWithUser['userInfo'] }; timestamp?: string; eventId?: string }) => {
       const updatedLink = data.link;
       
-      // Only update if this is the link we're viewing
       if (updatedLink._id !== linkData._id.toString()) return;
 
-      // Update linkData with the new data (preserve userInfo)
       setLinkData((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
           ...updatedLink,
           userInfo: prev.userInfo || updatedLink.userInfo,
-          // Ensure dates are Date objects
           createdAt: updatedLink.createdAt instanceof Date 
             ? updatedLink.createdAt 
             : new Date(updatedLink.createdAt),
@@ -137,7 +135,6 @@ export default function PostModal({
         } as LinkWithUser;
       });
 
-      // Update like state
       const userId = currentUser?._id?.toString();
       if (userId) {
         setIsLiked(updatedLink.likes?.includes(userId) || false);
@@ -274,7 +271,6 @@ export default function PostModal({
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {
-    // Only close if clicking directly on the overlay, not on child elements
     if (e.target === e.currentTarget) {
       handleClose();
     }
@@ -282,7 +278,66 @@ export default function PostModal({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
-      handleClose();
+      if (showDeleteModal) {
+        setShowDeleteModal(false);
+      } else {
+        handleClose();
+      }
+    }
+  };
+
+  const isOwner = linkData && currentUser?._id?.toString() === linkData.userId;
+
+  const handleDelete = async () => {
+    if (!currentUser || !linkData || isDeleting) return;
+
+    const linkId = linkData._id.toString();
+    const userId = currentUser._id.toString();
+
+    setShowDeleteModal(false);  
+    handleClose();
+
+    toast.success("Link deleted successfully", { id: "delete-post" });
+
+    const { rollback } = optimisticDeleteLink(linkId, userId, mutateCurrentUser);
+
+    if (linkData.userId) {
+      mutate(
+        `user-links-${linkData.userId}`,
+        (links: ILink[] | undefined) => {
+          if (!links) return links;
+          return links.filter((l) => l._id.toString() !== linkId);
+        },
+        { revalidate: false }
+      );
+    }
+
+    onLinkUpdated();
+
+    try {
+      const res = await fetch(`/api/links/${linkId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete post");
+      }
+
+    } catch (error) {
+      rollback();
+      if (linkData._id.toString() === linkId) {
+        setShowDeleteModal(false);
+      }
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete post",
+        { id: "delete-post" }
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -317,7 +372,6 @@ export default function PostModal({
               onClick={(e) => e.stopPropagation()}
               style={{ maxHeight: '100vh' }}
             >
-              {}
               <button
                 onClick={handleClose}
                 onMouseDown={(e) => e.stopPropagation()}
@@ -328,7 +382,6 @@ export default function PostModal({
                 <FiX size={20} className="text-gray-800 dark:text-gray-100 pointer-events-none" />
               </button>
 
-              {}
               <div className="relative w-full md:w-1/2 h-[50vh] md:h-auto bg-black flex items-center justify-center flex-shrink-0">
                 <div
                   className="relative w-full h-full cursor-zoom-in"
@@ -345,9 +398,7 @@ export default function PostModal({
                 </div>
               </div>
 
-              {}
               <div className="w-full md:w-1/2 flex flex-col bg-right-nav-light dark:bg-left-nav-dark h-full overflow-y-auto">
-                {}
                 <div className="p-4 md:p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 z-10 bg-right-nav-light dark:bg-left-nav-dark">
                   <div className="flex items-center justify-between gap-2 md:gap-3 bg-right-nav-light dark:bg-left-nav-dark">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -373,7 +424,6 @@ export default function PostModal({
                       </div>
                     </div>
 
-                    {}
                     <div className="flex items-center gap-2 md:hidden flex-shrink-0 ">
                       <button
                         onClick={handleLike}
@@ -411,11 +461,26 @@ export default function PostModal({
                         className={isSaved ? "fill-current" : ""}
                       />
                     </button>
+                    {isOwner && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={isDeleting}
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group"
+                        aria-label="Delete post"
+                      >
+                        <FiTrash2 
+                          size={18} 
+                          className="text-primary-dark dark:text-primary-light group-hover:text-white transition-transform rotate-180 group-hover:rotate-0" 
+                        />
+                      </button>
+                    )}
                     </div>
                   </div>
                 </div>
 
-                {}
                 {linkData.description && (
                   <div className="px-4 py-3 md:p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 z-10  bg-right-nav-light dark:bg-left-nav-dark">
                     <p className="text-sm md:text-base text-primary-dark dark:text-white break-words leading-relaxed">
@@ -424,7 +489,6 @@ export default function PostModal({
                   </div>
                 )}
 
-                {}
                 {!linkData.description && (
                   <div className="px-4 py-6 md:hidden  bg-right-nav-light dark:bg-left-nav-dark">
                     <div className="text-center py-8">
@@ -435,7 +499,6 @@ export default function PostModal({
                   </div>
                 )}
 
-                {}
                 <div className="hidden md:flex p-4 border-t border-gray-200 dark:border-gray-700 space-y-3 flex-shrink-0 z-10 bg-right-nav-light dark:bg-left-nav-dark">
                   <div className="flex items-center gap-4">
                       <button
@@ -460,7 +523,7 @@ export default function PostModal({
                     </div>
                     <button
                       onClick={handleSaveToggle}
-                      className={`flex items-center gap-2 transition-colors ml-auto ${
+                      className={`flex items-center gap-2 transition-colors ${
                         isSaved
                           ? "text-violet-600 hover:text-purple-600"
                           : "text-primary-dark dark:text-primary-light hover:text-violet-500"
@@ -471,10 +534,26 @@ export default function PostModal({
                         className={isSaved ? "fill-current" : ""}
                       />
                     </button>
+                    {isOwner && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={isDeleting}
+                        className="flex items-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 text-primary-dark dark:text-primary-light hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 hover:text-white rounded-lg px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed group ml-auto"
+                        aria-label="Delete post"
+                      >
+                        <FiTrash2 
+                          size={24} 
+                          className="transition-transform rotate-180 group-hover:rotate-0 group-hover:text-white" 
+                        />
+                      </button>
+                    )}
+                    {!isOwner && <div className="ml-auto" />}
                   </div>
                 </div>
 
-                {}
                 <div className="hidden md:flex flex-1 overflow-hidden relative bg-right-nav-light dark:bg-left-nav-dark" style={{ minHeight: 0 }}>
                   <CommentSection
                     linkId={linkData._id.toString()}
@@ -489,7 +568,6 @@ export default function PostModal({
         )}
       </AnimatePresence>
 
-      {}
       {linkData && (
         <FullImageModal
           isOpen={fullImageModalOpen}
@@ -498,7 +576,6 @@ export default function PostModal({
         />
       )}
 
-      {}
       <AnimatePresence>
         {showCommentsModalMobile && linkData && (
           <motion.div
@@ -508,7 +585,6 @@ export default function PostModal({
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            {}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-primary-dark dark:text-primary-light">
                 Comments ({linkData.comments.length})
@@ -521,7 +597,6 @@ export default function PostModal({
               </button>
             </div>
 
-            {}
             <div className="h-[calc(100vh-73px)] overflow-hidden relative">
               <CommentSection
                 linkId={linkData._id.toString()}
@@ -533,6 +608,12 @@ export default function PostModal({
           </motion.div>
         )}
       </AnimatePresence>
+      {showDeleteModal && (
+        <DeletePostModal
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
     </>
   );
 }

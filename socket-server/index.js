@@ -101,6 +101,32 @@ app.post("/api/link-requests/unlink-notify", async (req, res) => {
     }
 });
 
+app.post("/api/links/link-deleted-notify", async (req, res) => {
+    const { linkId, ownerId, updatedOwner, timestamp } = req.body;
+
+    if (!linkId || !ownerId) {
+        return res.status(400).json({ error: "Link ID and Owner ID are required" });
+    }
+
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        const eventId = `link-deleted-${linkId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Emit to all connected clients (broadcast)
+        authenticatedNamespace.emit("link:deleted", {
+            linkId,
+            ownerId,
+            updatedOwner,
+            timestamp: timestamp || new Date().toISOString(),
+            eventId,
+        });
+
+        res.json({ success: true, message: "Link deleted event emitted" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
 app.post("/api/notifications/interaction-notify", async (req, res) => {
     const { userId, actorId, linkId, type, actor, commentId, deepLink, commentText } = req.body;
 

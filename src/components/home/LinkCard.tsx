@@ -5,12 +5,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
-import { FiHeart, FiMessageCircle, FiBookmark } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiBookmark, FiTrash2 } from "react-icons/fi";
 import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
-import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
+import { optimisticToggleLike, revalidateLinkCaches, optimisticDeleteLink } from "@/utils/linkInteractions";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
 import FullImageModal from "@/components/links/FullImageModal";
+import DeletePostModal from "@/components/DeletePostModal";
+import { mutate } from "swr";
 import toast from "react-hot-toast";
 
 interface LinkWithUser extends ILink {
@@ -34,6 +36,8 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(link.likes.length);
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isSaved = isLinkSaved(currentUser, link._id);
 
@@ -132,6 +136,58 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
     return resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png";
   };
 
+  const isOwner = currentUser?._id?.toString() === link.userId;
+
+  const handleDelete = async () => {
+    if (!currentUser || isDeleting) return;
+
+    const linkId = link._id.toString();
+    const userId = currentUser._id.toString();
+
+    setShowDeleteModal(false);
+    setIsDeleting(true);
+
+    toast.success("Link deleted successfully", { id: "delete-post" });
+
+    const { rollback } = optimisticDeleteLink(linkId, userId, mutateCurrentUser);
+
+    if (link.userId) {
+      mutate(
+        `user-links-${link.userId}`,
+        (links: ILink[] | undefined) => {
+          if (!links) return links;
+          return links.filter((l) => l._id.toString() !== linkId);
+        },
+        { revalidate: false }
+      );
+    }
+
+    onLinkUpdated();
+
+    try {
+      const res = await fetch(`/api/links/${linkId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete post");
+      }
+
+    } catch (error) {
+      rollback();
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete post",
+        { id: "delete-post" }
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -139,8 +195,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
       transition={{ duration: 0.4 }}
       className="w-full max-w-2xl mx-auto bg-right-nav-light dark:bg-right-nav-dark rounded-2xl overflow-hidden shadow-lg border border-primary-light/20 dark:border-primary-dark/30 mb-6"
     >
-      {}
-      <div className="flex items-center gap-3 p-4 pb-3">
+      <div className="flex items-center gap-3 p-4 pb-3 relative">
         <div
           onClick={handleUserClick}
           className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
@@ -166,9 +221,24 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
             </div>
           )}
         </div>
+        {isOwner && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteModal(true);
+            }}
+            disabled={isDeleting}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group"
+            aria-label="Delete post"
+          >
+            <FiTrash2 
+              size={16} 
+              className="text-gray-600 dark:text-gray-400 group-hover:text-white transition-transform group-hover:rotate-90" 
+            />
+          </button>
+        )}
       </div>
 
-      {}
       <div
         className="relative w-full aspect-square bg-gray-200 dark:bg-gray-800 cursor-zoom-in"
         onClick={() => setFullImageModalOpen(true)}
@@ -183,7 +253,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         />
       </div>
 
-      {}
       <div className="p-4 pt-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
@@ -218,7 +287,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </button>
         </div>
 
-        {}
         {likesCount > 0 && (
           <div className="mb-2">
             <span className="font-bold text-black dark:text-white text-sm">
@@ -227,7 +295,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </div>
         )}
 
-        {}
         {link.description && (
           <div className="space-y-1 mb-2">
             <div className="flex flex-col items-start gap-2 text-sm">
@@ -241,7 +308,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           </div>
         )}
 
-        {}
         {link.comments.length > 0 && (
           <button
             onClick={(e) => {
@@ -255,12 +321,17 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         )}
       </div>
 
-      {}
       <FullImageModal
         isOpen={fullImageModalOpen}
         imageUrl={link.imageUrl}
         onClose={() => setFullImageModalOpen(false)}
       />
+      {showDeleteModal && (
+        <DeletePostModal
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
     </motion.div>
   );
 }
