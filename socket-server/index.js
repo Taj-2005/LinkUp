@@ -102,7 +102,7 @@ app.post("/api/link-requests/unlink-notify", async (req, res) => {
 });
 
 app.post("/api/notifications/interaction-notify", async (req, res) => {
-    const { userId, actorId, linkId, type, actor, commentId, deepLink } = req.body;
+    const { userId, actorId, linkId, type, actor, commentId, deepLink, commentText } = req.body;
 
     if (!userId || !actorId || !linkId || !type) {
         return res.status(400).json({ error: "User ID, Actor ID, Link ID, and Type are required" });
@@ -112,11 +112,15 @@ app.post("/api/notifications/interaction-notify", async (req, res) => {
         const authenticatedNamespace = io.of("/");
         const { emitNotificationUpdate } = require("./utils/emitNotificationUpdate");
 
+        const timestamp = new Date().toISOString();
+        const eventId = `notif-new-${userId}-${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
         authenticatedNamespace.to(`user:${userId}`).emit("notification:new", {
             type,
             linkId,
             actorId,
-            timestamp: new Date().toISOString(),
+            timestamp,
+            eventId,
         });
 
         if (actor && deepLink) {
@@ -127,9 +131,11 @@ app.post("/api/notifications/interaction-notify", async (req, res) => {
                 actor: {
                     _id: actor._id || actorId,
                     username: actor.username || "Unknown",
+                    name: actor.name || undefined,
                     avatar: actor.avatar || actor.user_avatar || null,
                 },
                 commentId: commentId || undefined,
+                commentText: commentText || undefined,
                 deepLink: deepLink,
             });
 
@@ -165,6 +171,58 @@ app.post("/api/notifications/update-notify", async (req, res) => {
     }
 });
 
+app.post("/api/links/feed-update-notify", (req, res) => {
+    const { linkId, userId } = req.body;
+
+    if (!linkId || !userId) {
+        return res.status(400).json({ error: "Link ID and User ID are required" });
+    }
+
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        const timestamp = new Date().toISOString();
+        const eventId = `feed-update-${linkId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        authenticatedNamespace.emit("feed:update", {
+            linkId,
+            userId,
+            timestamp,
+            eventId,
+            type: "newLink",
+        });
+
+        console.log(`Emitted feed:update event to ALL connected users for new link: ${linkId} by user: ${userId}`);
+        res.json({ success: true, message: "Feed update event emitted to all connected users" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
+app.post("/api/links/link-update-notify", (req, res) => {
+    const { link } = req.body;
+
+    if (!link || !link._id) {
+        return res.status(400).json({ error: "Link data is required" });
+    }
+
+    if (io) {
+        const authenticatedNamespace = io.of("/");
+        const timestamp = new Date().toISOString();
+        const eventId = `link-update-${link._id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        authenticatedNamespace.emit("link:update", {
+            link,
+            timestamp,
+            eventId,
+        });
+
+        console.log(`Emitted link:update event to ALL connected users for link: ${link._id}`);
+        res.json({ success: true, message: "Link update event emitted to all connected users" });
+    } else {
+        res.status(503).json({ error: "Socket.IO not initialized" });
+    }
+});
+
 app.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
@@ -190,30 +248,8 @@ async function startServer() {
             path: "/socket.io",
         });
 
-        if (process.env.REDIS_URL) {
-            try {
-                const { createAdapter } = require("@socket.io/redis-adapter");
-                const { createClient } = require("redis");
-
-                const pubClient = createClient({ url: process.env.REDIS_URL });
-                const subClient = pubClient.duplicate();
-
-                Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
-                    io.adapter(createAdapter(pubClient, subClient));
-                    console.log("✓ Redis adapter enabled for Socket.IO clustering (horizontal scalability)");
-                }).catch((error) => {
-                    console.error("Failed to connect to Redis:", error);
-                    console.log("⚠ Socket.IO will run in single-server mode");
-                });
-            } catch (error) {
-                console.error("Redis adapter not available:", error.message);
-                console.log("⚠ Install @socket.io/redis-adapter and redis packages for clustering support");
-                console.log("  npm install @socket.io/redis-adapter redis");
-            }
-        } else {
-            console.log("ℹ Redis URL not provided - Socket.IO running in single-server mode");
-            console.log("  Set REDIS_URL environment variable for horizontal scalability");
-        }
+        console.log("✓ Socket.IO running in single-instance mode");
+        console.log("  Caching handled by SWR on frontend");
 
         app.set("io", io);
 

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
 import { dbConnect } from "@/lib/dbConnect";
 import { Notification } from "@/models/Notification";
+import { emitNotificationUpdateEvent } from "@/lib/socket-helpers";
 
 export async function PATCH() {
   await dbConnect();
@@ -18,22 +19,10 @@ export async function PATCH() {
       { $set: { read: true } }
     );
 
-    const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
-    try {
-      await fetch(`${SOCKET_SERVER_URL}/api/notifications/update-notify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          action: "clear",
-        }),
-      }).catch(() => {
-
-      });
-    } catch (socketError) {
-
-      console.error("Socket notification error (non-critical):", socketError);
-    }
+    await emitNotificationUpdateEvent({
+      userId,
+      action: "clear",
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

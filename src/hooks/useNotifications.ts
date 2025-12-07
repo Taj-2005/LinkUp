@@ -15,6 +15,7 @@ export function useNotifications() {
       revalidateOnFocus: false,
       revalidateIfStale: false,
       shouldRetryOnError: false,
+      fallbackData: undefined,
     }
   );
 

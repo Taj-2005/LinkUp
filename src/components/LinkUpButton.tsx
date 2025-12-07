@@ -8,6 +8,8 @@ import { authFetch } from "@/lib/authFetch";
 import { invalidateGlobalLinkUpCaches } from "@/utils/globalCacheInvalidation";
 import { optimisticUpdateUser } from "@/utils/swrCache";
 import { useUsers } from "@/hooks/useUsers";
+import { mutate } from "swr";
+import { invalidateLinkStatus } from "@/hooks/useLinkStatus";
 import UnlinkModal from "./UnlinkModal";
 import toast from "react-hot-toast";
 
@@ -23,7 +25,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
     const [showUnlinkModal, setShowUnlinkModal] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const socket = useSocketStore((state) => state.socket);
-    const { currentUser } = useUsers();
+    const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
 
     const shouldUseHook = providedStatus === undefined;
     const { status: hookStatus, isLoading: hookIsLoading } = useLinkStatus(
@@ -62,10 +64,19 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
         const previousLinkedTo = currentUser.linked_to || [];
 
         try {
-
             await optimisticUpdateUser(currentUser._id, {
                 linked_to: [...previousLinkedTo],
             });
+
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers(),
+                invalidateLinkStatus(currentUser._id, receiverId),
+                mutate("/api/link-requests/pending"),
+                mutate("/api/link-requests/sent"),
+                mutate("/api/link-requests"),
+                mutate("linkRequests", undefined, { revalidate: false }),
+            ]);
 
             await sendLinkRequest(receiverId);
 
@@ -77,12 +88,16 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
 
             toast.success("Link request sent!");
         } catch (error) {
-
             await optimisticUpdateUser(currentUser._id, {
                 linked_to: previousLinkedTo,
             });
 
-            await invalidateGlobalLinkUpCaches(currentUser._id, receiverId);
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers(),
+                invalidateLinkStatus(currentUser._id, receiverId),
+                invalidateGlobalLinkUpCaches(currentUser._id, receiverId),
+            ]);
 
             toast.error(error instanceof Error ? error.message : "Failed to send request");
         } finally {
@@ -91,7 +106,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
     };
 
     const handleUnlink = async () => {
-        if (!currentUser) return;
+        if (!currentUser || isProcessing) return;
 
         setIsProcessing(true);
 
@@ -101,34 +116,94 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
         const isInLinkedTo = previousLinkedTo.includes(receiverId);
         const isInLinkedBy = previousLinkedBy.includes(receiverId);
 
+        setShowUnlinkModal(false);
+        toast.success("Unlinked successfully");
+
         try {
+            const updatedLinkedTo = isInLinkedTo
+                ? previousLinkedTo.filter(id => id !== receiverId)
+                : previousLinkedTo;
+            const updatedLinkedBy = isInLinkedBy
+                ? previousLinkedBy.filter(id => id !== receiverId)
+                : previousLinkedBy;
 
             await optimisticUpdateUser(currentUser._id, {
-                linked_to: isInLinkedTo
-                    ? previousLinkedTo.filter(id => id !== receiverId)
-                    : previousLinkedTo,
-                linked_by: isInLinkedBy
-                    ? previousLinkedBy.filter(id => id !== receiverId)
-                    : previousLinkedBy,
+                linked_to: updatedLinkedTo,
+                linked_by: updatedLinkedBy,
             });
 
-            await authFetch("/api/link-requests/unlink-users", {
+            mutate(
+                "all-users",
+                (users: { _id?: { toString(): string } | string; linked_to?: string[]; linked_by?: string[]; [key: string]: unknown }[] | undefined) => {
+                    if (!users) return users;
+                    return users.map((user) => {
+                        const userId = user._id?.toString();
+                        if (userId === receiverId) {
+                            const otherLinkedTo = user.linked_to || [];
+                            const otherLinkedBy = user.linked_by || [];
+                            return {
+                                ...user,
+                                linked_to: otherLinkedTo.filter((id: string) => id !== currentUser._id),
+                                linked_by: otherLinkedBy.filter((id: string) => id !== currentUser._id),
+                            };
+                        }
+                        return user;
+                    });
+                },
+                { revalidate: false }
+            );
+
+            mutate(
+                ["link-status", currentUser._id, receiverId],
+                { status: "none" },
+                { revalidate: false }
+            );
+            mutate(
+                ["link-status", receiverId, currentUser._id],
+                { status: "none" },
+                { revalidate: false }
+            );
+
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers(),
+                mutate("/api/link-requests/pending", undefined, { revalidate: false }),
+                mutate("/api/link-requests/sent", undefined, { revalidate: false }),
+                mutate("/api/link-requests", undefined, { revalidate: false }),
+                mutate("linkRequests", undefined, { revalidate: false }),
+            ]);
+
+            authFetch("/api/link-requests/unlink-users", {
                 method: "POST",
                 body: JSON.stringify({ otherUserId: receiverId }),
+            }).catch((error) => {
+                optimisticUpdateUser(currentUser._id, {
+                    linked_to: previousLinkedTo,
+                    linked_by: previousLinkedBy,
+                });
+
+                Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers(),
+                    invalidateLinkStatus(currentUser._id, receiverId),
+                    invalidateGlobalLinkUpCaches(currentUser._id, receiverId),
+                ]);
+
+                toast.error(error instanceof Error ? error.message : "Failed to unlink");
             });
 
-            await invalidateGlobalLinkUpCaches(currentUser._id, receiverId);
-
-            setShowUnlinkModal(false);
-            toast.success("Unlinked successfully");
         } catch (error) {
-
             await optimisticUpdateUser(currentUser._id, {
                 linked_to: previousLinkedTo,
                 linked_by: previousLinkedBy,
             });
 
-            await invalidateGlobalLinkUpCaches(currentUser._id, receiverId);
+            await Promise.all([
+                mutateCurrentUser(),
+                mutateAllUsers(),
+                invalidateLinkStatus(currentUser._id, receiverId),
+                invalidateGlobalLinkUpCaches(currentUser._id, receiverId),
+            ]);
 
             toast.error(error instanceof Error ? error.message : "Failed to unlink");
         } finally {

@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import { Link } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
+import { emitFeedUpdateEvent } from "@/lib/socket-helpers";
 
 export async function POST(req: Request) {
   await dbConnect();
@@ -60,6 +61,8 @@ export async function POST(req: Request) {
         await user.save();
       }
     }
+
+    await emitFeedUpdateEvent(link._id.toString(), userId);
 
     return NextResponse.json(
       {

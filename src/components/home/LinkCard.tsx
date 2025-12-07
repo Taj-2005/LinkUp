@@ -33,8 +33,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
   const { currentUser, mutateCurrentUser } = useUsers();
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(link.likes.length);
-  const [isLiking, setIsLiking] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
 
   const isSaved = isLinkSaved(currentUser, link._id);
@@ -53,13 +51,11 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isLiking || !currentUser) return;
+    if (!currentUser) return;
 
-    setIsLiking(true);
     const previousLiked = isLiked;
     const previousCount = likesCount;
     const userId = currentUser._id.toString();
-
     const newLiked = !isLiked;
 
     requestAnimationFrame(() => {
@@ -86,7 +82,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
       await revalidateLinkCaches();
     } catch (error) {
-
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
       optimisticToggleLike(link._id, userId, previousLiked);
@@ -96,18 +91,14 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle like"
       );
-    } finally {
-      setIsLiking(false);
     }
   };
 
   const handleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isSaving || !currentUser) return;
+    if (!currentUser) return;
 
     const previousSaved = isSaved;
-    setIsSaving(true);
-
     const { rollback } = optimisticToggleSaved(
       mutateCurrentUser,
       link._id,
@@ -128,14 +119,11 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
 
       await mutateCurrentUser();
     } catch (error) {
-
       rollback();
 
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle save"
       );
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -201,7 +189,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           <div className="flex items-center gap-4">
             <button
               onClick={handleLike}
-              disabled={isLiking}
               className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
                 isLiked ? "text-red-500" : ""
               }`}
@@ -220,14 +207,13 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
               <FiMessageCircle size={24} />
             </button>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
-              isSaved ? "text-violet-600" : ""
-            } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
-            aria-label="Save Link"
-          >
+            <button
+              onClick={handleSave}
+              className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
+                isSaved ? "text-violet-600" : ""
+              }`}
+              aria-label="Save Link"
+            >
             <FiBookmark size={24} className={isSaved ? "fill-current" : ""} />
           </button>
         </div>

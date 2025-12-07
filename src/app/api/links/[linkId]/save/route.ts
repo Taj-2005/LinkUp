@@ -5,9 +5,8 @@ import { User } from "@/models/User";
 import { Link } from "@/models/Link";
 import { dbConnect } from "@/lib/dbConnect";
 import { createNotification } from "@/utils/notifications";
+import { emitNotificationEvent } from "@/lib/socket-helpers";
 import mongoose from "mongoose";
-
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(
   req: Request,
@@ -73,9 +72,9 @@ export async function POST(
         { $addToSet: { savedLinks: linkIdStr } } as unknown as mongoose.mongo.UpdateFilter<mongoose.mongo.Document>
       );
 
-      let actorUser: { username?: string; user_avatar?: string } | null = currentUser as { username?: string; user_avatar?: string } | null;
+      let actorUser: { username?: string; name?: string; user_avatar?: string } | null = currentUser as { username?: string; name?: string; user_avatar?: string } | null;
       if (!actorUser) {
-        const fetchedUser = await User.findById(userId).select("username user_avatar").lean() as { username?: string; user_avatar?: string } | null;
+        const fetchedUser = await User.findById(userId).select("username name user_avatar").lean() as { username?: string; name?: string; user_avatar?: string } | null;
         actorUser = fetchedUser;
       }
 
@@ -89,29 +88,19 @@ export async function POST(
         type: "save",
       });
 
-      try {
-        await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: link.userId,
-            actorId: userId.toString(),
-            linkId: linkId,
-            type: "save",
-            deepLink: deepLink,
-            actor: {
-              _id: userId.toString(),
-              username: actorUser?.username || "Unknown",
-              avatar: actorUser?.user_avatar || null,
-            },
-          }),
-        }).catch(() => {
-
-        });
-      } catch (socketError) {
-
-        console.error("Socket notification error (non-critical):", socketError);
-      }
+      await emitNotificationEvent({
+        userId: link.userId,
+        actorId: userId.toString(),
+        linkId: linkId,
+        type: "save",
+        deepLink: deepLink,
+        actor: {
+          _id: userId.toString(),
+          username: actorUser?.username || "Unknown",
+          name: actorUser?.name || undefined,
+          avatar: actorUser?.user_avatar || null,
+        },
+      });
     }
 
     if (updateResult.matchedCount === 0) {

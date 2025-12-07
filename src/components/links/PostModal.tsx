@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
 import { useModalStore } from "@/store/useModalStore";
+import { useSocketStore } from "@/store/useSocketStore";
 import CommentSection from "./CommentSection";
 import FullImageModal from "./FullImageModal";
 import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
@@ -40,14 +41,15 @@ export default function PostModal({
   deepLinkReplyId,
 }: PostModalProps) {
   const { currentUser, mutateCurrentUser } = useUsers();
+  const { socket, isConnected } = useSocketStore();
   const setIsModalOpen = useModalStore((state) => state.setIsModalOpen);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [linkData, setLinkData] = useState<LinkWithUser | null>(link as LinkWithUser | null);
-  const [isLiking, setIsLiking] = useState(false);
+  // Removed isLiking state - no loading indicators needed
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
   const [showCommentsModalMobile, setShowCommentsModalMobile] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  // Removed isSaving state - no loading indicators needed
 
   const isSaved = isLinkSaved(currentUser, linkData?._id || "");
 
@@ -108,10 +110,51 @@ export default function PostModal({
     };
   }, [isOpen, setIsModalOpen]);
 
-  const handleLike = async () => {
-    if (!linkData || isLiking || !currentUser) return;
+  // Listen for real-time link updates (comments, likes, replies)
+  useEffect(() => {
+    if (!socket || !isConnected || !linkData) return;
 
-    setIsLiking(true);
+    const handleLinkUpdate = (data: { link: ILink & { userInfo?: LinkWithUser['userInfo'] }; timestamp?: string; eventId?: string }) => {
+      const updatedLink = data.link;
+      
+      // Only update if this is the link we're viewing
+      if (updatedLink._id !== linkData._id.toString()) return;
+
+      // Update linkData with the new data (preserve userInfo)
+      setLinkData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          ...updatedLink,
+          userInfo: prev.userInfo || updatedLink.userInfo,
+          // Ensure dates are Date objects
+          createdAt: updatedLink.createdAt instanceof Date 
+            ? updatedLink.createdAt 
+            : new Date(updatedLink.createdAt),
+          updatedAt: updatedLink.updatedAt instanceof Date 
+            ? updatedLink.updatedAt 
+            : new Date(updatedLink.updatedAt),
+        } as LinkWithUser;
+      });
+
+      // Update like state
+      const userId = currentUser?._id?.toString();
+      if (userId) {
+        setIsLiked(updatedLink.likes?.includes(userId) || false);
+      }
+      setLikesCount(updatedLink.likes?.length || 0);
+    };
+
+    socket.on("link:update", handleLinkUpdate);
+
+    return () => {
+      socket.off("link:update", handleLinkUpdate);
+    };
+  }, [socket, isConnected, linkData, currentUser]);
+
+  const handleLike = async () => {
+    if (!linkData || !currentUser) return;
+
     const previousLiked = isLiked;
     const previousCount = likesCount;
     const userId = currentUser._id.toString();
@@ -142,7 +185,6 @@ export default function PostModal({
 
       await revalidateLinkCaches();
     } catch (error) {
-
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
       optimisticToggleLike(linkData._id, userId, previousLiked);
@@ -152,17 +194,13 @@ export default function PostModal({
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle like"
       );
-    } finally {
-      setIsLiking(false);
     }
   };
 
   const handleSaveToggle = async () => {
-    if (!linkData || isSaving || !currentUser) return;
+    if (!linkData || !currentUser) return;
 
     const previousSaved = isSaved;
-    setIsSaving(true);
-
     const { rollback } = optimisticToggleSaved(
       mutateCurrentUser,
       linkData._id,
@@ -183,14 +221,11 @@ export default function PostModal({
 
       await mutateCurrentUser();
     } catch (error) {
-
       rollback();
 
       toast.error(
         error instanceof Error ? error.message : "Failed to toggle save"
       );
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -198,7 +233,6 @@ export default function PostModal({
     if (!linkData?._id) return;
 
     try {
-
       const res = await fetch(`/api/links/user/${linkData.userId}`);
       const data = await res.json();
 
@@ -231,6 +265,27 @@ export default function PostModal({
     setFullImageModalOpen(true);
   };
 
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    onClose();
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Only close if clicking directly on the overlay, not on child elements
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      handleClose();
+    }
+  };
+
   if (!linkData) return null;
 
   const getAvatarSrc = (userAvatar?: string) => {
@@ -247,10 +302,14 @@ export default function PostModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleOverlayClick}
+            onKeyDown={handleKeyDown}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="post-modal-title"
           >
             <motion.div
-              className="bg-white dark:bg-gray-900 rounded-none md:rounded-2xl w-full h-full md:h-[90vh] md:max-w-7xl overflow-hidden flex flex-col md:flex-row"
+              className="bg-white dark:bg-gray-900 rounded-none md:rounded-2xl w-full h-full md:h-[90vh] md:max-w-7xl overflow-hidden flex flex-col md:flex-row relative"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -260,10 +319,13 @@ export default function PostModal({
             >
               {}
               <button
-                onClick={onClose}
-                className="absolute top-3 right-3 md:top-4 md:right-4 z-10 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg p-2 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                onClick={handleClose}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="absolute top-3 right-3 md:top-4 md:right-4 z-[100] rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-lg p-2 hover:bg-white dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+                aria-label="Close modal"
+                type="button"
               >
-                <FiX size={20} className="text-gray-800 dark:text-gray-100" />
+                <FiX size={20} className="text-gray-800 dark:text-gray-100 pointer-events-none" />
               </button>
 
               {}
@@ -299,9 +361,9 @@ export default function PostModal({
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-base md:text-base text-primary-dark dark:text-white">
+                        <h2 id="post-modal-title" className="font-semibold text-base md:text-base text-primary-dark dark:text-white">
                           {linkData.userInfo?.username || "Unknown User"}
-                        </p>
+                        </h2>
                         {linkData.location && (
                           <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1">
                             <FiMapPin size={12} />
@@ -315,7 +377,6 @@ export default function PostModal({
                     <div className="flex items-center gap-2 md:hidden flex-shrink-0 ">
                       <button
                         onClick={handleLike}
-                        disabled={isLiking}
                         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors ${
                           isLiked
                             ? "text-red-500 bg-red-50 dark:bg-red-900/20"
@@ -339,12 +400,11 @@ export default function PostModal({
                       </button>
                     <button
                       onClick={handleSaveToggle}
-                      disabled={isSaving}
                       className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors ${
                         isSaved
                           ? "text-violet-600 bg-gradient-to-r from-violet-50 via-purple-50 to-pink-50 dark:from-violet-900/20 dark:via-purple-900/20 dark:to-pink-900/20"
                           : "text-primary-dark dark:text-primary-light bg-gray-100 dark:bg-gray-800"
-                      } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                      }`}
                     >
                       <FiBookmark
                         size={18}
@@ -378,10 +438,9 @@ export default function PostModal({
                 {}
                 <div className="hidden md:flex p-4 border-t border-gray-200 dark:border-gray-700 space-y-3 flex-shrink-0 z-10 bg-right-nav-light dark:bg-left-nav-dark">
                   <div className="flex items-center gap-4">
-                    <button
-                      onClick={handleLike}
-                      disabled={isLiking}
-                      className={`flex items-center gap-2 transition-colors ${
+                      <button
+                        onClick={handleLike}
+                        className={`flex items-center gap-2 transition-colors ${
                         isLiked
                           ? "text-red-500"
                           : "text-primary-dark dark:text-primary-light"
@@ -401,12 +460,11 @@ export default function PostModal({
                     </div>
                     <button
                       onClick={handleSaveToggle}
-                      disabled={isSaving}
                       className={`flex items-center gap-2 transition-colors ml-auto ${
                         isSaved
                           ? "text-violet-600 hover:text-purple-600"
                           : "text-primary-dark dark:text-primary-light hover:text-violet-500"
-                      } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                      }`}
                     >
                       <FiBookmark
                         size={24}

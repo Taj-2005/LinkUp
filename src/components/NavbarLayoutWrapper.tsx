@@ -35,16 +35,12 @@ export default function NavbarLayoutWrapper({ children }: { children: React.Reac
     };
 
     const handleLinkRequestAccepted = () => {
-
       mutateCurrentUser();
-
       mutateAllUsers();
     };
 
     const handleUserUnlinked = () => {
-
       mutateCurrentUser();
-
       mutateAllUsers();
     };
 

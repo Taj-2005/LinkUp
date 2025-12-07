@@ -14,9 +14,11 @@ interface InteractionEvent {
     actor: {
         _id: string;
         username: string;
+        name?: string;
         avatar?: string;
     };
     commentId?: string;
+    commentText?: string;
     deepLink: string;
 }
 
@@ -78,6 +80,7 @@ export default function InteractionToastContainer() {
                             type={toast.type}
                             linkId={toast.linkId}
                             deepLink={toast.deepLink}
+                            commentText={toast.commentText}
                             onClose={() => removeToast(toast.id)}
                         />
                     ))}

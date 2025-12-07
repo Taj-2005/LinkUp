@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiBell } from "react-icons/fi";
 import Profile from "@/components/home/Profile";
@@ -15,7 +15,6 @@ import { useFeedLinks } from "@/hooks/useLinks";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useModalStore } from "@/store/useModalStore";
-import { parseDeepLink, scrollToComment, scrollToReply } from "@/utils/deepLinks";
 import { ILink } from "@/models/Link";
 
 interface LinkWithUser extends ILink {
@@ -39,15 +38,16 @@ function HomeContent() {
   const [selectedLink, setSelectedLink] = useState<LinkWithUser | null>(null);
   const [deepLinkHandled, setDeepLinkHandled] = useState(false);
 
+  const memoizedLinks = useMemo(() => links, [links]);
+
   useEffect(() => {
     if (isLoading || deepLinkHandled) return;
 
     const linkId = searchParams?.get("link");
-    const hash = typeof window !== "undefined" ? window.location.hash : "";
 
     if (linkId) {
 
-      const link = links.find((l) => l._id === linkId);
+      const link = memoizedLinks.find((l) => l._id === linkId);
       
       if (link) {
 
@@ -57,29 +57,10 @@ function HomeContent() {
 
         router.replace("/livelinks", { scroll: false });
       } else {
-
-        mutateFeedLinks().then(() => {
-          const retryLink = links.find((l) => l._id === linkId);
-          if (retryLink) {
-            setSelectedLink(retryLink);
-            setIsModalOpen(true);
-            setDeepLinkHandled(true);
-            if (hash) {
-              setTimeout(() => {
-                const parsed = parseDeepLink(window.location.href);
-                if (parsed.commentId) {
-                  scrollToComment(parsed.commentId);
-                } else if (parsed.replyId) {
-                  scrollToReply(parsed.replyId);
-                }
-              }, 300);
-            }
-            router.replace("/livelinks", { scroll: false });
-          }
-        });
+        setDeepLinkHandled(true);
       }
     }
-  }, [searchParams, links, isLoading, isModalOpen, deepLinkHandled, router, setIsModalOpen, mutateFeedLinks]);
+  }, [searchParams, memoizedLinks, isLoading, isModalOpen, deepLinkHandled, router, setIsModalOpen, mutateFeedLinks]);
 
   const handleCommentClick = useCallback((link: LinkWithUser) => {
     setSelectedLink(link);
@@ -97,7 +78,6 @@ function HomeContent() {
   }, [searchParams, router, setIsModalOpen]);
 
   const handleLinkUpdated = useCallback(() => {
-
     mutateFeedLinks();
     mutateCurrentUser();
   }, [mutateFeedLinks, mutateCurrentUser]);
@@ -140,13 +120,13 @@ function HomeContent() {
                     <FeedLinkSkeleton key={i} />
                   ))}
                 </>
-              ) : links.length === 0 ? (
+              ) : memoizedLinks.length === 0 ? (
                 <EmptyState
                   message="No links or posts yet — let's wait until someone posts!"
                   subMessage="Be the first to share a link!"
                 />
               ) : (
-                links.map((link) => (
+                memoizedLinks.map((link) => (
                   <LinkCard
                     key={link._id.toString()}
                     link={link}

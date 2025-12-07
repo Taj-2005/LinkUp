@@ -43,9 +43,9 @@ export default function LinkAcceptedToast({ receiver, onClose }: LinkAcceptedToa
             className="w-[90vw] max-w-sm md:max-w-md"
             onClick={handleClick}
         >
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow">
+            <div className="bg-left-nav-dark dark:bg-left-nav-dark rounded-2xl shadow-2xl border border-green-500/30 dark:border-green-500/30 p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow ring-2 ring-green-500/20">
                 <div className="flex items-center gap-3 md:gap-4">
-                    <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0">
+                    <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-green-500/50">
                         <Image
                             src={
                                 receiver.user_avatar
@@ -61,13 +61,13 @@ export default function LinkAcceptedToast({ receiver, onClose }: LinkAcceptedToa
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm md:text-base font-semibold text-gray-900 dark:text-white truncate">
+                        <p className="text-sm md:text-base font-semibold text-primary-light dark:text-primary-light truncate">
                             {receiver.name}
                         </p>
-                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-xs md:text-sm text-primary-light/60 dark:text-primary-light/60 truncate">
                             @{receiver.username}
                         </p>
-                        <p className="text-xs md:text-sm text-green-600 dark:text-green-400 mt-1 font-medium">
+                        <p className="text-xs md:text-sm text-green-400 dark:text-green-400 mt-1 font-medium">
                             accepted your link request
                         </p>
                     </div>

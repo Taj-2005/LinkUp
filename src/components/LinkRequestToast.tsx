@@ -43,9 +43,9 @@ export default function LinkRequestToast({ requester, onClose }: LinkRequestToas
             className="w-[90vw] max-w-sm md:max-w-md"
             onClick={handleClick}
         >
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow">
+            <div className="bg-left-nav-dark dark:bg-left-nav-dark rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow ring-2 ring-violet-500/20">
                 <div className="flex items-center gap-3 md:gap-4">
-                    <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0">
+                    <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-violet-500/50">
                         <Image
                             src={
                                 requester.user_avatar
@@ -61,13 +61,13 @@ export default function LinkRequestToast({ requester, onClose }: LinkRequestToas
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm md:text-base font-semibold text-gray-900 dark:text-white truncate">
+                        <p className="text-sm md:text-base font-semibold text-primary-light dark:text-primary-light truncate">
                             {requester.name}
                         </p>
-                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-xs md:text-sm text-primary-light/60 dark:text-primary-light/60 truncate">
                             @{requester.username}
                         </p>
-                        <p className="text-xs md:text-sm text-primary-dark dark:text-primary-light mt-1">
+                        <p className="text-xs md:text-sm text-primary-light/80 dark:text-primary-light/80 mt-1">
                             sent you a link request
                         </p>
                     </div>

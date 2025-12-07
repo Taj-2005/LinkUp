@@ -7,6 +7,7 @@ import { useUsers } from "@/hooks/useUsers";
 import LinkRequestToast from "./LinkRequestToast";
 import LinkAcceptedToast from "./LinkAcceptedToast";
 import { getUser } from "@/utils/api";
+import { optimisticUpdateUser } from "@/utils/swrCache";
 
 interface LinkRequest {
     requestId: string;
@@ -96,10 +97,53 @@ export default function LinkRequestToastContainer() {
                                 },
                             ]);
 
-                            await Promise.all([
-                                mutateCurrentUser(),
-                                mutateAllUsers()
+                            if (currentUser?._id) {
+                                const { invalidateGlobalLinkUpCaches } = await import("@/utils/globalCacheInvalidation");
+                                const { invalidateLinkStatus } = await import("@/hooks/useLinkStatus");
+                                const { mutate } = await import("swr");
+                                
+                                const currentUserId = currentUser._id.toString();
+                                
+                                const currentLinkedTo = currentUser.linked_to || [];
+                                const updatedLinkedTo = [...currentLinkedTo];
+                                if (!updatedLinkedTo.includes(receiverIdStr)) {
+                                    updatedLinkedTo.push(receiverIdStr);
+                                }
+                                await optimisticUpdateUser(currentUserId, {
+                                    linked_to: updatedLinkedTo,
+                                });
+                                
+                                mutate(
+                                    "all-users",
+                                    (users: { _id?: { toString(): string } | string; linked_by?: string[]; [key: string]: unknown }[] | undefined) => {
+                                        if (!users) return users;
+                                        return users.map((user) => {
+                                            if (user._id?.toString() === receiverIdStr) {
+                                                const receiverLinkedBy = user.linked_by || [];
+                                                const updatedReceiverLinkedBy = [...receiverLinkedBy];
+                                                if (!updatedReceiverLinkedBy.includes(currentUserId)) {
+                                                    updatedReceiverLinkedBy.push(currentUserId);
+                                                }
+                                                return { ...user, linked_by: updatedReceiverLinkedBy };
+                                            }
+                                            return user;
+                                        });
+                                    },
+                                    { revalidate: false }
+                                );
+                                
+                                await Promise.all([
+                                    mutateCurrentUser(),
+                                    mutateAllUsers(),
+                                    invalidateLinkStatus(currentUserId, receiverIdStr),
+                                    mutate("/api/link-requests/pending", undefined, { revalidate: false }),
+                                    mutate("/api/link-requests/sent", undefined, { revalidate: false }),
+                                    mutate("/api/link-requests", undefined, { revalidate: false }),
+                                    mutate("linkRequests", undefined, { revalidate: false }),
                                 ]);
+                                
+                                await invalidateGlobalLinkUpCaches(currentUserId, receiverIdStr);
+                            }
                         } else {
                             console.warn("Receiver not found:", receiverIdStr);
                         }

@@ -4,8 +4,9 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSend } from "react-icons/fi";
 import Image from "next/image";
-import { IComment, IReply } from "@/models/Link";
+import { IComment, IReply, ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
+import { useSocketStore } from "@/store/useSocketStore";
 import { optimisticAddComment, optimisticAddReply, revalidateLinkCaches } from "@/utils/linkInteractions";
 import {
   createOptimisticComment,
@@ -31,11 +32,10 @@ export default function CommentSection({
   onReplyAdded,
 }: CommentSectionProps) {
   const { currentUser } = useUsers();
+  const { socket, isConnected } = useSocketStore();
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [submittingComment, setSubmittingComment] = useState(false);
-  const [submittingReply, setSubmittingReply] = useState<string | null>(null);
   const commentsContainerRef = useRef<HTMLDivElement>(null);
   const scrollToCommentRef = useRef<string | null>(null);
 
@@ -50,8 +50,6 @@ export default function CommentSection({
       prevPropsLengthRef.current = propsComments.length;
     }
   }, [propsComments.length, propsComments]);
-
-  const comments = useMemo(() => localComments, [localComments]);
 
   const scrollToLatest = React.useCallback(() => {
     if (!commentsContainerRef.current) return;
@@ -119,9 +117,66 @@ export default function CommentSection({
     });
   }, []);
 
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const handleLinkUpdate = (data: { link: ILink; timestamp?: string; eventId?: string }) => {
+      const updatedLink = data.link;
+      
+      if (updatedLink._id !== linkId) return;
+
+      if (updatedLink.comments && Array.isArray(updatedLink.comments)) {
+        setLocalComments((prevComments) => {
+          if (rollbackRef.current !== null) {
+            return prevComments;
+          }
+
+          const prevCommentIds = new Set(prevComments.map(c => c._id.toString()));
+          const newComment = updatedLink.comments.find(
+            (c: IComment) => !prevCommentIds.has(c._id.toString())
+          );
+
+          const formattedComments = updatedLink.comments.map((serverComment: IComment) => {
+            return {
+              ...serverComment,
+              createdAt: serverComment.createdAt instanceof Date 
+                ? serverComment.createdAt 
+                : new Date(serverComment.createdAt),
+              updatedAt: serverComment.updatedAt instanceof Date 
+                ? serverComment.updatedAt 
+                : new Date(serverComment.updatedAt),
+              replies: (serverComment.replies || []).map((r: IReply) => ({
+                ...r,
+                createdAt: r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt),
+                updatedAt: r.updatedAt instanceof Date ? r.updatedAt : new Date(r.updatedAt),
+              })),
+            } as IComment;
+          });
+
+          if (newComment) {
+            scrollToCommentRef.current = newComment._id.toString();
+            requestAnimationFrame(() => {
+              scrollToLatest();
+            });
+          }
+
+          return formattedComments;
+        });
+      }
+    };
+
+    socket.on("link:update", handleLinkUpdate);
+
+    return () => {
+      socket.off("link:update", handleLinkUpdate);
+    };
+  }, [socket, isConnected, linkId, scrollToLatest]);
+
+  const comments = useMemo(() => localComments, [localComments]);
+
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || submittingComment || !currentUser) return;
+    if (!newComment.trim() || !currentUser) return;
 
     const text = newComment.trim();
     setNewComment("");
@@ -140,15 +195,10 @@ export default function CommentSection({
     });
 
     scrollToCommentRef.current = optimisticComment._id;
-
     optimisticAddComment(linkId, optimisticComment);
     onCommentAdded();
 
-    requestAnimationFrame(() => {
-      scrollToLatest();
-    });
-
-    setSubmittingComment(true);
+    scrollToLatest();
 
     try {
       const res = await fetch(`/api/links/${linkId}/comment`, {
@@ -186,7 +236,6 @@ export default function CommentSection({
       await revalidateLinkCaches();
       rollbackRef.current = null;
     } catch (error) {
-
       if (rollbackRef.current) {
         setLocalComments(rollbackRef.current());
         rollbackRef.current = null;
@@ -197,13 +246,11 @@ export default function CommentSection({
       toast.error(
         error instanceof Error ? error.message : "Failed to add comment"
       );
-    } finally {
-      setSubmittingComment(false);
     }
   };
 
   const handleAddReply = async (commentId: string) => {
-    if (!replyText.trim() || submittingReply || !currentUser) return;
+    if (!replyText.trim() || !currentUser) return;
 
     const text = replyText.trim();
     
@@ -224,15 +271,10 @@ export default function CommentSection({
     });
 
     scrollToCommentRef.current = optimisticReply._id;
-
     optimisticAddReply(linkId, commentId, optimisticReply);
     onReplyAdded();
 
-    requestAnimationFrame(() => {
-      scrollToLatest();
-    });
-
-    setSubmittingReply(commentId);
+    scrollToLatest();
 
     try {
       const res = await fetch(
@@ -269,22 +311,16 @@ export default function CommentSection({
         });
       }
 
-      await revalidateLinkCaches();
       rollbackRef.current = null;
     } catch (error) {
-
       if (rollbackRef.current) {
         setLocalComments(rollbackRef.current());
         rollbackRef.current = null;
       }
 
-      await revalidateLinkCaches();
-
       toast.error(
         error instanceof Error ? error.message : "Failed to add reply"
       );
-    } finally {
-      setSubmittingReply(null);
     }
   };
 
@@ -304,7 +340,6 @@ export default function CommentSection({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {}
       <div
         ref={commentsContainerRef}
         data-comment-section
@@ -324,7 +359,6 @@ export default function CommentSection({
               className="space-y-2"
               data-comment-id={comment._id.toString()}
             >
-              {}
               <div className="flex gap-3">
                 <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                   <Image
@@ -357,7 +391,6 @@ export default function CommentSection({
                 </div>
               </div>
 
-              {}
               <AnimatePresence>
                 {comment.replies && comment.replies.length > 0 && (
                   <motion.div
@@ -393,7 +426,6 @@ export default function CommentSection({
                 )}
               </AnimatePresence>
 
-              {}
               {replyingTo === comment._id.toString() && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -428,7 +460,7 @@ export default function CommentSection({
                     />
                     <button
                       type="submit"
-                      disabled={!replyText.trim() || submittingReply === comment._id.toString()}
+                      disabled={!replyText.trim()}
                       className="p-1.5 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all"
                     >
                       <FiSend size={14} />
@@ -440,8 +472,7 @@ export default function CommentSection({
           ))
         )}
       </div>
-
-      {}
+          
       <div className="border-t border-gray-200 dark:border-gray-700 p-3 md:p-4 flex-shrink-0  bg-right-nav-light dark:bg-left-nav-dark z-10">
         <form onSubmit={handleAddComment} className="flex gap-2">
           <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
@@ -463,7 +494,7 @@ export default function CommentSection({
           />
           <button
             type="submit"
-            disabled={!newComment.trim() || submittingComment}
+            disabled={!newComment.trim()}
             className="p-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all"
           >
             <FiSend size={18} />

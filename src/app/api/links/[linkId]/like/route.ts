@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
-import { Link } from "@/models/Link";
+import { Link, IComment } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
 import { createNotification } from "@/utils/notifications";
+import { emitNotificationEvent, emitLinkUpdateEvent } from "@/lib/socket-helpers";
 import mongoose from "mongoose";
-
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
 export async function POST(
   req: Request,
@@ -43,7 +42,7 @@ export async function POST(
       if (!link.likes.includes(userIdStr)) {
         link.likes.push(userIdStr);
         
-        const user = await User.findById(userId).select("username user_avatar").lean() as { username?: string; user_avatar?: string } | null;
+        const user = await User.findById(userId).select("username name user_avatar").lean() as { username?: string; name?: string; user_avatar?: string } | null;
 
         if (!user) {
           return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -59,33 +58,39 @@ export async function POST(
           type: "like",
         });
 
-        try {
-          await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: link.userId,
-              actorId: userIdStr,
-              linkId: linkId,
-              type: "like",
-              deepLink: deepLink,
-              actor: {
-                _id: userIdStr,
-                username: user.username || "Unknown",
-                avatar: user.user_avatar || null,
-              },
-            }),
-          }).catch(() => {
-
-          });
-        } catch (socketError) {
-
-          console.error("Socket notification error (non-critical):", socketError);
-        }
+        await emitNotificationEvent({
+          userId: link.userId,
+          actorId: userIdStr,
+          linkId: linkId,
+          type: "like",
+          deepLink: deepLink,
+          actor: {
+            _id: userIdStr,
+            username: user.username || "Unknown",
+            name: user.name || undefined,
+            avatar: user.user_avatar || null,
+          },
+        });
       }
     }
 
     await link.save();
+
+    await emitLinkUpdateEvent({
+      _id: link._id.toString(),
+      userId: link.userId.toString(),
+      likes: link.likes,
+      comments: link.comments.map((c: IComment) => ({
+        _id: c._id.toString(),
+        userId: c.userId,
+        username: c.username,
+        user_avatar: c.user_avatar,
+        text: c.text,
+        replies: c.replies || [],
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+      })),
+    });
 
     return NextResponse.json(
       {

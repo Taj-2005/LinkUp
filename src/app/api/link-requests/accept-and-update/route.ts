@@ -3,8 +3,7 @@ import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
 import { dbConnect } from "@/lib/dbConnect";
 import { User } from "@/models/User";
-
-const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
+import { emitLinkRequestAcceptedEvent } from "@/lib/socket-helpers";
 
 export async function POST(req: Request) {
     await dbConnect();
@@ -27,22 +26,7 @@ export async function POST(req: Request) {
             $addToSet: { linked_to: payload.userId },
         });
 
-        try {
-            await fetch(`${SOCKET_SERVER_URL}/api/link-requests/link-accepted-notify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    requesterId: requesterId,
-                    receiverId: payload.userId,
-                    requestId: requestId
-                }),
-            }).catch(() => {
-
-            });
-        } catch (socketError) {
-
-            console.error("Socket notification error (non-critical):", socketError);
-        }
+        await emitLinkRequestAcceptedEvent(requesterId, payload.userId);
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {

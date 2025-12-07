@@ -148,8 +148,6 @@ export default function UserProfile() {
               setUser(freshUser);
             }
           } catch{
-
-            // console.error("Failed to refresh profile on linkup event:", error);
           }
         }
       }
@@ -291,65 +289,65 @@ if (!user || userNotFound) {
                   </motion.div>
                 </div>
               ) : (
-<motion.div
-  key="notfound"
-  className="flex flex-col items-center gap-6 py-20"
-  initial={{ opacity: 0, scale: 0.92, y: 20 }}
-  animate={{ opacity: 1, scale: 1, y: 0 }}
-  exit={{ opacity: 0, y: 10 }}
-  transition={{ duration: 0.55, ease: "easeOut" }}
->
+                <motion.div
+                  key="notfound"
+                  className="flex flex-col items-center gap-6 py-20"
+                  initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.55, ease: "easeOut" }}
+                >
 
-  <motion.div
-    className="relative w-32 h-32 flex items-center justify-center"
-    initial={{ scale: 0.7, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    transition={{ type: "spring", stiffness: 120, damping: 15 }}
-  >
-    <motion.div
-      className="absolute inset-0 blur-xl opacity-40"
-      style={{
-        background:
-          "radial-gradient(circle at center, rgba(255,200,0,0.4), rgba(255,150,0,0.15), transparent)"
-      }}
-      animate={{ scale: [1, 1.1, 1] }}
-      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-    />
+                  <motion.div
+                    className="relative w-32 h-32 flex items-center justify-center"
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 15 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 blur-xl opacity-40"
+                      style={{
+                        background:
+                          "radial-gradient(circle at center, rgba(255,200,0,0.4), rgba(255,150,0,0.15), transparent)"
+                      }}
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
 
-    <motion.div
-      className="text-[80px] select-none pointer-events-none"
-      animate={{ y: [-3, 3, -3] }}
-      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-    >
-      🥺
-    </motion.div>
-  </motion.div>
+                    <motion.div
+                      className="text-[80px] select-none pointer-events-none"
+                      animate={{ y: [-3, 3, -3] }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      🥺
+                    </motion.div>
+                  </motion.div>
 
-  <motion.p
-    className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.35 }}
-  >
-    User Not Found
-  </motion.p>
+                  <motion.p
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35 }}
+                  >
+                    User Not Found
+                  </motion.p>
 
-  <motion.p
-    className="text-base text-gray-600 dark:text-gray-400 max-w-xs text-center leading-relaxed"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.35, delay: 0.1 }}
-  >
-    We tried our best but couldn’t locate this profile.
-  </motion.p>
+                  <motion.p
+                    className="text-base text-gray-600 dark:text-gray-400 max-w-xs text-center leading-relaxed"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: 0.1 }}
+                  >
+                    We tried our best but couldn’t locate this profile.
+                  </motion.p>
 
-  <motion.div
-    className="h-1 w-24 bg-gray-300 dark:bg-gray-600 rounded-full mt-2"
-    initial={{ width: 0, opacity: 0 }}
-    animate={{ width: "6rem", opacity: 1 }}
-    transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
-  />
-</motion.div>
+                  <motion.div
+                    className="h-1 w-24 bg-gray-300 dark:bg-gray-600 rounded-full mt-2"
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: "6rem", opacity: 1 }}
+                    transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
+                  />
+                </motion.div>
 
               )}
             </AnimatePresence>

@@ -153,6 +153,9 @@ export function optimisticToggleLike(
 }
 
 export async function revalidateLinkCaches() {
-
-  mutate("feed-links");
+  mutate(
+    "feed-links",
+    (current: LinkWithUser[] | undefined) => current,
+    { revalidate: false }
+  );
 }

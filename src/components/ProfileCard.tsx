@@ -17,7 +17,7 @@ export default function ProfileCard({ user, onImageClick }: ProfileCardProps) {
 
   if (!user) {
       return (
-        <div className="w-full flex items-center justify-center">
+        <div className="w-full flex flex-col items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

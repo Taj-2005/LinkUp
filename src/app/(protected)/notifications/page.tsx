@@ -8,6 +8,9 @@ import { authFetch } from "@/lib/authFetch";
 import { invalidateGlobalLinkUpCaches } from "@/utils/globalCacheInvalidation";
 import { useUsers } from "@/hooks/useUsers";
 import { useNotifications } from "@/hooks/useNotifications";
+import { mutate } from "swr";
+import { invalidateLinkStatus } from "@/hooks/useLinkStatus";
+import { optimisticUpdateUser } from "@/utils/swrCache";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
@@ -41,7 +44,7 @@ export default function NotificationsPage() {
     const socket = useSocketStore((state) => state.socket);
     const setUnseenCount = useSocketStore((state) => state.setUnseenCount);
     const { resolvedTheme } = useTheme();
-    const { currentUser } = useUsers();
+    const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
     const { notifications, isLoading: notificationsLoading, mutate: mutateNotifications } = useNotifications();
 
     const loadRequests = useCallback(async () => {
@@ -65,7 +68,6 @@ export default function NotificationsPage() {
                             }
                             return req;
                         } catch {
-                            // console.error("Failed to fetch requester:", error);
                             return req;
                         }
                     }
@@ -77,7 +79,6 @@ export default function NotificationsPage() {
             const unseen = requestsWithDetails.filter((r: LinkRequest) => !r.seen && r.status === "requested").length;
             setUnseenCount(unseen);
         } catch {
-            // console.error("Failed to load requests:", error);
             setRequests([]);
             setUnseenCount(0);
         }
@@ -87,16 +88,11 @@ export default function NotificationsPage() {
         const loadAll = async () => {
             setLoading(true);
             await loadRequests();
-            await mutateNotifications();
-
-            const { getCombinedUnreadCount } = await import("@/utils/notificationBadge");
-            const count = await getCombinedUnreadCount();
-            setUnseenCount(count || 0);
-
+            await mutateNotifications(undefined, { revalidate: true });
             setLoading(false);
         };
         loadAll();
-    }, [loadRequests, mutateNotifications, setUnseenCount]);
+    }, [loadRequests, mutateNotifications]);
 
     useEffect(() => {
         if (!socket) return;
@@ -132,9 +128,51 @@ export default function NotificationsPage() {
 
     const handleAccept = async (requestId: string, requesterId: string) => {
         const previousRequests = [...requests];
+        const previousLinkedBy = currentUser?.linked_by || [];
+
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
         
         try {
+            if (currentUser?._id) {
+                const updatedLinkedBy = [...previousLinkedBy];
+                if (!updatedLinkedBy.includes(requesterId)) {
+                    updatedLinkedBy.push(requesterId);
+                }
+
+                await optimisticUpdateUser(currentUser._id, {
+                    linked_by: updatedLinkedBy,
+                });
+
+                mutate(
+                    "all-users",
+                    (users: { _id: string; linked_to?: string[]; [key: string]: unknown }[] | undefined) => {
+                        if (!users) return users;
+                        return users.map((user) => {
+                            if (user._id === requesterId) {
+                                const requesterLinkedTo = user.linked_to || [];
+                                const updatedRequesterLinkedTo = [...requesterLinkedTo];
+                                if (!updatedRequesterLinkedTo.includes(currentUser._id)) {
+                                    updatedRequesterLinkedTo.push(currentUser._id);
+                                }
+                                return { ...user, linked_to: updatedRequesterLinkedTo };
+                            }
+                            return user;
+                        });
+                    },
+                    { revalidate: false }
+                );
+
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers(),
+                    invalidateLinkStatus(currentUser._id, requesterId),
+                    mutate("/api/link-requests/pending", undefined, { revalidate: false }),
+                    mutate("/api/link-requests/sent", undefined, { revalidate: false }),
+                    mutate("/api/link-requests", undefined, { revalidate: false }),
+                    mutate("linkRequests", undefined, { revalidate: false }),
+                ]);
+            }
+
             await acceptLinkRequest(requestId);
             await authFetch("/api/link-requests/accept-and-update", {
                 method: "POST",
@@ -151,11 +189,23 @@ export default function NotificationsPage() {
             }
 
             loadRequests();
+            toast.success("Link request accepted!");
         } catch (error) {
             setRequests(previousRequests);
+            
+            if (currentUser?._id) {
+                await optimisticUpdateUser(currentUser._id, {
+                    linked_by: previousLinkedBy,
+                });
+            }
 
             if (currentUser?._id) {
-                await invalidateGlobalLinkUpCaches(currentUser._id, requesterId);
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers(),
+                    invalidateLinkStatus(currentUser._id, requesterId),
+                    invalidateGlobalLinkUpCaches(currentUser._id, requesterId),
+                ]);
             }
             toast.error(error instanceof Error ? error.message : "Failed to accept request");
         }
@@ -170,7 +220,20 @@ export default function NotificationsPage() {
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
         
         try {
+            if (currentUser?._id && requesterId) {
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers(),
+                    invalidateLinkStatus(currentUser._id, requesterId),
+                    mutate("/api/link-requests/pending"),
+                    mutate("/api/link-requests/sent"),
+                    mutate("/api/link-requests"),
+                    mutate("linkRequests", undefined, { revalidate: false }),
+                ]);
+            }
+
             await rejectLinkRequest(requestId);
+            
             if (socket) {
                 socket.emit("rejectLinkRequest", { requestId });
                 socket.emit("markRequestAsSeen", { requestId });
@@ -181,11 +244,17 @@ export default function NotificationsPage() {
             }
 
             loadRequests();
+            toast.success("Link request rejected");
         } catch (error) {
             setRequests(previousRequests);
 
             if (currentUser?._id && requesterId) {
-                await invalidateGlobalLinkUpCaches(currentUser._id, requesterId);
+                await Promise.all([
+                    mutateCurrentUser(),
+                    mutateAllUsers(),
+                    invalidateLinkStatus(currentUser._id, requesterId),
+                    invalidateGlobalLinkUpCaches(currentUser._id, requesterId),
+                ]);
             }
             toast.error(error instanceof Error ? error.message : "Failed to reject request");
         }

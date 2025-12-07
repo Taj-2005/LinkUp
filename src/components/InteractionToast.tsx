@@ -5,20 +5,23 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { FiHeart } from "react-icons/fi";
 
 interface InteractionToastProps {
     actor: {
         _id: string;
         username: string;
+        name?: string;
         avatar?: string;
     };
     type: "comment" | "reply" | "like" | "save";
     linkId: string;
     deepLink: string;
+    commentText?: string;
     onClose: () => void;
 }
 
-export default function InteractionToast({ actor, type, deepLink, onClose }: InteractionToastProps) {
+export default function InteractionToast({ actor, type, deepLink, commentText, onClose }: InteractionToastProps) {
     const { resolvedTheme } = useTheme();
     const router = useRouter();
 
@@ -51,14 +54,23 @@ export default function InteractionToast({ actor, type, deepLink, onClose }: Int
         }
     };
 
-    const getIcon = (): string => {
+    const getIcon = () => {
         switch (type) {
             case "like":
-                return "❤️";
+                return (
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: [0, 1.2, 1] }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        className="flex items-center justify-center"
+                    >
+                        <FiHeart className="text-red-500 fill-red-500" size={20} />
+                    </motion.div>
+                );
             case "comment":
             case "reply":
             case "save":
-                return "";
+                return null;
             default:
                 return "🔔";
         }
@@ -73,7 +85,11 @@ export default function InteractionToast({ actor, type, deepLink, onClose }: Int
             className="w-[90vw] max-w-sm md:max-w-md"
             onClick={handleClick}
         >
-            <div className="bg-left-nav-dark dark:bg-left-nav-dark rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow ring-2 ring-violet-500/20">
+            <div className={`bg-left-nav-dark dark:bg-left-nav-dark rounded-2xl shadow-2xl border p-4 md:p-5 cursor-pointer hover:shadow-3xl transition-shadow ${
+                type === "like"
+                    ? "border-red-500/30 dark:border-red-500/30 ring-2 ring-red-500/20"
+                    : "border-gray-200 dark:border-gray-700 ring-2 ring-violet-500/20"
+            }`}>
                 <div className="flex items-center gap-3 md:gap-4">
                     <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-violet-500/50">
                         <Image
@@ -85,21 +101,39 @@ export default function InteractionToast({ actor, type, deepLink, onClose }: Int
                                     : "/light-profile.png"
                             }
                             fill
-                            alt={`${actor.username} avatar`}
+                            alt={`${actor.name || actor.username} avatar`}
                             className="object-cover"
                             unoptimized
                         />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            {getIcon() && <span className="text-xl">{getIcon()}</span>}
+                            {type === "like" ? (
+                                getIcon()
+                            ) : getIcon() ? (
+                                <span className="text-xl">{getIcon()}</span>
+                            ) : null}
                             <p className="text-sm md:text-base font-semibold text-primary-light dark:text-primary-light truncate">
-                                {actor.username}
+                                {actor.name || actor.username}
                             </p>
                         </div>
-                        <p className="text-xs md:text-sm text-primary-light/80 dark:text-primary-light/80 mt-1">
+                        {actor.name && actor.username && (
+                            <p className="text-xs md:text-sm text-primary-light/60 dark:text-primary-light/60 truncate">
+                                @{actor.username}
+                            </p>
+                        )}
+                        <p className={`text-xs md:text-sm mt-1 ${
+                            type === "like" 
+                                ? "text-red-400 dark:text-red-400 font-medium" 
+                                : "text-primary-light/80 dark:text-primary-light/80"
+                        }`}>
                             {getMessage()}
                         </p>
+                        {commentText && (type === "comment" || type === "reply") && (
+                            <p className="text-xs md:text-sm mt-1.5 text-primary-light/70 dark:text-primary-light/70 line-clamp-2 italic">
+                                &quot;{commentText}&quot;
+                            </p>
+                        )}
                     </div>
                     <button
                         onClick={(e) => {

@@ -63,9 +63,13 @@ export async function GET() {
     return NextResponse.json({ links: linksWithUser }, { status: 200 });
   } catch (error) {
     console.error("Error fetching feed links:", error);
+    
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch links";
+    const isUnauthorized = errorMessage.includes("Unauthorized");
+    
     return NextResponse.json(
-      { error: "Failed to fetch links" },
-      { status: 500 }
+      { error: errorMessage },
+      { status: isUnauthorized ? 401 : 500 }
     );
   }
 }

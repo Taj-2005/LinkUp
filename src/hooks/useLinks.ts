@@ -70,17 +70,19 @@ async function fetchSavedLinks(): Promise<LinkWithUser[]> {
 }
 
 export function useFeedLinks() {
-  const { data, error, mutate, isLoading } = useSWR<LinkWithUser[]>(
+  const { data, error, mutate, isLoading: swrIsLoading } = useSWR<LinkWithUser[]>(
     "feed-links",
     fetchFeedLinks,
     {
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
       revalidateIfStale: false,
-      revalidateOnReconnect: true,
+      revalidateOnReconnect: false,
       shouldRetryOnError: true,
       dedupingInterval: 2000,
     }
   );
+
+  const isLoading = !data && swrIsLoading;
 
   return {
     links: data || [],
@@ -95,9 +97,9 @@ export function useUserLinks(userId: string | null | undefined) {
     userId ? `user-links-${userId}` : null,
     () => userId ? fetchUserLinks(userId) : Promise.resolve([]),
     {
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
       revalidateIfStale: false,
-      revalidateOnReconnect: true,
+      revalidateOnReconnect: false,
       shouldRetryOnError: true,
       dedupingInterval: 2000,
     }
@@ -116,9 +118,9 @@ export function useSavedLinks() {
     "saved-links",
     fetchSavedLinks,
     {
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
       revalidateIfStale: false,
-      revalidateOnReconnect: true,
+      revalidateOnReconnect: false,
       shouldRetryOnError: true,
       dedupingInterval: 2000,
     }
