@@ -403,7 +403,7 @@ export async function sendEngagementEmail(
   const mailOptions = {
     from: `"${process.env.EMAIL_FROM_NAME || "LinkUp"}" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "🚀 Real-Time Notifications & Instant Linkup Requests on LinkUp",
+    subject: "⚡ Your LinkUp just got a major upgrade — check it out!",
     html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -592,81 +592,72 @@ h3 {
   <div class="wrapper">
     <div class="header">
       <img src="${logoUrl}" alt="LinkUp - Real-Time Social Networking Platform" class="logo" />
-      <div class="header-title">Real-Time Updates & Instant Connections! ⚡</div>
-      <div class="subtitle">Experience seamless linkup request management</div>
+      <div class="header-title">Your Network Just Got Smarter ⚡</div>
+      <div class="subtitle">Real-time updates, instant connections, zero delays</div>
     </div>
     <div class="content">
       <h2>Hi ${username} 👋</h2>
 
       <p>
-        We're thrilled to share exciting updates on <strong>LinkUp</strong>!
-        We've enhanced your networking experience with <strong>real-time notifications</strong>
-        and streamlined <strong>linkup request management</strong> — making it easier than ever
-        to connect, engage, and grow your network.
+        We've been working behind the scenes to make LinkUp faster, smarter, and more connected than ever. 
+        Say hello to <strong>real-time everything</strong> — notifications that pop instantly, connections that update live, 
+        and a networking experience that actually feels real-time.
       </p>
 
       <div class="highlight-box">
-        <strong>🚀 What's New: Real-Time Notifications</strong>
-        Get instant updates the moment they happen! Our advanced real-time notification system
-        ensures you never miss a connection opportunity, profile update, or network activity.
-        Everything syncs instantly across all your devices — no page refresh needed.
+        <strong>⚡ Live Notifications That Actually Work</strong>
+        No more refreshing. No more waiting. When someone likes your link, comments on your post, or wants to connect, 
+        you'll know immediately. Our real-time system keeps you in the loop 24/7, syncing seamlessly across all your devices.
       </div>
 
-      <h3>✨ Enhanced Linkup Request Features</h3>
+      <h3>🎯 What's New & Improved</h3>
 
       <ul class="feature-list">
         <li>
-          <strong>Instant Accept:</strong> Accept linkup requests in real-time with a single click.
-          Your network updates immediately, and both parties are notified instantly.
+          <strong>One-Click Connections:</strong> Accept linkup requests instantly. Your network updates live, 
+          and both of you get notified in real-time. It's that simple.
         </li>
         <li>
-          <strong>Quick Reject:</strong> Politely decline requests with our streamlined rejection flow.
-          Your preferences are respected, and the process is smooth and intuitive.
+          <strong>Smart Request Management:</strong> Decline requests with ease. Our streamlined flow respects your choices 
+          and keeps things moving smoothly.
         </li>
         <li>
-          <strong>Easy Unlink:</strong> Manage your connections effortlessly. Unlink from users
-          anytime with our user-friendly interface, and changes reflect instantly across the platform.
+          <strong>Flexible Network Control:</strong> Unlink from anyone, anytime. Changes reflect instantly across the platform, 
+          giving you full control over your connections.
         </li>
         <li>
-          <strong>Real-Time Sync:</strong> All linkup actions — accept, reject, or unlink —
-          update in real-time. Your connection counts, linked_by, and linked_to lists refresh
-          automatically without manual page refreshes.
+          <strong>Zero-Lag Updates:</strong> Every action — accepts, rejects, unlinks — happens in real-time. 
+          Your connection counts and network lists stay perfectly in sync, automatically.
         </li>
       </ul>
 
       <p>
-        <strong>Why This Matters:</strong> Our real-time infrastructure powered by Socket.IO
-        ensures that every interaction is instant and seamless. Whether you're accepting a new
-        connection, managing your network, or updating your profile, changes appear immediately
-        for you and all affected users — creating a truly responsive and engaging social experience.
+        <strong>The Tech Behind It:</strong> We've built this on a real-time infrastructure that makes every interaction 
+        feel instant. Powered by Socket.IO, your network updates happen live — no delays, no refreshes, just pure responsiveness. 
+        Whether you're building connections or managing your network, everything happens in real-time.
       </p>
 
       <p>
-        <strong>Ready to experience the difference?</strong> Visit LinkUp now and discover how
-        real-time notifications and instant linkup management can transform your networking journey.
-        Connect with confidence, manage relationships effortlessly, and build meaningful connections
-        that matter.
+        <strong>Ready to see it in action?</strong> Jump back into LinkUp and experience networking that actually feels alive. 
+        Build connections faster, manage relationships effortlessly, and watch your network grow in real-time.
       </p>
 
       <center>
-        <a href="${appUrl}" class="cta-btn">Explore LinkUp Now →</a>
+        <a href="${appUrl}" class="cta-btn">Try It Now →</a>
       </center>
 
       <p class="note">
-        <strong>Pro Tip:</strong> Keep LinkUp open in your browser to receive real-time notifications
-        as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date
-        automatically, providing you with the most current information at all times.
+        <strong>💡 Pro Tip:</strong> Keep LinkUp open to catch notifications as they happen. Our smart caching keeps everything 
+        fresh automatically — you'll always see the latest updates without lifting a finger.
       </p>
 
       <p>
-        Thank you for being part of the LinkUp community. We're committed to providing you with
-        the best social networking experience, and these updates are just the beginning.
-        We're excited to see the connections you'll make! 🌟
+        Thanks for being part of LinkUp! We're constantly improving to give you the best networking experience possible. 
+        These updates are just the start — there's more exciting stuff coming your way. Can't wait to see what connections you build next! 🚀
       </p>
 
       <p style="margin-top: 24px; font-size: 14px; color: #a78bfa !important;">
-        <strong>Questions or feedback?</strong> We'd love to hear from you! Your input helps us
-        create a better platform for everyone.
+        <strong>Got thoughts?</strong> We're all ears! Your feedback shapes what we build next.
       </p>
     </div>
     <div class="footer">
@@ -678,7 +669,7 @@ h3 {
 </body>
 </html>
 `,
-    text: `Hi ${username}!\n\nWe're excited to share major updates on LinkUp! We've enhanced your experience with real-time notifications and streamlined linkup request management.\n\n✨ What's New:\n\n⚡ Real-Time Notifications\nGet instant updates the moment they happen! Our advanced real-time notification system ensures you never miss a connection opportunity, profile update, or network activity. Everything syncs instantly across all your devices — no page refresh needed.\n\n🚀 Enhanced Linkup Request Features:\n\n• Instant Accept: Accept linkup requests in real-time with a single click. Your network updates immediately, and both parties are notified instantly.\n\n• Quick Reject: Politely decline requests with our streamlined rejection flow. Your preferences are respected, and the process is smooth and intuitive.\n\n• Easy Unlink: Manage your connections effortlessly. Unlink from users anytime with our user-friendly interface, and changes reflect instantly across the platform.\n\n• Real-Time Sync: All linkup actions — accept, reject, or unlink — update in real-time. Your connection counts, linked_by, and linked_to lists refresh automatically without manual page refreshes.\n\nWhy This Matters: Our real-time infrastructure powered by Socket.IO ensures that every interaction is instant and seamless. Whether you're accepting a new connection, managing your network, or updating your profile, changes appear immediately for you and all affected users — creating a truly responsive and engaging social experience.\n\nReady to experience the difference? Visit LinkUp now: ${appUrl}\n\nPro Tip: Keep LinkUp open in your browser to receive real-time notifications as they happen. Our intelligent caching system ensures your data stays fresh and up-to-date automatically.\n\nThank you for being part of the LinkUp community. We're committed to providing you with the best social networking experience!\n\n- The LinkUp Team`,
+    text: `Hey ${username}!\n\nWe've been working behind the scenes to make LinkUp faster, smarter, and more connected than ever. Say hello to real-time everything — notifications that pop instantly, connections that update live, and a networking experience that actually feels real-time.\n\n⚡ Live Notifications That Actually Work\nNo more refreshing. No more waiting. When someone likes your link, comments on your post, or wants to connect, you'll know immediately. Our real-time system keeps you in the loop 24/7, syncing seamlessly across all your devices.\n\n🎯 What's New & Improved:\n\n• One-Click Connections: Accept linkup requests instantly. Your network updates live, and both of you get notified in real-time. It's that simple.\n\n• Smart Request Management: Decline requests with ease. Our streamlined flow respects your choices and keeps things moving smoothly.\n\n• Flexible Network Control: Unlink from anyone, anytime. Changes reflect instantly across the platform, giving you full control over your connections.\n\n• Zero-Lag Updates: Every action — accepts, rejects, unlinks — happens in real-time. Your connection counts and network lists stay perfectly in sync, automatically.\n\nThe Tech Behind It: We've built this on a real-time infrastructure that makes every interaction feel instant. Powered by Socket.IO, your network updates happen live — no delays, no refreshes, just pure responsiveness.\n\nReady to see it in action? Jump back into LinkUp: ${appUrl}\n\n💡 Pro Tip: Keep LinkUp open to catch notifications as they happen. Our smart caching keeps everything fresh automatically.\n\nThanks for being part of LinkUp! We're constantly improving to give you the best networking experience possible. These updates are just the start — there's more exciting stuff coming your way.\n\n- The LinkUp Team`,
   };
 
   try {
