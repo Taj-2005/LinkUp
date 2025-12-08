@@ -34,48 +34,125 @@ function HomeContent() {
   const unseenCount = useSocketStore((state) => state.unseenCount);
   const isModalOpen = useModalStore((state) => state.isModalOpen);
   const setIsModalOpen = useModalStore((state) => state.setIsModalOpen);
+  const globalSelectedLink = useModalStore((state) => state.selectedLink);
   const { links, isLoading, mutate: mutateFeedLinks } = useFeedLinks();
   const [selectedLink, setSelectedLink] = useState<LinkWithUser | null>(null);
-  const [deepLinkHandled, setDeepLinkHandled] = useState(false);
+  
+  const modalLink = globalSelectedLink || selectedLink;
 
   const memoizedLinks = useMemo(() => links, [links]);
+  const setSelectedLinkGlobal = useModalStore((state) => state.setSelectedLink);
 
-  useEffect(() => {
-    if (isLoading || deepLinkHandled) return;
+  const fetchLinkById = useCallback(async (linkId: string): Promise<LinkWithUser | null> => {
+    try {
+      const linkInFeed = memoizedLinks.find((l) => l._id.toString() === linkId);
+      if (linkInFeed) {
+        return linkInFeed;
+      }
 
-    const linkId = searchParams?.get("link");
+      if (currentUser?._id) {
+        const res = await fetch(`/api/links/user/${currentUser._id}`, {
+          credentials: "include",
+        });
 
-    if (linkId) {
+        if (res.ok) {
+          const data = await res.json();
+          const userLinks = data.links || [];
+          const foundLink = userLinks.find((l: LinkWithUser) => l._id.toString() === linkId);
+          if (foundLink) {
+            return {
+              ...foundLink,
+              userInfo: {
+                username: currentUser.username,
+                user_avatar: currentUser.user_avatar,
+                name: currentUser.name,
+              },
+            } as LinkWithUser;
+          }
+        }
+      }
 
-      const link = memoizedLinks.find((l) => l._id === linkId);
-      
-      if (link) {
+      return null;
+    } catch (error) {
+      console.error("Error fetching link by ID:", error);
+      return null;
+    }
+  }, [memoizedLinks, currentUser]);
 
-        setSelectedLink(link);
-        setIsModalOpen(true);
-        setDeepLinkHandled(true);
+  const parseHash = useCallback(() => {
+    if (typeof window === "undefined") return { commentId: undefined, replyId: undefined };
+    const hash = window.location.hash;
+    let commentId: string | undefined;
+    let replyId: string | undefined;
 
-        router.replace("/livelinks", { scroll: false });
-      } else {
-        setDeepLinkHandled(true);
+    if (hash) {
+      const commentMatch = hash.match(/^#comment-(.+)$/);
+      if (commentMatch) {
+        commentId = commentMatch[1];
+      }
+
+      const replyMatch = hash.match(/^#reply-(.+)$/);
+      if (replyMatch) {
+        replyId = replyMatch[1];
       }
     }
-  }, [searchParams, memoizedLinks, isLoading, isModalOpen, deepLinkHandled, router, setIsModalOpen, mutateFeedLinks]);
+
+    return { commentId, replyId };
+  }, []);
+
+  useEffect(() => {
+    const linkId = searchParams?.get("link");
+    
+    if (!linkId) {
+      if (isModalOpen && globalSelectedLink) {
+        setIsModalOpen(false);
+        setSelectedLinkGlobal(null);
+        setSelectedLink(null);
+      }
+      return;
+    }
+
+    if (isModalOpen && globalSelectedLink?._id.toString() === linkId) {
+      return;
+    }
+
+    const link = memoizedLinks.find((l) => l._id.toString() === linkId);
+    
+    if (link) {
+      setSelectedLinkGlobal(link);
+      setSelectedLink(link);
+      setIsModalOpen(true);
+      
+      if (searchParams?.get("link") === linkId) {
+        router.replace("/livelinks", { scroll: false });
+      }
+    } else if (!isLoading) {
+      fetchLinkById(linkId).then((fetchedLink) => {
+        if (fetchedLink) {
+          setSelectedLinkGlobal(fetchedLink);
+          setSelectedLink(fetchedLink);
+          setIsModalOpen(true);
+          
+          router.replace("/livelinks", { scroll: false });
+        }
+      });
+    }
+  }, [searchParams, memoizedLinks, isLoading, isModalOpen, globalSelectedLink, router, setIsModalOpen, setSelectedLinkGlobal, fetchLinkById]);
 
   const handleCommentClick = useCallback((link: LinkWithUser) => {
     setSelectedLink(link);
     setIsModalOpen(true);
   }, [setIsModalOpen]);
-
+  
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedLink(null);
-    setDeepLinkHandled(false);
+    setSelectedLinkGlobal(null);
 
     if (searchParams?.get("link")) {
       router.replace("/livelinks", { scroll: false });
     }
-  }, [searchParams, router, setIsModalOpen]);
+  }, [searchParams, router, setIsModalOpen, setSelectedLinkGlobal]);
 
   const handleLinkUpdated = useCallback(() => {
     mutateFeedLinks();
@@ -106,12 +183,10 @@ function HomeContent() {
             </div>
           </button>
           
-          {}
           <div className="pt-6 md:pt-0 pb-4 px-2">
             <Stories />
           </div>
           
-          {}
           <div className="px-2 md:px-4 pb-20 md:pb-4">
             <div className="w-full flex flex-col items-center">
               {isLoading ? (
@@ -166,26 +241,15 @@ function HomeContent() {
 
         </div>
       </div>
-
-      {}
-      {selectedLink && (
+              
+      {modalLink && (
         <PostModal
           isOpen={isModalOpen}
-          link={selectedLink}
+          link={modalLink}
           onClose={handleCloseModal}
           onLinkUpdated={handleLinkUpdated}
-          deepLinkCommentId={(() => {
-            if (typeof window === "undefined") return undefined;
-            const hash = window.location.hash;
-            const match = hash.match(/^#comment-(.+)$/);
-            return match ? match[1] : undefined;
-          })()}
-          deepLinkReplyId={(() => {
-            if (typeof window === "undefined") return undefined;
-            const hash = window.location.hash;
-            const match = hash.match(/^#reply-(.+)$/);
-            return match ? match[1] : undefined;
-          })()}
+          deepLinkCommentId={parseHash().commentId}
+          deepLinkReplyId={parseHash().replyId}
         />
       )}
     </div>

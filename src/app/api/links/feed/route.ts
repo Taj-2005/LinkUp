@@ -11,9 +11,10 @@ export async function GET() {
   const cookieStore = await cookies();
 
   try {
-    requireAuth(cookieStore);
-
-    const links = await Link.find()
+    const payload = requireAuth(cookieStore);
+    const currentUserId = payload.userId.toString();
+    
+    const links = await Link.find({ userId: { $ne: currentUserId } })
       .sort({ createdAt: -1 })
       .lean();
 

@@ -30,7 +30,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
-    // Verify ownership
     if (link.userId.toString() !== userId.toString()) {
       return NextResponse.json(
         { error: "Forbidden: You can only delete your own posts" },
@@ -41,15 +40,12 @@ export async function DELETE(
     const linkIdStr = linkId.toString();
     const ownerId = link.userId.toString();
 
-    // Use MongoDB session for atomic transaction
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-      // Delete the link document
       await Link.findByIdAndDelete(linkId).session(session);
 
-      // Atomically remove linkId from user.links array
       const db = mongoose.connection.db;
       if (!db) {
         await session.abortTransaction();
@@ -68,27 +64,22 @@ export async function DELETE(
         { session }
       );
 
-      // Commit transaction
       await session.commitTransaction();
 
-      // Get updated user info for socket event
       const updatedUser = await User.findById(ownerId)
         .select("_id links")
         .lean();
 
-      // Define type for lean user result
       interface UserWithLinks {
         _id: unknown;
         links?: unknown[];
         [key: string]: unknown;
       }
 
-      // Handle the case where findById might return an array (TypeScript safety)
       const userData = updatedUser && !Array.isArray(updatedUser) 
         ? (updatedUser as UserWithLinks)
         : null;
 
-      // Emit socket event for real-time update (non-blocking)
       await emitLinkDeletedEvent({
         linkId: linkIdStr,
         ownerId: ownerId,
@@ -111,8 +102,7 @@ export async function DELETE(
         },
         { status: 200 }
       );
-    } catch (error) {
-      // Rollback transaction on error
+    } catch (error) { 
       await session.abortTransaction();
       throw error;
     } finally {

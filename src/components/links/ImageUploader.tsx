@@ -70,28 +70,21 @@ export default function ImageUploader({
 
     setError(null);
     
-    // UI-FIRST: Show preview immediately using object URL (synchronous)
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
     
-    // Start upload in background
     setUploading(true);
 
     try {
-      // Upload to Cloudinary in background
       const cloudinaryUrl = await uploadToCloudinary(file);
       
-      // Replace preview with Cloudinary URL once upload completes
       setPreviewUrl(cloudinaryUrl);
       
-      // Clean up object URL to free memory
       URL.revokeObjectURL(objectUrl);
       
       onImageUploaded(cloudinaryUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
-      // Keep the preview URL (object URL) even if upload fails, so user can see what they selected
-      // Only clear if user explicitly removes it
     } finally {
       setUploading(false);
     }
@@ -131,8 +124,7 @@ export default function ImageUploader({
     }
   };
 
-  const handleRemove = () => {
-    // Clean up object URL if it exists
+  const handleRemove = () => {  
     if (previewUrl && previewUrl.startsWith('blob:')) {
       URL.revokeObjectURL(previewUrl);
     }

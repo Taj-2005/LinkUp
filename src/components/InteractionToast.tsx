@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { FiHeart } from "react-icons/fi";
 
 interface InteractionToastProps {
     actor: {
@@ -42,39 +41,18 @@ export default function InteractionToast({ actor, type, deepLink, commentText, o
     const getMessage = (): string => {
         switch (type) {
             case "comment":
-                return `${actor.username} commented on your link`;
+                return "commented on your link";
             case "reply":
-                return `${actor.username} replied to your link`;
+                return "replied to your link";
             case "like":
-                return `${actor.username} liked your link`;
+                return "liked your post";
             case "save":
-                return `${actor.username} saved your link`;
+                return "saved your link";
             default:
-                return `${actor.username} interacted with your link`;
+                return "interacted with your link";
         }
     };
 
-    const getIcon = () => {
-        switch (type) {
-            case "like":
-                return (
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: [0, 1.2, 1] }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        className="flex items-center justify-center"
-                    >
-                        <FiHeart className="text-red-500 fill-red-500" size={20} />
-                    </motion.div>
-                );
-            case "comment":
-            case "reply":
-            case "save":
-                return null;
-            default:
-                return "🔔";
-        }
-    };
 
     return (
         <motion.div
@@ -107,27 +85,12 @@ export default function InteractionToast({ actor, type, deepLink, commentText, o
                         />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            {type === "like" ? (
-                                getIcon()
-                            ) : getIcon() ? (
-                                <span className="text-xl">{getIcon()}</span>
-                            ) : null}
-                            <p className="text-sm md:text-base font-semibold text-primary-light dark:text-primary-light truncate">
-                                {actor.name || actor.username}
-                            </p>
-                        </div>
-                        {actor.name && actor.username && (
-                            <p className="text-xs md:text-sm text-primary-light/60 dark:text-primary-light/60 truncate">
-                                @{actor.username}
-                            </p>
-                        )}
-                        <p className={`text-xs md:text-sm mt-1 ${
+                        <p className={`text-sm md:text-base font-medium text-primary-light dark:text-primary-light ${
                             type === "like" 
-                                ? "text-red-400 dark:text-red-400 font-medium" 
-                                : "text-primary-light/80 dark:text-primary-light/80"
+                                ? "text-red-400 dark:text-red-400" 
+                                : ""
                         }`}>
-                            {getMessage()}
+                            @{actor.username} {getMessage()}
                         </p>
                         {commentText && (type === "comment" || type === "reply") && (
                             <p className="text-xs md:text-sm mt-1.5 text-primary-light/70 dark:text-primary-light/70 line-clamp-2 italic">
@@ -157,3 +120,4 @@ export default function InteractionToast({ actor, type, deepLink, commentText, o
         </motion.div>
     );
 }
+    

@@ -65,36 +65,41 @@ export async function POST(
 
     const savedComment = link.comments[link.comments.length - 1];
 
-    const { generateDeepLink } = await import("@/utils/deepLinks");
-    const deepLink = generateDeepLink(linkId, "comment", savedComment._id.toString());
+    if (link.userId.toString() !== userId.toString()) {
+      const { generateDeepLink } = await import("@/utils/deepLinks");
+      const deepLink = generateDeepLink(linkId, "comment", savedComment._id.toString());
 
-    await createNotification({
-      userId: link.userId,
-      actorId: userId.toString(),
-      linkId: linkId,
-      type: "comment",
-      commentId: savedComment._id.toString(),
-    });
+      await createNotification({
+        userId: link.userId,
+        actorId: userId.toString(),
+        linkId: linkId,
+        type: "comment",
+        commentId: savedComment._id.toString(),
+      });
 
-    await emitNotificationEvent({
-      userId: link.userId,
-      actorId: userId.toString(),
-      linkId: linkId,
-      type: "comment",
-      commentId: savedComment._id.toString(),
-      deepLink: deepLink,
-      commentText: text.trim(),
-      actor: {
-        _id: user._id.toString(),
-        username: user.username || "Unknown",
-        name: user.name || undefined,
-        avatar: user.user_avatar || null,
-      },
-    });
+      await emitNotificationEvent({
+        userId: link.userId,
+        actorId: userId.toString(),
+        linkId: linkId,
+        type: "comment",
+        commentId: savedComment._id.toString(),
+        deepLink: deepLink,
+        commentText: text.trim(),
+        actor: {
+          _id: user._id.toString(),
+          username: user.username || "Unknown",
+          name: user.name || undefined,
+          avatar: user.user_avatar || null,
+        },
+      });
+    }
 
     await emitLinkUpdateEvent({
       _id: link._id.toString(),
       userId: link.userId.toString(),
+      imageUrl: link.imageUrl,
+      description: link.description,
+      location: link.location,
       likes: link.likes,
       comments: link.comments.map((c: IComment) => ({
         _id: c._id.toString(),
@@ -106,6 +111,8 @@ export async function POST(
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
       })),
+      createdAt: link.createdAt,
+      updatedAt: link.updatedAt,
     });
 
     return NextResponse.json(

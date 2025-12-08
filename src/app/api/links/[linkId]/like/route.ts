@@ -48,29 +48,31 @@ export async function POST(
           return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const { generateDeepLink } = await import("@/utils/deepLinks");
-        const deepLink = generateDeepLink(linkId, "like");
+        if (link.userId.toString() !== userIdStr) {
+          const { generateDeepLink } = await import("@/utils/deepLinks");
+          const deepLink = generateDeepLink(linkId, "like");
 
-        await createNotification({
-          userId: link.userId,
-          actorId: userIdStr,
-          linkId: linkId,
-          type: "like",
-        });
+          await createNotification({
+            userId: link.userId,
+            actorId: userIdStr,
+            linkId: linkId,
+            type: "like",
+          });
 
-        await emitNotificationEvent({
-          userId: link.userId,
-          actorId: userIdStr,
-          linkId: linkId,
-          type: "like",
-          deepLink: deepLink,
-          actor: {
-            _id: userIdStr,
-            username: user.username || "Unknown",
-            name: user.name || undefined,
-            avatar: user.user_avatar || null,
-          },
-        });
+          await emitNotificationEvent({
+            userId: link.userId,
+            actorId: userIdStr,
+            linkId: linkId,
+            type: "like",
+            deepLink: deepLink,
+            actor: {
+              _id: userIdStr,
+              username: user.username || "Unknown",
+              name: user.name || undefined,
+              avatar: user.user_avatar || null,
+            },
+          });
+        }
       }
     }
 
@@ -79,6 +81,9 @@ export async function POST(
     await emitLinkUpdateEvent({
       _id: link._id.toString(),
       userId: link.userId.toString(),
+      imageUrl: link.imageUrl,
+      description: link.description,
+      location: link.location,
       likes: link.likes,
       comments: link.comments.map((c: IComment) => ({
         _id: c._id.toString(),
@@ -90,6 +95,8 @@ export async function POST(
         createdAt: c.createdAt,
         updatedAt: c.updatedAt,
       })),
+      createdAt: link.createdAt,
+      updatedAt: link.updatedAt,
     });
 
     return NextResponse.json(

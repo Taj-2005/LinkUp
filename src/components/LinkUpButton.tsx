@@ -12,6 +12,7 @@ import { mutate } from "swr";
 import { invalidateLinkStatus } from "@/hooks/useLinkStatus";
 import UnlinkModal from "./UnlinkModal";
 import toast from "react-hot-toast";
+import { showToastWithAvatar } from "@/utils/toastHelpers";
 
 interface LinkUpButtonProps {
     receiverId: string;
@@ -117,7 +118,17 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
         const isInLinkedBy = previousLinkedBy.includes(receiverId);
 
         setShowUnlinkModal(false);
-        toast.success("Unlinked successfully");
+        if (currentUser) {
+          showToastWithAvatar(
+            {
+              username: currentUser.username || "You",
+              user_avatar: currentUser.user_avatar,
+              name: currentUser.name,
+            },
+            "unlinked successfully",
+            { duration: 3000 }
+          );
+        }
 
         try {
             const updatedLinkedTo = isInLinkedTo
@@ -196,7 +207,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             await optimisticUpdateUser(currentUser._id, {
                 linked_to: previousLinkedTo,
                 linked_by: previousLinkedBy,
-            });
+            }); 
 
             await Promise.all([
                 mutateCurrentUser(),

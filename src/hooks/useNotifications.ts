@@ -14,14 +14,18 @@ export function useNotifications() {
     {
       revalidateOnFocus: false,
       revalidateIfStale: false,
+      revalidateOnMount: false,
+      revalidateOnReconnect: false,
       shouldRetryOnError: false,
+      dedupingInterval: 2000,
+      keepPreviousData: true,
       fallbackData: undefined,
     }
   );
 
   return {
     notifications: data || [],
-    isLoading,
+    isLoading: isLoading && !data,
     isError: error,
     mutate,
   };

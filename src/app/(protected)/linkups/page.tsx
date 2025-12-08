@@ -15,7 +15,7 @@ export default function Home() {
   const noUserSelected = !user;
   return (
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
-      <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark shadow-md border border-primary-light/30 dark:border-primary-dark/30">
+      <div className="w-full m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark shadow-md border border-primary-light/30 dark:border-primary-dark/30">
 
         <div className={`w-full md:w-[30%] border-b md:border-b-0 md:border-r border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark p-4 overflow-y-auto hide-scrollbar ${noUserSelected ? 'flex flex-col' : 'hidden md:flex flex-col'}`}>
           <h2 className="text-lg md:text-xl font-semibold text-primary-dark dark:text-primary-light mb-4 md:mb-6 select-none">
@@ -24,7 +24,7 @@ export default function Home() {
           <Chats setUser={setUser} />
         </div>
 
-        <div className={`w-full md:w-[70%] bg-right-nav-light dark:bg-right-nav-dark flex flex-col ${noUserSelected ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`w-full md:w-[70%] bg-right-nav-light dark:bg-right-nav-dark flex flex-col h-full ${noUserSelected ? 'hidden md:flex' : 'flex'}`}>
 
           {noUserSelected ? (
             <>

@@ -7,7 +7,6 @@ const VERIFY_CACHE_DURATION = 5 * 60 * 1000;
 let lastVerifyTime = 0;
 
 function getLogoUrl(): string {
-  // Use Cloudinary URL from environment variable, or fallback to default
   return process.env.EMAIL_LOGO_URL || "https://res.cloudinary.com/doexqrehm/image/upload/v1763634808/logo_xfnbwl.png";
 }
 

@@ -8,11 +8,12 @@ import { motion } from "framer-motion";
 import { FiHeart, FiMessageCircle, FiBookmark, FiTrash2 } from "react-icons/fi";
 import { ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
-import { optimisticToggleLike, revalidateLinkCaches, optimisticDeleteLink } from "@/utils/linkInteractions";
+import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
 import FullImageModal from "@/components/links/FullImageModal";
-import DeletePostModal from "@/components/DeletePostModal";
-import { mutate } from "swr";
+import DeleteModal from "@/components/DeleteModal";
+import { deleteLinkHandler } from "@/utils/deleteLinkHandler";
+import { isValidImageUrl, getPlaceholderImageUrl } from "@/utils/linkCacheMutations";
 import toast from "react-hot-toast";
 
 interface LinkWithUser extends ILink {
@@ -37,7 +38,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
   const [likesCount, setLikesCount] = useState(link.likes.length);
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const isSaved = isLinkSaved(currentUser, link._id);
 
@@ -136,56 +136,27 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
     return resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png";
   };
 
+  const imageUrl = isValidImageUrl(link.imageUrl) 
+    ? link.imageUrl! 
+    : getPlaceholderImageUrl(resolvedTheme === "dark");
+
   const isOwner = currentUser?._id?.toString() === link.userId;
 
   const handleDelete = async () => {
-    if (!currentUser || isDeleting) return;
+    if (!currentUser) return;
 
     const linkId = link._id.toString();
     const userId = currentUser._id.toString();
 
     setShowDeleteModal(false);
-    setIsDeleting(true);
 
-    toast.success("Link deleted successfully", { id: "delete-post" });
-
-    const { rollback } = optimisticDeleteLink(linkId, userId, mutateCurrentUser);
-
-    if (link.userId) {
-      mutate(
-        `user-links-${link.userId}`,
-        (links: ILink[] | undefined) => {
-          if (!links) return links;
-          return links.filter((l) => l._id.toString() !== linkId);
-        },
-        { revalidate: false }
-      );
-    }
-
-    onLinkUpdated();
-
-    try {
-      const res = await fetch(`/api/links/${linkId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to delete post");
-      }
-
-    } catch (error) {
-      rollback();
-
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete post",
-        { id: "delete-post" }
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+    await deleteLinkHandler({
+      linkId,
+      userId,
+      linkUserId: link.userId,
+      mutateCurrentUser,
+      onLinkDeleted: onLinkUpdated,
+    });
   };
 
   return (
@@ -227,7 +198,6 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
               e.stopPropagation();
               setShowDeleteModal(true);
             }}
-            disabled={isDeleting}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group"
             aria-label="Delete post"
           >
@@ -244,10 +214,10 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         onClick={() => setFullImageModalOpen(true)}
       >
         <Image
-          src={link.imageUrl}
+          src={imageUrl}
           alt={link.description || `Link by ${link.userInfo?.username || "User"}`}
           fill
-          unoptimized
+          unoptimized={imageUrl.startsWith("data:")}
           className="object-cover"
           priority={false}
         />
@@ -326,12 +296,11 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
         imageUrl={link.imageUrl}
         onClose={() => setFullImageModalOpen(false)}
       />
-      {showDeleteModal && (
-        <DeletePostModal
-          onConfirm={handleDelete}
-          onCancel={() => setShowDeleteModal(false)}
-        />
-      )}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </motion.div>
   );
 }

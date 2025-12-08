@@ -1,6 +1,7 @@
 import { mutate } from "swr";
 import { ILink, IComment, IReply } from "@/models/Link";
 import { IUser } from "@/models/User";
+import { safeMergeLinkUpdate } from "./linkCacheUtils";
 
 export interface LinkWithUser extends ILink {
   userInfo?: {
@@ -20,10 +21,9 @@ export function optimisticAddComment(
       if (!links) return links;
       return links.map((link) => {
         if (link._id === linkId) {
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             comments: [...(link.comments || []), comment],
-          } as LinkWithUser;
+          } as Partial<LinkWithUser>);
         }
         return link;
       });
@@ -37,10 +37,9 @@ export function optimisticAddComment(
       if (!links) return links;
       return links.map((link) => {
         if (link._id === linkId) {
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             comments: [...(link.comments || []), comment],
-          } as ILink;
+          } as Partial<ILink>);
         }
         return link;
       });
@@ -60,8 +59,7 @@ export function optimisticAddReply(
       if (!links) return links;
       return links.map((link) => {
         if (link._id === linkId) {
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             comments: (link.comments || []).map((comment) => {
               if (comment._id === commentId) {
                 return {
@@ -71,7 +69,7 @@ export function optimisticAddReply(
               }
               return comment;
             }),
-          } as LinkWithUser;
+          } as Partial<LinkWithUser>);
         }
         return link;
       });
@@ -85,8 +83,7 @@ export function optimisticAddReply(
       if (!links) return links;
       return links.map((link) => {
         if (link._id === linkId) {
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             comments: (link.comments || []).map((comment) => {
               if (comment._id === commentId) {
                 return {
@@ -96,7 +93,7 @@ export function optimisticAddReply(
               }
               return comment;
             }),
-          } as ILink;
+          } as Partial<ILink>);
         }
         return link;
       });
@@ -120,10 +117,9 @@ export function optimisticToggleLike(
           const newLikes = isLiked
             ? [...likes, userId]
             : likes.filter((id) => id !== userId);
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             likes: newLikes,
-          } as LinkWithUser;
+          } as Partial<LinkWithUser>);
         }
         return link;
       });
@@ -141,10 +137,9 @@ export function optimisticToggleLike(
           const newLikes = isLiked
             ? [...likes, userId]
             : likes.filter((id) => id !== userId);
-          return {
-            ...link,
+          return safeMergeLinkUpdate(link, {
             likes: newLikes,
-          } as ILink;
+          } as Partial<ILink>);
         }
         return link;
       });
@@ -161,10 +156,55 @@ export async function revalidateLinkCaches() {
   );
 }
 
-/**
- * Optimistically removes a link from all caches
- * Returns a rollback function to restore previous state
- */
+export function optimisticAddLink(
+  newLink: LinkWithUser,
+  userId: string,
+  mutateCurrentUser?: MutateCurrentUser
+) {
+  const safeLink = {
+    ...newLink,
+    imageUrl: newLink.imageUrl && typeof newLink.imageUrl === "string" && newLink.imageUrl.trim() !== ""
+      ? newLink.imageUrl
+      : null,
+  } as LinkWithUser;
+
+  mutate(
+    `user-links-${userId}`,
+    (links: ILink[] | undefined) => {
+      if (!links) return [safeLink as ILink];
+      const exists = links.some((l) => l._id.toString() === safeLink._id.toString());
+      if (exists) return links;
+      return [safeLink as ILink, ...links];
+    },
+    { revalidate: false }
+  );
+
+  mutate(
+    "feed-links",
+    (links: LinkWithUser[] | undefined) => {
+      if (!links) return [safeLink];
+      const exists = links.some((l) => l._id.toString() === safeLink._id.toString());
+      if (exists) return links;
+      return [safeLink, ...links];
+    },
+    { revalidate: false }
+  );
+
+  if (mutateCurrentUser) {
+    mutateCurrentUser(
+      (data: { user: IUser } | undefined) => {
+        if (!data?.user) return data;
+        const currentLinks = data.user.links || [];
+        const linkIdStr = safeLink._id.toString();
+        if (currentLinks.includes(linkIdStr)) return data;
+        const updatedLinks = [linkIdStr, ...currentLinks];
+        return { ...data, user: { ...data.user, links: updatedLinks } as IUser };
+      },
+      false
+    );
+  }
+}
+
 type MutateCurrentUser = (
   data?: { user: IUser } | ((data: { user: IUser } | undefined) => { user: IUser } | undefined),
   shouldRevalidate?: boolean
@@ -177,7 +217,6 @@ export function optimisticDeleteLink(
 ): {
   rollback: () => void;
 } {
-  // Capture previous states for rollback
   const previousStates: {
     feedLinks?: LinkWithUser[];
     userLinks?: { [key: string]: ILink[] };
@@ -185,7 +224,6 @@ export function optimisticDeleteLink(
     savedLinks?: LinkWithUser[];
   } = {};
 
-  // Update feed-links - capture state in the updater
   mutate(
     "feed-links",
     (links: LinkWithUser[] | undefined) => {
@@ -198,7 +236,6 @@ export function optimisticDeleteLink(
     { revalidate: false }
   );
 
-  // Update saved-links - capture state in the updater
   mutate(
     "saved-links",
     (links: LinkWithUser[] | undefined) => {
@@ -211,7 +248,6 @@ export function optimisticDeleteLink(
     { revalidate: false }
   );
 
-  // Update all user-links caches
   mutate(
     (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
     (links: ILink[] | undefined) => {
@@ -223,7 +259,6 @@ export function optimisticDeleteLink(
     { revalidate: false }
   );
 
-  // Update current user's links array if mutateCurrentUser is provided
   if (mutateCurrentUser && userId) {
     mutateCurrentUser(
       (data: { user: IUser } | undefined) => {
@@ -245,8 +280,7 @@ export function optimisticDeleteLink(
       false
     );
   }
-
-  // Rollback function
+    
   const rollback = () => {
     if (previousStates.feedLinks) {
       mutate("feed-links", previousStates.feedLinks, { revalidate: false });

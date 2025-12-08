@@ -2,12 +2,12 @@
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiSend } from "react-icons/fi";
+import { FiSend, FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 import { IComment, IReply, ILink } from "@/models/Link";
 import { useUsers } from "@/hooks/useUsers";
 import { useSocketStore } from "@/store/useSocketStore";
-import { optimisticAddComment, optimisticAddReply, revalidateLinkCaches } from "@/utils/linkInteractions";
+import { optimisticAddComment, optimisticAddReply, revalidateLinkCaches, LinkWithUser } from "@/utils/linkInteractions";
 import {
   createOptimisticComment,
   createOptimisticReply,
@@ -17,12 +17,15 @@ import {
   replaceTempReply,
 } from "@/utils/commentOptimistic";
 import toast from "react-hot-toast";
+import DeleteModal from "@/components/DeleteModal";
+import { mutate } from "swr";
 
 interface CommentSectionProps {
   linkId: string;
   comments: IComment[];
   onCommentAdded: () => void;
   onReplyAdded: () => void;
+  linkOwnerId?: string;
 }
 
 export default function CommentSection({
@@ -30,8 +33,10 @@ export default function CommentSection({
   comments: propsComments,
   onCommentAdded,
   onReplyAdded,
+  linkOwnerId,
 }: CommentSectionProps) {
   const { currentUser } = useUsers();
+  const isLinkOwner = linkOwnerId && currentUser?._id?.toString() === linkOwnerId;
   const { socket, isConnected } = useSocketStore();
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -41,15 +46,42 @@ export default function CommentSection({
 
   const [localComments, setLocalComments] = useState<IComment[]>(propsComments);
   const rollbackRef = useRef<(() => IComment[]) | null>(null);
+  const [deleteModalState, setDeleteModalState] = useState<{
+    type: "comment" | "reply";
+    commentId: string;
+    replyId?: string;
+  } | null>(null);
 
-  const prevPropsLengthRef = useRef(propsComments.length);
   useEffect(() => {
-    if (rollbackRef.current === null && prevPropsLengthRef.current !== propsComments.length) {
-
-      setLocalComments(propsComments);
-      prevPropsLengthRef.current = propsComments.length;
+    if (rollbackRef.current === null) {
+      const currentIds = localComments.map(c => c._id.toString()).sort().join(',');
+      const propsIds = propsComments.map(c => c._id.toString()).sort().join(',');
+      
+      if (currentIds !== propsIds) {
+        setLocalComments(propsComments);
+      }
     }
-  }, [propsComments.length, propsComments]);
+  }, [propsComments, localComments]);
+  
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const handleLinkUpdate = (data: { link: ILink; timestamp?: string; eventId?: string }) => {
+      const updatedLink = data.link;
+      
+      if (updatedLink._id.toString() !== linkId) return;
+
+      if (updatedLink.comments) {
+        setLocalComments(updatedLink.comments);
+      }
+    };
+
+    socket.on("link:update", handleLinkUpdate);
+
+    return () => {
+      socket.off("link:update", handleLinkUpdate);
+    };
+  }, [socket, isConnected, linkId]);
 
   const scrollToLatest = React.useCallback(() => {
     if (!commentsContainerRef.current) return;
@@ -329,6 +361,252 @@ export default function CommentSection({
     return "/dark-profile.png";
   }, []);
 
+  const handleDeleteComment = async () => {
+    if (!deleteModalState || deleteModalState.type !== "comment" || !isLinkOwner) return;
+
+    const commentId = deleteModalState.commentId;
+    
+    setDeleteModalState(null);
+
+    const previousComments = [...localComments];
+
+    setLocalComments((prev) =>
+      prev.filter((c) => c._id.toString() !== commentId)
+    );
+
+    mutate(
+      "feed-links",
+      (links: LinkWithUser[] | undefined) => {
+        if (!links) return links;
+        return links.map((link) => {
+          if (link._id.toString() === linkId) {
+            return {
+              ...link,
+              comments: (link.comments || []).filter(
+                (c: IComment) => c._id.toString() !== commentId
+              ),
+            } as LinkWithUser;
+          }
+          return link;
+        });
+      },
+      { revalidate: false }
+    );
+    
+    mutate(
+      (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+      (links: ILink[] | undefined) => {
+        if (!links) return links;
+        return links.map((link) => {
+          if (link._id.toString() === linkId) {
+            return {
+              ...link,
+              comments: (link.comments || []).filter(
+                (c: IComment) => c._id.toString() !== commentId
+              ),
+            } as ILink;
+          }
+          return link;
+        });
+      },
+      { revalidate: false }
+    );
+
+    toast.success("Comment deleted successfully", { id: `delete-comment-${commentId}` });
+
+    onCommentAdded();
+
+    fetch(`/api/links/${linkId}/comment/${commentId}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to delete comment");
+        }
+      })
+      .catch((error) => {
+        setLocalComments(previousComments);
+        
+        mutate(
+          "feed-links",
+          (links: LinkWithUser[] | undefined) => {
+            if (!links) return links;
+            return links.map((link) => {
+              if (link._id.toString() === linkId) {
+                return {
+                  ...link,
+                  comments: previousComments,
+                } as LinkWithUser;
+              }
+              return link;
+            });
+          },
+          { revalidate: false }
+        );
+
+        mutate(
+          (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+          (links: ILink[] | undefined) => {
+            if (!links) return links;
+            return links.map((link) => {
+              if (link._id.toString() === linkId) {
+                return {
+                  ...link,
+                  comments: previousComments,
+                } as ILink;
+              }
+              return link;
+            });
+          },
+          { revalidate: false }
+        );
+
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete comment",
+          { id: `delete-comment-${commentId}` }
+        );
+      });
+  };
+
+  const handleDeleteReply = async () => {
+    if (!deleteModalState || deleteModalState.type !== "reply" || !isLinkOwner) return;
+
+    const commentId = deleteModalState.commentId;
+    const replyId = deleteModalState.replyId;
+    if (!replyId) return;
+
+    setDeleteModalState(null);
+
+    const previousComments = [...localComments];
+
+    setLocalComments((prev) =>
+      prev.map((comment) => {
+        if (comment._id.toString() === commentId) {
+          return {
+            ...comment,
+            replies: (comment.replies || []).filter(
+              (r) => r._id.toString() !== replyId
+            ),
+          } as IComment;
+        }
+        return comment;
+      })
+    );
+
+    mutate(
+      "feed-links",
+      (links: LinkWithUser[] | undefined) => {
+        if (!links) return links;
+        return links.map((link) => {
+          if (link._id.toString() === linkId) {
+            return {
+              ...link,
+              comments: (link.comments || []).map((c: IComment) => {
+                if (c._id.toString() === commentId) {
+                  return {
+                    ...c,
+                    replies: (c.replies || []).filter(
+                      (r: IReply) => r._id.toString() !== replyId
+                    ),
+                  } as IComment;
+                }
+                return c;
+              }),
+            } as LinkWithUser;
+          }
+          return link;
+        });
+      },
+      { revalidate: false }
+    );
+
+    mutate(
+      (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+      (links: ILink[] | undefined) => {
+        if (!links) return links;
+        return links.map((link) => {
+          if (link._id.toString() === linkId) {
+            return {
+              ...link,
+              comments: (link.comments || []).map((c: IComment) => {
+                if (c._id.toString() === commentId) {
+                  return {
+                    ...c,
+                    replies: (c.replies || []).filter(
+                      (r: IReply) => r._id.toString() !== replyId
+                    ),
+                  } as IComment;
+                }
+                return c;
+              }),
+            } as ILink;
+          }
+          return link;
+        });
+      },
+      { revalidate: false }
+    );
+
+    toast.success("Reply deleted successfully", { id: `delete-reply-${replyId}` });
+
+    onReplyAdded();
+
+    fetch(`/api/links/${linkId}/comment/${commentId}/reply/${replyId}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to delete reply");
+        }
+      })
+      .catch((error) => {
+        setLocalComments(previousComments);
+        
+        mutate(
+          "feed-links",
+          (links: LinkWithUser[] | undefined) => {
+            if (!links) return links;
+            return links.map((link) => {
+              if (link._id.toString() === linkId) {
+                return {
+                  ...link,
+                  comments: previousComments,
+                } as LinkWithUser;
+              }
+              return link;
+            });
+          },
+          { revalidate: false }
+        );
+
+        mutate(
+          (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+          (links: ILink[] | undefined) => {
+            if (!links) return links;
+            return links.map((link) => {
+              if (link._id.toString() === linkId) {
+                return {
+                  ...link,
+                  comments: previousComments,
+                } as ILink;
+              }
+              return link;
+            });
+          },
+          { revalidate: false }
+        );
+
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete reply",
+          { id: `delete-reply-${replyId}` }
+        );
+      });
+  };
+
   useEffect(() => {
     if (scrollToCommentRef.current && commentsContainerRef.current) {
 
@@ -370,7 +648,25 @@ export default function CommentSection({
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className=" bg-right-nav-light dark:bg-right-nav-dark rounded-2xl px-4 py-2">
+                  <div className="relative bg-right-nav-light dark:bg-right-nav-dark rounded-2xl px-4 py-2">
+                    {isLinkOwner && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteModalState({
+                            type: "comment",
+                            commentId: comment._id.toString(),
+                          });
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        aria-label="Delete comment"
+                      >
+                        <FiTrash2
+                          size={14}
+                          className="text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
+                        />
+                      </button>
+                    )}
                     <p className="font-semibold text-sm text-primary-dark dark:text-primary-light">
                       {comment.username}
                     </p>
@@ -411,7 +707,26 @@ export default function CommentSection({
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="rounded-2xl px-3 py-2 bg-right-nav-light dark:bg-right-nav-dark">
+                          <div className="relative rounded-2xl px-3 py-2 bg-right-nav-light dark:bg-right-nav-dark">
+                            {isLinkOwner && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteModalState({
+                                    type: "reply",
+                                    commentId: comment._id.toString(),
+                                    replyId: reply._id.toString(),
+                                  });
+                                }}
+                                className="absolute top-1.5 right-1.5 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                aria-label="Delete reply"
+                              >
+                                <FiTrash2
+                                  size={12}
+                                  className="text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors"
+                                />
+                              </button>
+                            )}
                             <p className="font-semibold text-xs text-primary-dark dark:text-primary-light">
                               {reply.username}
                             </p>
@@ -501,6 +816,22 @@ export default function CommentSection({
           </button>
         </form>
       </div>
+
+      <DeleteModal
+        isOpen={!!deleteModalState}
+        onConfirm={
+          deleteModalState?.type === "comment"
+            ? handleDeleteComment
+            : handleDeleteReply
+        }
+        onCancel={() => setDeleteModalState(null)}
+        title={deleteModalState?.type === "comment" ? "Delete Comment" : "Delete Reply"}
+        message={
+          deleteModalState?.type === "comment"
+            ? "Are you sure you want to delete this comment? This action cannot be undone."
+            : "Are you sure you want to delete this reply? This action cannot be undone."
+        }
+      />
     </div>
   );
 }

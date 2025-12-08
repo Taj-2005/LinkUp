@@ -12,8 +12,8 @@ export async function DELETE() {
   try {
     const payload = requireAuth(cookieStore);
     const userId = payload.userId;
-
-    await Notification.deleteMany({ userId, read: true });
+    
+    await Notification.deleteMany({ userId });
 
     const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
     try {

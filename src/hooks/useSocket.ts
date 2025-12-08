@@ -1,9 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { mutate } from "swr";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useUsers } from "@/hooks/useUsers";
 import { ILink, IComment } from "@/models/Link";
 import { IUser } from "@/models/User";
+import { INotification } from "@/models/Notification";
+import { showToastWithAvatar } from "@/utils/toastHelpers";
+import { useModalStore } from "@/store/useModalStore";
+import { isValidImageUrl } from "@/utils/linkCacheMutations";
+import { safeMergeLinkUpdate } from "@/utils/linkCacheUtils";
 
 interface LinkWithUserInfo {
   _id: string;
@@ -63,6 +68,7 @@ interface UnseenCountUpdatePayload {
 export function useSocket() {
   const { socket, isConnected, setUnseenCount } = useSocketStore();
   const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
+  const { setSelectedLink, setIsModalOpen } = useModalStore();
   const currentUserRef = useRef(currentUser);
   
   useEffect(() => {
@@ -71,6 +77,35 @@ export function useSocket() {
   
   const processedEvents = useRef<Set<string>>(new Set());
   const eventIdCache = useRef<Map<string, number>>(new Map());
+  const notificationUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedNotificationUpdate = useCallback(() => {
+    if (notificationUpdateTimeoutRef.current) {
+      clearTimeout(notificationUpdateTimeoutRef.current);
+    }
+    
+    notificationUpdateTimeoutRef.current = setTimeout(async () => {
+      mutate(
+        "notifications",
+        async (current: INotification[] | undefined) => {
+          try {
+            const response = await fetch("/api/notifications", {
+              credentials: "include",
+            });
+            if (response.ok) {
+              const data = await response.json();
+              return data.notifications || [];
+            }
+          } catch (error) {
+            console.error("Failed to update notifications cache:", error);
+          }
+          return current || [];
+        },
+        { revalidate: false }
+      );
+      notificationUpdateTimeoutRef.current = null;
+    }, 500);
+  }, []);
 
   useEffect(() => {
     if (!socket || !isConnected) return;
@@ -117,19 +152,10 @@ export function useSocket() {
         : 0;
       setUnseenCount(validCount);
       
-      mutate("notifications", undefined, { revalidate: false });
       mutate("linkRequests", undefined, { revalidate: false });
-      
-      setTimeout(() => {
-        mutate("notifications"); // Background revalidation
-      }, 100);
     };
 
-    /**
-     * Handle new notification
-     * Optimistically invalidates notifications cache
-     */
-    const handleNewNotification = (data: { type: string; linkId: string; actorId: string; timestamp?: string }) => {
+    const handleNewNotification = async (data: { type: string; linkId: string; actorId: string; timestamp?: string }) => {
       const eventId = getEventId("notification:new", data);
       
       if (processedEvents.current.has(eventId)) {
@@ -139,14 +165,10 @@ export function useSocket() {
       processedEvents.current.add(eventId);
       cleanupOldEvents();
 
-      // Optimistic cache update only - no refetch
-      mutate("notifications", undefined, { revalidate: false });
+      debouncedNotificationUpdate();
     };
-
-    /**
-     * Handle notification update (read, clear, etc.)
-     */
-    const handleNotificationUpdate = (data: { userId: string; action: string; notificationId?: string; timestamp?: string }) => {
+        
+    const handleNotificationUpdate = async (data: { userId: string; action: string; notificationId?: string; timestamp?: string }) => {
       const eventId = getEventId("notification:update", data);
       
       if (processedEvents.current.has(eventId)) {
@@ -156,14 +178,10 @@ export function useSocket() {
       processedEvents.current.add(eventId);
       cleanupOldEvents();
 
-      // Optimistic cache update only - no refetch
-      mutate("notifications", undefined, { revalidate: false });
+      debouncedNotificationUpdate();
     };
 
-    /**
-     * Handle feed updates (new link created)
-     * Updates feed, users, and user caches for ALL connected users (including creator)
-     */
+
     const handleFeedUpdate = (data: { linkId: string; userId: string; timestamp?: string; type: string }) => {
       const eventId = getEventId("feed:update", data);
       
@@ -174,36 +192,12 @@ export function useSocket() {
       processedEvents.current.add(eventId);
       cleanupOldEvents();
 
-      // Silently update ALL SWR caches for all connected users (including creator)
-      // Keep current data visible - no revalidation to prevent skeleton flicker
-      // 1. Update feed cache (keep current data, mark for background sync)
-      mutate(
-        "feed-links",
-        (current: LinkWithUserInfo[] | undefined) => current, // Keep current data visible
-        { revalidate: false } // No immediate revalidation
-      );
-      
-      // 2. Update the creator's user links cache (keep current data)
-      mutate(
-        `user-links-${data.userId}`,
-        (current: Omit<LinkWithUserInfo, 'userInfo'>[] | undefined) => current,
-        { revalidate: false }
-      );
-      
-      // 3. Update users list cache (if user info changed) - silent background update
+      mutate("feed-links");
+      mutate(`user-links-${data.userId}`);
       mutateAllUsers();
-      
-      // 4. Update current user cache (if it's the current user) - silent background update
       mutateCurrentUser();
-      
-      // NO setTimeout revalidation - prevents skeleton flicker
-      // Feed will update via optimistic mutations from interaction handlers
     };
 
-    /**
-     * Handle link deletion
-     * Removes the deleted link from all caches
-     */
     const handleLinkDeleted = (data: { linkId: string; ownerId: string; updatedOwner?: { _id: string; links: string[] }; timestamp?: string; eventId?: string }) => {
       const eventId = getEventId("link:deleted", data);
       
@@ -217,7 +211,6 @@ export function useSocket() {
       const deletedLinkId = data.linkId;
       const ownerId = data.ownerId;
 
-      // Remove from feed-links cache
       mutate(
         "feed-links",
         (links: LinkWithUserInfo[] | undefined) => {
@@ -227,7 +220,6 @@ export function useSocket() {
         { revalidate: false }
       );
 
-      // Remove from saved-links cache (link might be saved by other users)
       mutate(
         "saved-links",
         (links: LinkWithUserInfo[] | undefined) => {
@@ -237,7 +229,6 @@ export function useSocket() {
         { revalidate: false }
       );
 
-      // Remove from user-links cache for the owner
       if (ownerId) {
         mutate(
           `user-links-${ownerId}`,
@@ -249,7 +240,6 @@ export function useSocket() {
         );
       }
 
-      // Update current user's links array if they're the owner
       if (data.updatedOwner && currentUserRef.current?._id?.toString() === ownerId) {
         mutateCurrentUser(
           (data: { user: IUser } | undefined) => {
@@ -263,7 +253,6 @@ export function useSocket() {
         );
       }
 
-      // Update all-users cache if owner info is provided
       if (data.updatedOwner) {
         mutate(
           "all-users",
@@ -283,21 +272,20 @@ export function useSocket() {
         );
       }
 
-      // Background revalidation for consistency
-      setTimeout(() => {
-        mutate("feed-links");
-        if (ownerId) {
-          mutate(`user-links-${ownerId}`);
-        }
-        mutateCurrentUser();
-        mutateAllUsers();
-      }, 100);
+      if (currentUserRef.current?._id?.toString() === ownerId) {
+        mutateCurrentUser(
+          (data: { user: IUser } | undefined) => {
+            if (!data?.user) return data;
+            const updatedLinks = (data.user.links || []).filter(
+              (id: string) => id.toString() !== deletedLinkId.toString()
+            );
+            return { ...data, user: { ...data.user, links: updatedLinks } as IUser };
+          },
+          { revalidate: false }
+        );
+      }
     };
 
-    /**
-     * Handle link updates (like, comment, reply, save)
-     * Updates the specific link in the feed cache with new data
-     */
     const handleLinkUpdate = (data: { link: ILink; timestamp?: string; eventId?: string }) => {
       const eventId = getEventId("link:update", data);
       
@@ -310,88 +298,90 @@ export function useSocket() {
 
       const updatedLink = data.link;
 
-      // Update feed-links cache by merging the updated link into the array
       mutate(
         "feed-links",
         (links: LinkWithUserInfo[] | undefined) => {
           if (!links) return links;
           return links.map((link) => {
             if (link._id === updatedLink._id.toString()) {
-              // Merge updated link data while preserving other properties
-              // Convert ILink to plain object format
-              const updatedLinkPlain: LinkWithUserInfo = {
+              const update: Partial<LinkWithUserInfo> = {
                 _id: updatedLink._id.toString(),
                 userId: updatedLink.userId.toString(),
-                imageUrl: updatedLink.imageUrl,
-                description: updatedLink.description,
-                location: updatedLink.location,
-                likes: updatedLink.likes,
-                comments: updatedLink.comments,
-                createdAt: updatedLink.createdAt,
-                updatedAt: updatedLink.updatedAt,
-                userInfo: (updatedLink as LinkWithUserInfo).userInfo,
+                ...(updatedLink.imageUrl && { imageUrl: updatedLink.imageUrl }),
+                ...(updatedLink.description !== undefined && { description: updatedLink.description }),
+                ...(updatedLink.location !== undefined && { location: updatedLink.location }),
+                likes: updatedLink.likes || link.likes,
+                comments: updatedLink.comments || link.comments,
+                ...(updatedLink.createdAt && { createdAt: updatedLink.createdAt }),
+                ...(updatedLink.updatedAt && { updatedAt: updatedLink.updatedAt }),
               };
-              return {
-                ...link,
-                ...updatedLinkPlain,
-                // Preserve userInfo if it exists
-                userInfo: link.userInfo || updatedLinkPlain.userInfo,
-              };
+              return safeMergeLinkUpdate(link, update) as LinkWithUserInfo;
             }
             return link;
           });
         },
-        { revalidate: false } // No revalidation - instant update only
+          { revalidate: false } 
       );
 
-      // Update user-links cache for the link owner
-      if (updatedLink.userId) {
-        mutate(
-          `user-links-${updatedLink.userId}`,
-          (links: Omit<LinkWithUserInfo, 'userInfo'>[] | undefined) => {
-            if (!links) return links;
-            return links.map((link) => {
-              if (link._id === updatedLink._id.toString()) {
-                // Convert ILink to plain object format
-                const updatedLinkPlain: Omit<LinkWithUserInfo, 'userInfo'> = {
-                  _id: updatedLink._id.toString(),
-                  userId: updatedLink.userId.toString(),
-                  imageUrl: updatedLink.imageUrl,
-                  description: updatedLink.description,
-                  location: updatedLink.location,
-                  likes: updatedLink.likes,
-                  comments: updatedLink.comments,
-                  createdAt: updatedLink.createdAt,
-                  updatedAt: updatedLink.updatedAt,
-                };
-                return {
-                  ...link,
-                  ...updatedLinkPlain,
-                };
-              }
-              return link;
-            });
-          },
-          { revalidate: false }
-        );
-      }
+      mutate(
+        (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
+        (links: Omit<LinkWithUserInfo, 'userInfo'>[] | undefined) => {
+          if (!links) return links;
+          return links.map((link) => {
+            if (link._id === updatedLink._id.toString()) {
+              const update: Partial<Omit<LinkWithUserInfo, 'userInfo'>> = {
+                _id: updatedLink._id.toString(),
+                userId: updatedLink.userId.toString(),
+                ...(updatedLink.imageUrl && { imageUrl: updatedLink.imageUrl }),
+                ...(updatedLink.description !== undefined && { description: updatedLink.description }),
+                ...(updatedLink.location !== undefined && { location: updatedLink.location }),
+                likes: updatedLink.likes || link.likes,
+                comments: updatedLink.comments || link.comments,
+                ...(updatedLink.createdAt && { createdAt: updatedLink.createdAt }),
+                ...(updatedLink.updatedAt && { updatedAt: updatedLink.updatedAt }),
+              };
+              return safeMergeLinkUpdate(link, update) as Omit<LinkWithUserInfo, 'userInfo'>;
+            }
+            return link;
+          });
+        },
+        { revalidate: false }
+      );
+
+      mutate(
+        "saved-links",
+        (links: LinkWithUserInfo[] | undefined) => {
+          if (!links) return links;
+          return links.map((link) => {
+            if (link._id === updatedLink._id.toString()) {
+              const update: Partial<LinkWithUserInfo> = {
+                _id: updatedLink._id.toString(),
+                userId: updatedLink.userId.toString(),
+                ...(updatedLink.imageUrl && { imageUrl: updatedLink.imageUrl }),
+                ...(updatedLink.description !== undefined && { description: updatedLink.description }),
+                ...(updatedLink.location !== undefined && { location: updatedLink.location }),
+                likes: updatedLink.likes || link.likes,
+                comments: updatedLink.comments || link.comments,
+                ...(updatedLink.createdAt && { createdAt: updatedLink.createdAt }),
+                ...(updatedLink.updatedAt && { updatedAt: updatedLink.updatedAt }),
+              };
+              return safeMergeLinkUpdate(link, update) as LinkWithUserInfo;
+            }
+            return link;
+          });
+        },
+        { revalidate: false }
+      );
+
+      mutateAllUsers();
     };
 
-    /**
-     * Handle user updates
-     * Updates user-related caches
-     */
     const handleUserUpdate = () => {
       mutateCurrentUser();
       mutateAllUsers();
     };
 
-    /**
-     * Handle link request events
-     * Updates user and link request caches
-     */
     const handleLinkRequestReceived = async (data?: { requesterId?: string; receiverId?: string }) => {
-      // Instant cache updates - no revalidation to prevent flicker
       mutateCurrentUser();
       mutateAllUsers();
       mutate("linkRequests", undefined, { revalidate: false });
@@ -399,16 +389,13 @@ export function useSocket() {
       mutate("/api/link-requests/sent", undefined, { revalidate: false });
       mutate("/api/link-requests", undefined, { revalidate: false });
       
-      // Also invalidate link-status caches if we have user IDs
       if (data?.requesterId && data?.receiverId) {
         const { invalidateLinkStatus } = await import("@/hooks/useLinkStatus");
-        // Instant link-status updates
         invalidateLinkStatus(data.requesterId, data.receiverId);
       }
     };
 
     const handleLinkRequestAccepted = async (data?: { requestId?: string; requesterId?: string; receiverId?: string }) => {
-      // Also invalidate link-status caches if we have user IDs
       if (data?.requesterId && data?.receiverId) {
         const { optimisticUpdateUser } = await import("@/utils/swrCache");
         const { invalidateGlobalLinkUpCaches } = await import("@/utils/globalCacheInvalidation");
@@ -416,13 +403,11 @@ export function useSocket() {
         
         const currentUser = currentUserRef.current;
         
-        // Optimistically update user caches
         if (currentUser?._id) {
           const currentUserId = currentUser._id.toString();
           const requesterId = data.requesterId.toString();
           const receiverId = data.receiverId.toString();
           
-          // If current user is the receiver, add requester to linked_by
           if (currentUserId === receiverId) {
             const currentLinkedBy = currentUser.linked_by || [];
             const updatedLinkedBy = [...currentLinkedBy];
@@ -434,7 +419,6 @@ export function useSocket() {
             });
           }
           
-          // If current user is the requester, add receiver to linked_to
           if (currentUserId === requesterId) {
             const currentLinkedTo = currentUser.linked_to || [];
             const updatedLinkedTo = [...currentLinkedTo];
@@ -446,7 +430,6 @@ export function useSocket() {
             });
           }
           
-          // Also optimistically update the other user in allUsers cache
           mutate(
             "all-users",
             (users: UserPlain[] | undefined) => {
@@ -454,7 +437,6 @@ export function useSocket() {
               return users.map((user) => {
                 const userId = user._id;
                 if (userId === requesterId && currentUserId === receiverId) {
-                  // Current user is receiver, update requester's linked_to
                   const requesterLinkedTo = user.linked_to || [];
                   const updatedRequesterLinkedTo = [...requesterLinkedTo];
                   if (!updatedRequesterLinkedTo.includes(receiverId)) {
@@ -462,7 +444,6 @@ export function useSocket() {
                   }
                   return { ...user, linked_to: updatedRequesterLinkedTo };
                 } else if (userId === receiverId && currentUserId === requesterId) {
-                  // Current user is requester, update receiver's linked_by
                   const receiverLinkedBy = user.linked_by || [];
                   const updatedReceiverLinkedBy = [...receiverLinkedBy];
                   if (!updatedReceiverLinkedBy.includes(requesterId)) {
@@ -477,7 +458,6 @@ export function useSocket() {
           );
         }
         
-        // Instant cache updates
         mutateCurrentUser();
         mutateAllUsers();
         mutate("linkRequests", undefined, { revalidate: false });
@@ -485,13 +465,10 @@ export function useSocket() {
         mutate("/api/link-requests/sent", undefined, { revalidate: false });
         mutate("/api/link-requests", undefined, { revalidate: false });
         
-        // Instant link-status updates
         invalidateLinkStatus(data.requesterId, data.receiverId);
         
-        // Background revalidation for consistency
         await invalidateGlobalLinkUpCaches(data.requesterId, data.receiverId);
       } else {
-        // Fallback if we don't have user IDs
         mutateCurrentUser();
         mutateAllUsers();
         mutate("linkRequests", undefined, { revalidate: false });
@@ -502,7 +479,6 @@ export function useSocket() {
     };
 
     const handleLinkRequestRejected = async (data?: { requestId?: string; requesterId?: string; receiverId?: string }) => {
-      // Instant cache updates
       mutateCurrentUser();
       mutateAllUsers();
       mutate("linkRequests", undefined, { revalidate: false });
@@ -510,15 +486,12 @@ export function useSocket() {
       mutate("/api/link-requests/sent", undefined, { revalidate: false });
       mutate("/api/link-requests", undefined, { revalidate: false });
       
-      // Also invalidate link-status caches if we have user IDs
       if (data?.requesterId && data?.receiverId) {
         const { invalidateGlobalLinkUpCaches } = await import("@/utils/globalCacheInvalidation");
         const { invalidateLinkStatus } = await import("@/hooks/useLinkStatus");
         
-        // Instant link-status updates
         invalidateLinkStatus(data.requesterId, data.receiverId);
         
-        // Background revalidation for consistency
         await invalidateGlobalLinkUpCaches(data.requesterId, data.receiverId);
       }
     };
@@ -527,12 +500,10 @@ export function useSocket() {
       const { invalidateGlobalLinkUpCaches } = await import("@/utils/globalCacheInvalidation");
       const { optimisticUpdateUser } = await import("@/utils/swrCache");
       
-      // Extract user IDs from different event formats
       const userA = data?.from || data?.userA;
       const userB = data?.to || data?.userB;
       
       if (!userA || !userB) {
-        // Fallback: just update caches without user-specific updates
         mutateCurrentUser();
         mutateAllUsers();
         mutate("linkRequests", undefined, { revalidate: false });
@@ -545,8 +516,6 @@ export function useSocket() {
       const currentUser = currentUserRef.current;
       const currentUserId = currentUser?._id?.toString();
       
-      // INSTANT UI UPDATE - Set link-status to "none" immediately for both directions
-      // This ensures the button changes from "Linked" to "LinkUp" instantly for ALL users
       mutate(
         ["link-status", userA, userB],
         { status: "none" },
@@ -558,20 +527,17 @@ export function useSocket() {
         { revalidate: false }
       );
       
-      // INSTANT UI UPDATE - Optimistically update user caches if current user is involved
       if (currentUserId === userA || currentUserId === userB) {
         const otherUserId = currentUserId === userA ? userB : userA;
         const currentLinkedTo = currentUser?.linked_to || [];
         const currentLinkedBy = currentUser?.linked_by || [];
         
-        // Remove other user from current user's linked arrays
         await optimisticUpdateUser(currentUserId, {
           linked_to: currentLinkedTo.filter((id: string) => id !== otherUserId),
           linked_by: currentLinkedBy.filter((id: string) => id !== otherUserId),
         });
       }
       
-      // INSTANT UI UPDATE - Optimistically update other user in allUsers cache
       mutate(
         "all-users",
         (users: UserPlain[] | undefined) => {
@@ -579,7 +545,6 @@ export function useSocket() {
           return users.map((user) => {
             const userId = user._id;
             if (userId === userA) {
-              // Remove userB from userA's linked arrays
               const linkedTo = user.linked_to || [];
               const linkedBy = user.linked_by || [];
               return {
@@ -588,7 +553,6 @@ export function useSocket() {
                 linked_by: linkedBy.filter((id: string) => id !== userB),
               };
             } else if (userId === userB) {
-              // Remove userA from userB's linked arrays
               const linkedTo = user.linked_to || [];
               const linkedBy = user.linked_by || [];
               return {
@@ -603,7 +567,6 @@ export function useSocket() {
         { revalidate: false }
       );
       
-      // Instant cache updates for all users
       mutateCurrentUser();
       mutateAllUsers();
       mutate("linkRequests", undefined, { revalidate: false });
@@ -611,23 +574,143 @@ export function useSocket() {
       mutate("/api/link-requests/sent", undefined, { revalidate: false });
       mutate("/api/link-requests", undefined, { revalidate: false });
       
-      // Background revalidation for consistency (updates all related caches globally)
       await invalidateGlobalLinkUpCaches(userA, userB);
     };
 
-    // Register all event listeners
+    const handleLinkCreated = (data: { 
+      link: LinkWithUserInfo; 
+      actor: { _id: string; username: string; name?: string; user_avatar?: string };
+      timestamp?: string; 
+      eventId?: string;
+    }) => {
+      const eventId = getEventId("link:created", data);
+      
+      if (processedEvents.current.has(eventId)) {
+        return;
+      }
+      
+      processedEvents.current.add(eventId);
+      cleanupOldEvents();
+
+      const rawLink = data.link;
+      const actorId = data.actor._id;
+      const currentUserId = currentUserRef.current?._id?.toString();
+      
+      if (!isValidImageUrl(rawLink.imageUrl)) {
+        console.warn("Received link with invalid imageUrl, skipping cache update:", rawLink._id);
+        return;
+      }
+
+      const newLink: LinkWithUserInfo = {
+        ...rawLink,
+        imageUrl: rawLink.imageUrl,
+        userInfo: rawLink.userInfo || {
+          username: data.actor.username,
+          user_avatar: data.actor.user_avatar,
+          name: data.actor.name,
+        },
+      };
+
+      if (actorId !== currentUserId) {
+      const toastId = `link-created-${newLink._id}`;
+      showToastWithAvatar(
+        {
+          username: data.actor.username,
+          user_avatar: data.actor.user_avatar,
+          name: data.actor.name,
+        },
+        "uploaded a new link",
+        {
+          id: toastId,
+          duration: 5000,
+          type: "success",
+          onClick: () => {
+            setSelectedLink(newLink as unknown as Parameters<typeof setSelectedLink>[0]);
+            setIsModalOpen(true);
+          },
+        }
+      );
+      }
+
+      mutate(
+        "feed-links",
+        (links: LinkWithUserInfo[] | undefined) => {
+          if (!links) return [newLink];
+          const exists = links.some((l) => l._id.toString() === newLink._id.toString());
+          if (exists) return links;
+          return [newLink, ...links];
+        },
+        { revalidate: false }
+      );
+
+      if (newLink.userId) {
+        mutate(
+          `user-links-${newLink.userId}`,
+          (links: Omit<LinkWithUserInfo, 'userInfo'>[] | undefined) => {
+            if (!links) return [newLink as Omit<LinkWithUserInfo, 'userInfo'>];
+            const exists = links.some((l) => l._id.toString() === newLink._id.toString());
+            if (exists) return links;
+            return [newLink as Omit<LinkWithUserInfo, 'userInfo'>, ...links];
+          },
+          { revalidate: false }
+        );
+      }
+
+      mutate(
+        "all-users",
+        (users: UserPlain[] | undefined) => {
+          if (!users) return users;
+          return users.map((user) => {
+            if (user._id === actorId) {
+              const currentLinks = user.links || [];
+              const linkIdStr = newLink._id.toString();
+              if (!currentLinks.includes(linkIdStr)) {
+                return {
+                  ...user,
+                  links: [linkIdStr, ...currentLinks],
+                };
+              }
+            }
+            return user;
+          });
+        },
+        { revalidate: false }
+      );
+
+      if (actorId === currentUserId) {
+        mutateCurrentUser(
+          (data: { user: IUser } | undefined) => {
+            if (!data?.user) return data;
+            const currentLinks = data.user.links || [];
+            const linkIdStr = newLink._id.toString();
+            if (!currentLinks.includes(linkIdStr)) {
+              return {
+                ...data,
+                user: {
+                  ...data.user,
+                  links: [linkIdStr, ...currentLinks],
+                } as IUser,
+              };
+            }
+            return data;
+          },
+          { revalidate: false }
+        );
+      }
+    };
+
     socket.on("unseenCount:update", handleUnseenCountUpdate);
     socket.on("notification:new", handleNewNotification);
     socket.on("notification:update", handleNotificationUpdate);
     socket.on("feed:update", handleFeedUpdate);
     socket.on("link:update", handleLinkUpdate);
     socket.on("link:deleted", handleLinkDeleted);
+    socket.on("link:created", handleLinkCreated);
     socket.on("userUpdated", handleUserUpdate);
     socket.on("linkRequestReceived", handleLinkRequestReceived);
     socket.on("linkRequestAccepted", handleLinkRequestAccepted);
     socket.on("linkRequestRejected", handleLinkRequestRejected);
-    socket.on("userUnlinked", handleUserUnlinked);
-    // Listen for global linkup events (unlinked, etc.) - broadcasts to ALL users
+    socket.on("userUnlinked", handleUserUnlinked);    
     socket.on("linkup:unlinked", (data: { from: string; to: string }) => handleUserUnlinked(data));
     socket.on("global:linkup", (data: { type: string; userA: string; userB: string }) => {
       if (data.type === "unlinked") {
@@ -635,7 +718,6 @@ export function useSocket() {
       }
     });
 
-    // Cleanup on unmount
     return () => {
       socket.off("unseenCount:update", handleUnseenCountUpdate);
       socket.off("notification:new", handleNewNotification);
@@ -643,6 +725,7 @@ export function useSocket() {
       socket.off("feed:update", handleFeedUpdate);
       socket.off("link:update", handleLinkUpdate);
       socket.off("link:deleted", handleLinkDeleted);
+      socket.off("link:created", handleLinkCreated);
       socket.off("userUpdated", handleUserUpdate);
       socket.off("linkRequestReceived", handleLinkRequestReceived);
       socket.off("linkRequestAccepted", handleLinkRequestAccepted);
@@ -651,6 +734,6 @@ export function useSocket() {
       socket.off("linkup:unlinked");
       socket.off("global:linkup");
     };
-  }, [socket, isConnected, setUnseenCount, mutateCurrentUser, mutateAllUsers]);
+  }, [socket, isConnected, setUnseenCount, mutateCurrentUser, mutateAllUsers, setSelectedLink, setIsModalOpen, debouncedNotificationUpdate]);
 }
 

@@ -10,11 +10,13 @@ import { useModalStore } from "@/store/useModalStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import CommentSection from "./CommentSection";
 import FullImageModal from "./FullImageModal";
-import DeletePostModal from "@/components/DeletePostModal";
-import { optimisticToggleLike, revalidateLinkCaches, optimisticDeleteLink } from "@/utils/linkInteractions";
+import DeleteModal from "@/components/DeleteModal";
+import { optimisticToggleLike, revalidateLinkCaches } from "@/utils/linkInteractions";
 import { scrollToComment, scrollToReply } from "@/utils/deepLinks";
 import { isLinkSaved, optimisticToggleSaved } from "@/utils/savedLinks";
-import { mutate } from "swr";
+import { deleteLinkHandler } from "@/utils/deleteLinkHandler";
+import { isValidImageUrl, getPlaceholderImageUrl } from "@/utils/linkCacheMutations";
+import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 
 interface LinkWithUser extends ILink {
@@ -43,6 +45,7 @@ export default function PostModal({
   deepLinkReplyId,
 }: PostModalProps) {
   const { currentUser, mutateCurrentUser } = useUsers();
+  const { resolvedTheme } = useTheme();
   const { socket, isConnected } = useSocketStore();
   const setIsModalOpen = useModalStore((state) => state.setIsModalOpen);
   const [isLiked, setIsLiked] = useState(false);
@@ -51,9 +54,14 @@ export default function PostModal({
   const [fullImageModalOpen, setFullImageModalOpen] = useState(false);
   const [showCommentsModalMobile, setShowCommentsModalMobile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const isSaved = isLinkSaved(currentUser, linkData?._id || "");
+
+  const imageUrl = linkData && isValidImageUrl(linkData.imageUrl)
+    ? linkData.imageUrl!
+    : linkData
+    ? getPlaceholderImageUrl(resolvedTheme === "dark")
+    : getPlaceholderImageUrl(resolvedTheme === "dark");
 
   useEffect(() => {
     if (link) {
@@ -65,35 +73,76 @@ export default function PostModal({
   }, [link, currentUser]);
 
   useEffect(() => {
-    if (isOpen && linkData && (deepLinkCommentId || deepLinkReplyId)) {
+    if (!isOpen || !linkData || (!deepLinkCommentId && !deepLinkReplyId)) {
+      return;
+    }
 
-      const timeoutId = setTimeout(() => {
+    const attemptScroll = () => {
+      let scrolled = false;
 
-        requestAnimationFrame(() => {
-          let scrolled = false;
+      if (deepLinkReplyId) {
+        scrolled = scrollToReply(deepLinkReplyId);
+        if (!scrolled && deepLinkCommentId) {
+          scrolled = scrollToComment(deepLinkCommentId);
+        }
+      } else if (deepLinkCommentId) {
+        scrolled = scrollToComment(deepLinkCommentId);
+      }
 
-          if (deepLinkReplyId) {
+      return scrolled;
+    };
 
-            scrolled = scrollToReply(deepLinkReplyId);
-            if (!scrolled && deepLinkCommentId) {
+    let observer: MutationObserver | null = null;
+    let intervalId: NodeJS.Timeout | null = null;
 
-              scrolled = scrollToComment(deepLinkCommentId);
-            }
-          } else if (deepLinkCommentId) {
-            scrolled = scrollToComment(deepLinkCommentId);
-          }
+    const initialTimeout = setTimeout(() => {
+      requestAnimationFrame(() => {
+        if (attemptScroll()) {
+          return;
+        }
 
-          if (!scrolled) {
-            const commentSection = document.querySelector('[data-comment-section]') as HTMLElement;
-            if (commentSection) {
-              commentSection.scrollTo({ top: 0, behavior: "smooth" });
-            }
+        const commentSection = document.querySelector('[data-comment-section]') as HTMLElement;
+        if (!commentSection) {
+          return;
+        }
+
+        let retryCount = 0;
+        const maxRetries = 50;
+        const retryInterval = 100;
+
+        observer = new MutationObserver(() => {
+          if (attemptScroll()) {
+            if (observer) observer.disconnect();
+            if (intervalId) clearInterval(intervalId);
           }
         });
-      }, 300);
 
-      return () => clearTimeout(timeoutId);
-    }
+        observer.observe(commentSection, {
+          childList: true,
+          subtree: true,
+        });
+
+        intervalId = setInterval(() => {
+          retryCount++;
+          
+          if (attemptScroll()) {
+            if (observer) observer.disconnect();
+            if (intervalId) clearInterval(intervalId);
+          } else if (retryCount >= maxRetries) {
+            if (observer) observer.disconnect();
+            if (intervalId) clearInterval(intervalId);
+              
+            commentSection.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }, retryInterval);
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      if (observer) observer.disconnect();
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [isOpen, linkData, deepLinkCommentId, deepLinkReplyId]);
 
   useEffect(() => {
@@ -122,9 +171,14 @@ export default function PostModal({
 
       setLinkData((prev) => {
         if (!prev) return prev;
+        const preservedImageUrl = isValidImageUrl(updatedLink.imageUrl) 
+          ? updatedLink.imageUrl 
+          : (isValidImageUrl(prev.imageUrl) ? prev.imageUrl : prev.imageUrl);
+        
         return {
           ...prev,
           ...updatedLink,
+          imageUrl: preservedImageUrl,
           userInfo: prev.userInfo || updatedLink.userInfo,
           createdAt: updatedLink.createdAt instanceof Date 
             ? updatedLink.createdAt 
@@ -289,56 +343,21 @@ export default function PostModal({
   const isOwner = linkData && currentUser?._id?.toString() === linkData.userId;
 
   const handleDelete = async () => {
-    if (!currentUser || !linkData || isDeleting) return;
+    if (!currentUser || !linkData) return;
 
     const linkId = linkData._id.toString();
     const userId = currentUser._id.toString();
 
-    setShowDeleteModal(false);  
+    setShowDeleteModal(false);
     handleClose();
 
-    toast.success("Link deleted successfully", { id: "delete-post" });
-
-    const { rollback } = optimisticDeleteLink(linkId, userId, mutateCurrentUser);
-
-    if (linkData.userId) {
-      mutate(
-        `user-links-${linkData.userId}`,
-        (links: ILink[] | undefined) => {
-          if (!links) return links;
-          return links.filter((l) => l._id.toString() !== linkId);
-        },
-        { revalidate: false }
-      );
-    }
-
-    onLinkUpdated();
-
-    try {
-      const res = await fetch(`/api/links/${linkId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to delete post");
-      }
-
-    } catch (error) {
-      rollback();
-      if (linkData._id.toString() === linkId) {
-        setShowDeleteModal(false);
-      }
-
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete post",
-        { id: "delete-post" }
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+    await deleteLinkHandler({
+      linkId,
+      userId,
+      linkUserId: linkData.userId,
+      mutateCurrentUser,
+      onLinkDeleted: onLinkUpdated,
+    });
   };
 
   if (!linkData) return null;
@@ -388,12 +407,12 @@ export default function PostModal({
                   onClick={handleImageClick}
                 >
                   <Image
-                    src={linkData.imageUrl}
+                    src={imageUrl}
                     alt={linkData.description || "Post image"}
                     fill
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    unoptimized
+                    unoptimized={imageUrl.startsWith("data:")}
                   />
                 </div>
               </div>
@@ -467,8 +486,7 @@ export default function PostModal({
                           e.stopPropagation();
                           setShowDeleteModal(true);
                         }}
-                        disabled={isDeleting}
-                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group"
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 bg-gray-100 dark:bg-gray-800 hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 group"
                         aria-label="Delete post"
                       >
                         <FiTrash2 
@@ -540,8 +558,7 @@ export default function PostModal({
                           e.stopPropagation();
                           setShowDeleteModal(true);
                         }}
-                        disabled={isDeleting}
-                        className="flex items-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 text-primary-dark dark:text-primary-light hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 hover:text-white rounded-lg px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed group ml-auto"
+                        className="flex items-center gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 text-primary-dark dark:text-primary-light hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 hover:text-white rounded-lg px-2 py-1 group ml-auto"
                         aria-label="Delete post"
                       >
                         <FiTrash2 
@@ -560,6 +577,7 @@ export default function PostModal({
                     comments={linkData.comments || []}
                     onCommentAdded={handleCommentAdded}
                     onReplyAdded={handleReplyAdded}
+                    linkOwnerId={linkData.userId}
                   />
                 </div>
               </div>
@@ -571,7 +589,7 @@ export default function PostModal({
       {linkData && (
         <FullImageModal
           isOpen={fullImageModalOpen}
-          imageUrl={linkData.imageUrl}
+          imageUrl={imageUrl}
           onClose={() => setFullImageModalOpen(false)}
         />
       )}
@@ -603,17 +621,17 @@ export default function PostModal({
                 comments={linkData.comments || []}
                 onCommentAdded={handleCommentAdded}
                 onReplyAdded={handleReplyAdded}
+                linkOwnerId={linkData.userId}
               />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      {showDeleteModal && (
-        <DeletePostModal
-          onConfirm={handleDelete}
-          onCancel={() => setShowDeleteModal(false)}
-        />
-      )}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </>
   );
 }

@@ -27,13 +27,19 @@ export default function InteractionToastContainer() {
     const { currentUser } = useUsers();
     const [toasts, setToasts] = useState<InteractionEvent[]>([]);
     const processedEventsRef = React.useRef<Set<string>>(new Set());
-
+    
     useEffect(() => {
         if (!socket || !currentUser) return;
 
         const handleInteraction = (data: InteractionEvent) => {
-
             if (data.linkOwnerId !== currentUser._id) {
+                return;
+            }
+
+            const actorId = String(data.actor._id);
+            const userId = String(currentUser._id);
+            
+            if (actorId === userId) {
                 return;
             }
 

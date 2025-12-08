@@ -6,14 +6,41 @@ export function generateDeepLink(
   _replyId?: string
 ): string {
   if (type === "comment" && commentId) {
-    return `/livelinks?link=${linkId}#comment-${commentId}`;
+    return `/livelinks?link=${encodeURIComponent(linkId)}#comment-${encodeURIComponent(commentId)}`;
   }
   if (type === "reply" && commentId) {
-
-    return `/livelinks?link=${linkId}#comment-${commentId}`;
+    return `/livelinks?link=${encodeURIComponent(linkId)}#comment-${encodeURIComponent(commentId)}`;
   }
 
-  return `/livelinks?link=${linkId}`;
+  return `/livelinks?link=${encodeURIComponent(linkId)}`;
+}
+
+export function normalizeDeepLink(deepLink: string): string {
+  if (deepLink.startsWith('http://') || deepLink.startsWith('https://')) {
+    try {
+      const url = new URL(deepLink);
+      return url.pathname + url.search + url.hash;
+    } catch {
+    }
+  }
+
+  if (!deepLink.startsWith('/')) {
+    return '/' + deepLink;
+  }
+
+  return deepLink;
+}
+
+export function toAbsoluteDeepLink(deepLink: string, baseUrl?: string): string {
+  const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin : '');
+  
+  if (deepLink.startsWith('http://') || deepLink.startsWith('https://')) {
+    return deepLink;
+  }
+
+  const normalized = deepLink.startsWith('/') ? deepLink : '/' + deepLink;
+  
+  return base + normalized;
 }
 
 export function parseDeepLink(url: string): {
@@ -22,7 +49,10 @@ export function parseDeepLink(url: string): {
   replyId?: string;
 } {
   try {
-    const urlObj = new URL(url, window.location.origin);
+    const urlObj = typeof window !== 'undefined' 
+      ? new URL(url, window.location.origin)
+      : new URL(url.startsWith('http') ? url : `https://example.com${url}`);
+    
     const linkId = urlObj.searchParams.get("link") || undefined;
     const hash = urlObj.hash;
 
@@ -30,19 +60,22 @@ export function parseDeepLink(url: string): {
     let replyId: string | undefined;
 
     if (hash) {
-
       const commentMatch = hash.match(/^#comment-(.+)$/);
       if (commentMatch) {
-        commentId = commentMatch[1];
+        commentId = decodeURIComponent(commentMatch[1]);
       }
 
       const replyMatch = hash.match(/^#reply-(.+)$/);
       if (replyMatch) {
-        replyId = replyMatch[1];
+        replyId = decodeURIComponent(replyMatch[1]);
       }
     }
 
-    return { linkId, commentId, replyId };
+    return { 
+      linkId: linkId ? decodeURIComponent(linkId) : undefined, 
+      commentId, 
+      replyId 
+    };
   } catch {
     return {};
   }

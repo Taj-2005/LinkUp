@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useSocketStore } from "@/store/useSocketStore";
 import { getLinkRequests, acceptLinkRequest, rejectLinkRequest } from "@/utils/linkRequestApi";
 import { authFetch } from "@/lib/authFetch";
@@ -15,9 +14,10 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { showToastWithAvatar } from "@/utils/toastHelpers";
 import { getUser } from "@/utils/api";
 import { INotification } from "@/models/Notification";
-import { generateDeepLink } from "@/utils/deepLinks";
+import NotificationSkeleton from "@/components/NotificationSkeleton";
 
 interface LinkRequest {
     _id: string;
@@ -37,7 +37,6 @@ interface LinkRequest {
 type NotificationTab = "all" | "requests" | "interactions";
 
 export default function NotificationsPage() {
-    const router = useRouter();
     const [requests, setRequests] = useState<LinkRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<NotificationTab>("all");
@@ -46,6 +45,7 @@ export default function NotificationsPage() {
     const { resolvedTheme } = useTheme();
     const { currentUser, mutateCurrentUser, mutateAllUsers } = useUsers();
     const { notifications, isLoading: notificationsLoading, mutate: mutateNotifications } = useNotifications();
+    const hasMarkedAsReadRef = useRef(false);
 
     const loadRequests = useCallback(async () => {
         try {
@@ -88,11 +88,52 @@ export default function NotificationsPage() {
         const loadAll = async () => {
             setLoading(true);
             await loadRequests();
-            await mutateNotifications(undefined, { revalidate: true });
             setLoading(false);
         };
         loadAll();
-    }, [loadRequests, mutateNotifications]);
+    }, [loadRequests]); 
+
+    useEffect(() => {
+        const markInteractionsAsRead = async () => {
+            if (hasMarkedAsReadRef.current) return;
+            if (notifications.length === 0 || loading || notificationsLoading) return;
+            
+            const unreadInteractionIds = notifications
+                .filter((n) => !n.read)
+                .map((n) => n._id);
+            
+            if (unreadInteractionIds.length === 0) return;
+            
+            hasMarkedAsReadRef.current = true;
+            
+            try {
+                await Promise.all(
+                    unreadInteractionIds.map((id) =>
+                        authFetch(`/api/notifications/${id}/read`, {
+                            method: "PATCH",
+                        }).catch(() => {
+                        })
+                    )
+                );
+                
+                mutateNotifications(
+                    (current: INotification[] | undefined): INotification[] => {
+                        if (!current) return [];
+                        return current.map((n) => 
+                            unreadInteractionIds.includes(n._id) 
+                                ? { ...n, read: true } as INotification
+                                : n
+                        );
+                    },
+                    { revalidate: false }
+                );
+            } catch (error) {
+                console.error("Failed to mark notifications as read:", error);
+            }
+        };
+        
+        markInteractionsAsRead();
+    }, [notifications, loading, notificationsLoading, mutateNotifications]);
 
     useEffect(() => {
         if (!socket) return;
@@ -110,7 +151,6 @@ export default function NotificationsPage() {
         };
 
         const handleNewNotification = () => {
-            mutateNotifications();
         };
 
         socket.on("linkup:requested", handleLinkupRequested);
@@ -189,7 +229,19 @@ export default function NotificationsPage() {
             }
 
             loadRequests();
-            toast.success("Link request accepted!");
+            const requester = requests.find((r) => r._id === requestId);
+            if (requester?.requester) {
+              showToastWithAvatar(
+                {
+                  username: requester.requester.username || "Unknown",
+                  user_avatar: requester.requester.user_avatar,
+                  name: requester.requester.name,
+                },
+                "accepted your link request"
+              );
+            } else {
+              toast.success("Link request accepted!");
+            }
         } catch (error) {
             setRequests(previousRequests);
             
@@ -237,14 +289,27 @@ export default function NotificationsPage() {
             if (socket) {
                 socket.emit("rejectLinkRequest", { requestId });
                 socket.emit("markRequestAsSeen", { requestId });
-            }
+            }   
 
             if (currentUser?._id && requesterId) {
                 await invalidateGlobalLinkUpCaches(currentUser._id, requesterId);
             }
 
             loadRequests();
-            toast.success("Link request rejected");
+            const rejectedRequest = previousRequests.find((r) => r._id === requestId);
+            if (rejectedRequest?.requester) {
+              showToastWithAvatar(
+                {
+                  username: rejectedRequest.requester.username || "Unknown",
+                  user_avatar: rejectedRequest.requester.user_avatar,
+                  name: rejectedRequest.requester.name,
+                },
+                "rejected your link request",
+                { type: "info" }
+              );
+            } else {
+              toast.success("Link request rejected");
+            }
         } catch (error) {
             setRequests(previousRequests);
 
@@ -260,37 +325,20 @@ export default function NotificationsPage() {
         }
     };
 
-    const handleMarkNotificationRead = async (notificationId: string) => {
-        try {
-            await authFetch(`/api/notifications/${notificationId}/read`, {
-                method: "PATCH",
-            });
-            mutateNotifications();
-
-        } catch{
-        }
-    };
-
-    const handleMarkAllRead = async () => {
-        try {
-            await authFetch("/api/notifications/read-all", {
-                method: "PATCH",
-            });
-            mutateNotifications();
-
-            toast.success("All notifications marked as read");
-        } catch {
-            toast.error("Failed to mark all as read");
-        }
-    };
-
-    const handleClearRead = async () => {
+    const handleClearAll = async () => {
         try {
             await authFetch("/api/notifications/clear", {
                 method: "DELETE",
             });
-            mutateNotifications();
-            toast.success("Read notifications cleared");
+            
+            mutateNotifications(
+                (): INotification[] => {
+                    return [];
+                },
+                { revalidate: false }
+            );
+            
+            toast.success("All interaction notifications cleared");
         } catch {
             toast.error("Failed to clear notifications");
         }
@@ -360,26 +408,14 @@ export default function NotificationsPage() {
     const showRequests = activeTab === "all" || activeTab === "requests";
     const showInteractions = activeTab === "all" || activeTab === "interactions";
 
-    if (loading || notificationsLoading) {
-        return (
-            <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
-                <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
-                    <div className="w-full overflow-y-auto hide-scrollbar p-4 md:p-6">
-                        <div className="flex items-center justify-center min-h-[50vh]">
-                            <div className="text-primary-dark dark:text-primary-light">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const isLoading = (loading || notificationsLoading) && notifications.length === 0 && requests.length === 0;
 
     const hasContent = requests.length > 0 || notifications.length > 0;
 
     return (
         <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
             <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
-                <div className="w-full overflow-y-auto hide-scrollbar p-4 md:p-6">
+                <div className="flex-shrink-0 p-4 md:p-6 pb-0">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                         <h1 className="text-2xl md:text-3xl font-bold text-primary-dark dark:text-primary-light">
                             Notifications
@@ -387,23 +423,16 @@ export default function NotificationsPage() {
                         {notifications.length > 0 && (
                             <div className="flex flex-wrap gap-2">
                                 <button
-                                    onClick={handleMarkAllRead}
+                                    onClick={handleClearAll}
                                     className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap"
                                 >
-                                    Mark all read
-                                </button>
-                                <button
-                                    onClick={handleClearRead}
-                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap"
-                                >
-                                    Clear read
+                                    Clear All
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    {}
-                    <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 pb-0">
                         <button
                             onClick={() => setActiveTab("all")}
                             className={`pb-2 px-4 text-sm font-semibold transition ${
@@ -422,7 +451,23 @@ export default function NotificationsPage() {
                                     : "text-gray-500 dark:text-gray-400"
                             }`}
                         >
-                            Link Requests ({requests.length})
+                            Link Requests{" "}
+                            {isLoading ? (
+                                <span className="inline-block w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded skeleton-wiggle" />
+                            ) : (
+                                <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 300,
+                                        damping: 20,
+                                    }}
+                                    className="inline-block"
+                                >
+                                    ({requests.length})
+                                </motion.span>
+                            )}
                         </button>
                         <button
                             onClick={() => setActiveTab("interactions")}
@@ -432,11 +477,38 @@ export default function NotificationsPage() {
                                     : "text-gray-500 dark:text-gray-400"
                             }`}
                         >
-                            Interactions ({notifications.length})
+                            Interactions{" "}
+                            {isLoading ? (
+                                <span className="inline-block w-4 h-4 bg-gray-300 dark:bg-gray-700 rounded skeleton-wiggle" />
+                            ) : (
+                                <motion.span
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 300,
+                                        damping: 20,
+                                    }}
+                                    className="inline-block"
+                                >
+                                    ({notifications.length})
+                                </motion.span>
+                            )}
                         </button>
                     </div>
-
-                    {!hasContent ? (
+                    </div>
+                            
+                <div className="flex-1 overflow-y-auto hide-scrollbar px-4 md:px-6 pb-4 md:pb-6">
+                    {isLoading ? (
+                        <div className="space-y-4">
+                            {showRequests && [...Array(2)].map((_, i) => (
+                                <NotificationSkeleton key={`skeleton-request-${i}`} variant="request" />
+                            ))}
+                            {showInteractions && [...Array(3)].map((_, i) => (
+                                <NotificationSkeleton key={`skeleton-interaction-${i}`} variant="interaction" />
+                            ))}
+                        </div>
+                    ) : !hasContent ? (
                         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                             <p className="text-lg md:text-xl text-primary-dark dark:text-primary-light mb-2">
                                 No notifications
@@ -447,13 +519,13 @@ export default function NotificationsPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {}
                             {showRequests && requests.map((request) => (
                                 request.requester && (
                                     <motion.div
                                         key={request._id}
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
                                         className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-md border border-gray-200 dark:border-gray-700"
                                     >
                                         <div className="flex items-center gap-4 mb-4">
@@ -500,32 +572,17 @@ export default function NotificationsPage() {
                                 )
                             ))}
 
-                            {}
                             {showInteractions && filteredNotifications.map((notification) => {
                                 const actor = notificationActors[notification.actorId];
                                 if (!actor) return null;
 
-                                const deepLink = notification.deepLink || generateDeepLink(
-                                    notification.linkId,
-                                    notification.type,
-                                    notification.commentId,
-                                    notification.replyId
-                                );
-
                                 return (
                                     <motion.div
                                         key={notification._id}
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        onClick={() => {
-
-                                            if (!notification.read) {
-                                                handleMarkNotificationRead(notification._id);
-                                            }
-
-                                            router.push(deepLink);
-                                        }}
-                                        className={`bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-md border border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition ${
+                                        transition={{ duration: 0.3, ease: "easeOut" }}
+                                        className={`bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-md border border-gray-200 dark:border-gray-700 ${
                                             !notification.read ? "bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800" : ""
                                         }`}
                                     >

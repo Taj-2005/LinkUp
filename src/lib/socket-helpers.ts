@@ -6,7 +6,7 @@ interface NotificationPayload {
   linkId: string;
   type: "comment" | "reply" | "like" | "save";
   commentId?: string;
-  replyId?: string;
+  replyId?: string; 
   deepLink?: string;
   actor?: {
     _id: string;
@@ -24,6 +24,10 @@ interface NotificationUpdatePayload {
 }
 
 export async function emitNotificationEvent(payload: NotificationPayload): Promise<void> {
+  if (payload.userId === payload.actorId) {
+    return;
+  }
+
   try {
     await fetch(`${SOCKET_SERVER_URL}/api/notifications/interaction-notify`, {
       method: "POST",
@@ -98,6 +102,9 @@ export async function emitFeedUpdateEvent(linkId: string, userId: string): Promi
 interface LinkUpdatePayload {
   _id: string;
   userId: string;
+  imageUrl?: string;
+  description?: string;
+  location?: string;
   likes?: string[];
   comments?: Array<{
     _id: string;
@@ -117,6 +124,8 @@ interface LinkUpdatePayload {
     createdAt: Date | string;
     updatedAt: Date | string;
   }>;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   [key: string]: unknown;
 }
 
@@ -151,6 +160,61 @@ export async function emitLinkDeletedEvent(payload: LinkDeletedPayload): Promise
     });
   } catch (error) {
     console.error("Socket link deleted error (non-critical):", error);
+  }
+}
+
+interface LinkCreatedPayload {
+  link: {
+    _id: string;
+    userId: string;
+    imageUrl: string;
+    description?: string;
+    location?: string;
+    likes: string[];
+    comments: Array<{
+      _id: string;
+      userId: string;
+      username: string;
+      user_avatar?: string;
+      text: string;
+      replies?: Array<{
+        _id: string;
+        userId: string;
+        username: string;
+        user_avatar?: string;
+        text: string;
+        createdAt: Date | string;
+        updatedAt: Date | string;
+      }>;
+      createdAt: Date | string;
+      updatedAt: Date | string;
+    }>;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    userInfo?: {
+      username?: string;
+      user_avatar?: string;
+      name?: string;
+    };
+  };
+  actor: {
+    _id: string;
+    username: string;
+    name?: string;
+    user_avatar?: string;
+  };
+  timestamp: string;
+}
+
+export async function emitLinkCreatedEvent(payload: LinkCreatedPayload): Promise<void> {
+  try {
+    await fetch(`${SOCKET_SERVER_URL}/api/links/link-created-notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error("Socket link created error (non-critical):", error);
   }
 }
 

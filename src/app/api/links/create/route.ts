@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
-import { Link } from "@/models/Link";
+import { Link, IComment, IReply } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
-import { emitFeedUpdateEvent } from "@/lib/socket-helpers";
+import { emitLinkCreatedEvent } from "@/lib/socket-helpers";
 
 export async function POST(req: Request) {
   await dbConnect();
@@ -50,11 +50,11 @@ export async function POST(req: Request) {
 
     await link.save();
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("username name user_avatar links");
     if (user) {
       if (!user.links) {
         user.links = [];
-      }
+      } 
 
       if (!user.links.includes(link._id.toString())) {
         user.links.push(link._id.toString());
@@ -62,7 +62,52 @@ export async function POST(req: Request) {
       }
     }
 
-    await emitFeedUpdateEvent(link._id.toString(), userId);
+    const linkData = {
+      _id: link._id.toString(),
+      userId: link.userId.toString(),
+      imageUrl: link.imageUrl,
+      description: link.description,
+      location: link.location,
+      likes: link.likes,
+      comments: link.comments.map((c: IComment) => ({
+        _id: c._id.toString(),
+        userId: c.userId,
+        username: c.username,
+        user_avatar: c.user_avatar,
+        text: c.text,
+        replies: (c.replies || []).map((r: IReply) => ({
+          _id: r._id.toString(),
+          userId: r.userId,
+          username: r.username,
+          user_avatar: r.user_avatar,
+          text: r.text,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+        })),
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+      })),
+      createdAt: link.createdAt,
+      updatedAt: link.updatedAt,
+    };
+      
+    await emitLinkCreatedEvent({
+      link: {
+        ...linkData,
+        userInfo: {
+          username: user?.username || "Unknown",
+          user_avatar: user?.user_avatar,
+          name: user?.name,
+        },
+      },
+      actor: {
+        _id: user?._id.toString() || userId.toString(),
+        username: user?.username || "Unknown",
+        name: user?.name,
+        user_avatar: user?.user_avatar,
+      },
+      timestamp: new Date().toISOString(),
+    });
 
     return NextResponse.json(
       {

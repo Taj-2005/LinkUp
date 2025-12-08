@@ -77,30 +77,32 @@ export async function POST(
         const fetchedUser = await User.findById(userId).select("username name user_avatar").lean() as { username?: string; name?: string; user_avatar?: string } | null;
         actorUser = fetchedUser;
       }
+      
+      if (link.userId.toString() !== userId.toString()) {
+        const { generateDeepLink } = await import("@/utils/deepLinks");
+        const deepLink = generateDeepLink(linkId, "save");
 
-      const { generateDeepLink } = await import("@/utils/deepLinks");
-      const deepLink = generateDeepLink(linkId, "save");
+        await createNotification({
+          userId: link.userId,
+          actorId: userId.toString(),
+          linkId: linkId,
+          type: "save",
+        });
 
-      await createNotification({
-        userId: link.userId,
-        actorId: userId.toString(),
-        linkId: linkId,
-        type: "save",
-      });
-
-      await emitNotificationEvent({
-        userId: link.userId,
-        actorId: userId.toString(),
-        linkId: linkId,
-        type: "save",
-        deepLink: deepLink,
-        actor: {
-          _id: userId.toString(),
-          username: actorUser?.username || "Unknown",
-          name: actorUser?.name || undefined,
-          avatar: actorUser?.user_avatar || null,
-        },
-      });
+        await emitNotificationEvent({
+          userId: link.userId,
+          actorId: userId.toString(),
+          linkId: linkId,
+          type: "save",
+          deepLink: deepLink,
+          actor: {
+            _id: userId.toString(),
+            username: actorUser?.username || "Unknown",
+            name: actorUser?.name || undefined,
+            avatar: actorUser?.user_avatar || null,
+          },
+        });
+      }
     }
 
     if (updateResult.matchedCount === 0) {

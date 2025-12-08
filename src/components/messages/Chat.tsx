@@ -15,7 +15,7 @@ export default function Chat({ user, onBack }: ChatProps) {
   const router = useRouter();
   return (
     <div className="flex flex-col h-full relative">
-      <header className="flex items-center justify-between border-b border-primary-light/50 dark:border-primary-dark/50 p-2 md:p-4 sticky top-0 bg-right-nav-light dark:bg-right-nav-dark z-10 shadow-sm gap-2">
+      <header className="flex items-center justify-between border-b border-primary-light/50 dark:border-primary-dark/50 p-2 md:p-4 sticky top-0 bg-right-nav-light dark:bg-right-nav-dark z-10 shadow-sm gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
           {onBack && (
             <button
@@ -41,11 +41,25 @@ export default function Chat({ user, onBack }: ChatProps) {
         </p>
       </div>
 
-      <footer className="md:relative fixed bottom-0 left-2 right-2 md:left-auto md:right-auto md:bottom-auto px-2 md:p-4 py-2 md:py-4 border-t border-primary-light/50 dark:border-primary-dark/50 bg-left-nav-light dark:bg-left-nav-dark md:rounded-b-xl shadow-inner z-20 rounded-t-xl md:rounded-t-none" style={{
-        bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
-      }}>
+      <footer
+        className="
+          sticky bottom-0 
+          md:relative 
+          left-0 right-0 
+          px-2 pt-2 pb-16 md:px-4 md:py-2 
+          border-t border-primary-light/50 dark:border-primary-dark/50
+          bg-left-nav-light dark:bg-left-nav-dark 
+          shadow-inner 
+          z-20 
+          rounded-t-xl md:rounded-none
+          w-full 
+          flex items-center
+          h-auto
+        "
+      >
         <SendText />
       </footer>
+
     </div>
   );
 }

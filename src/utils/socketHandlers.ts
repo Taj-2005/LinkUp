@@ -1,5 +1,6 @@
 import { Socket } from "socket.io-client";
 import { invalidateGlobalLinkUpCaches } from "./globalCacheInvalidation";
+import { showToastWithAvatar } from "./toastHelpers";
 
 export interface LinkUpUserInfo {
   name: string;
@@ -50,40 +51,36 @@ export function setupLinkSocketHandlers(socket: Socket | null, currentUserId: st
 
     await invalidateGlobalLinkUpCaches(from, to);
     
-    const { default: toast } = await import("react-hot-toast");
-    
-    if (type === "requested" && to === currentUserId && fromUser) {
-
-      const displayName = fromUser.name || "User";
-      const username = fromUser.username || "";
-      const message = username 
-        ? `${username} sent you a linkup request`
-        : `${displayName} sent you a linkup request`;
-      toast.success(message, { icon: "🔗" });
-    } else if (type === "accepted" && fromUser) {
-
-      const acceptedUser = from === currentUserId ? toUser : fromUser;
-      if (acceptedUser) {
-        const displayName = acceptedUser.name || "User";
-        const username = acceptedUser.username || "";
-        const message = username
-          ? `${username} accepted your linkup request`
-          : `${displayName} accepted your linkup request`;
-        toast.success(message, { icon: "✅" });
-      }
+    if (type === "requested" && to === currentUserId && from !== currentUserId && fromUser) {
+      showToastWithAvatar(
+        {
+          username: fromUser.username || "Unknown",
+          user_avatar: fromUser.user_avatar,
+          name: fromUser.name,
+        },
+        "sent you a link request"
+      );
+    } else if (type === "accepted" && from === currentUserId && toUser) {
+      showToastWithAvatar(
+        {
+          username: toUser.username || "Unknown",
+          user_avatar: toUser.user_avatar,
+          name: toUser.name,
+        },
+        "accepted your link request"
+      );
     } else if (type === "rejected") {
-
-    } else if (type === "canceled" && to === currentUserId && fromUser) {
-      const displayName = fromUser.name || "User";
-      const username = fromUser.username || "";
-      
-      const message = username
-        ? `@${username} canceled the linkup request`
-        : `${displayName} canceled the linkup request`;
-      
-      toast(message, { icon: "🚫" });
+    } else if (type === "canceled" && to === currentUserId && from !== currentUserId && fromUser) {
+      showToastWithAvatar(
+        {
+          username: fromUser.username || "Unknown",
+          user_avatar: fromUser.user_avatar,
+          name: fromUser.name,
+        },
+        "canceled the link request",
+        { type: "info" }
+      );
     } else if (type === "unlinked") {
-
     }
   };
 
