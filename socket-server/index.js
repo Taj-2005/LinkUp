@@ -189,7 +189,7 @@ async function startServer() {
     try {
         await dbConnect();
 
-        server = app.listen(PORT, () => {
+        server = app.listen(PORT, "0.0.0.0", () => {
             console.log(`✓ Express server running on port ${PORT}`);
         });
 
