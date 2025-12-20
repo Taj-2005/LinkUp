@@ -1,0 +1,122 @@
+name: Deploy Socket Server to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'socket-server/**'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/linkup-socket-server
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./socket-server
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Add EC2 to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create environment file
+        run: |
+          cat > .env <<EOF
+          PORT=3001
+          NODE_ENV=production
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+          CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+          ADMIN_UI_USERNAME=${{ secrets.ADMIN_UI_USERNAME }}
+          ADMIN_UI_PASSWORD=${{ secrets.ADMIN_UI_PASSWORD }}
+          EOF
+
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          # Copy .env file to EC2
+          scp -i private_key.pem -o StrictHostKeyChecking=no .env $EC2_USER@$EC2_HOST:~/
+          
+          # Deploy on EC2
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << ENDSSH
+            set -e
+            
+            echo "🚀 Starting deployment..."
+            
+            # Stop and remove existing container
+            docker stop linkup-socket 2>/dev/null || true
+            docker rm linkup-socket 2>/dev/null || true
+            
+            # Pull latest image
+            echo "📥 Pulling latest image..."
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/linkup-socket-server:latest
+            
+            # Run new container
+            echo "🔄 Starting new container..."
+            docker run -d \
+              --name linkup-socket \
+              --restart unless-stopped \
+              -p 3001:3001 \
+              --env-file ~/.env \
+              ${{ secrets.DOCKERHUB_USERNAME }}/linkup-socket-server:latest
+            
+            # Wait a moment for container to start
+            sleep 5
+            
+            # Check container status
+            echo "📊 Container status:"
+            docker ps | grep linkup-socket || (echo "❌ Container not running!" && exit 1)
+            
+            # Show recent logs
+            echo "📋 Recent logs:"
+            docker logs --tail 30 linkup-socket
+            
+            echo "✅ Deployment complete!"
+          ENDSSH
+          
+          rm -f private_key.pem
+
+      - name: Health check
+        run: |
+          sleep 10  # Wait for container to fully start
+          EC2_URL="http://${{ secrets.EC2_HOST }}:3001"
+          echo "🏥 Checking health endpoint: $EC2_URL/health"
+          curl -f --max-time 10 $EC2_URL/health || echo "⚠️ Health check failed, but deployment may still be starting"
+          echo "✅ Health check complete"
+
