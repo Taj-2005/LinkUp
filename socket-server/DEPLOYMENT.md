@@ -37,8 +37,9 @@ Complete guide to deploy LinkUp Socket Server to AWS EC2 with automated deployme
      - **Security group**: Create new security group
      - **Name**: `linkup-socket-sg`
      - **Allow inbound**:
-       - SSH (22) from "My IP"
+       - SSH (22) from "Anywhere-IPv4" (0.0.0.0/0) ⚠️ **Required for GitHub Actions**
        - Custom TCP port 3001 from "Anywhere-IPv4" (0.0.0.0/0)
+     - **Note**: SSH is secure because it uses key-based authentication. Only someone with your private key can access.
    - **Storage**: 8GB gp3 (free tier: 30GB total)
 4. Click **"Launch Instance"**
 5. Wait for instance to be running
@@ -267,9 +268,21 @@ After setup, every push to `main` branch will:
 
 ### Deployment Fails in GitHub Actions
 
-1. **Check SSH key format**: Make sure EC2_SSH_KEY secret has entire key file content
-2. **Check EC2 security group**: Port 22 (SSH) must be accessible from GitHub Actions IPs
+1. **Check SSH access**: 
+   - EC2 security group must allow SSH (port 22) from "Anywhere-IPv4" (0.0.0.0/0)
+   - GitHub Actions runs from dynamic IPs, so you can't restrict to specific IPs
+   - **Security**: This is safe because SSH uses key-based authentication - only someone with your private key can access
+
+2. **Check SSH key format**: Make sure EC2_SSH_KEY secret has entire key file content (including BEGIN/END lines)
+
 3. **Check EC2_SSH_KEY**: Ensure it's the correct key for your instance
+
+4. **Update Security Group** (if you restricted SSH):
+   - Go to EC2 Console → Security Groups
+   - Select your security group
+   - Inbound rules → Edit
+   - Find SSH rule → Source: Change to "Anywhere-IPv4" (0.0.0.0/0)
+   - Save rules
 
 ### Container Won't Start
 

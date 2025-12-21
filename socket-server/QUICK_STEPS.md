@@ -15,7 +15,8 @@ Deploy socket server to AWS EC2 with automatic deployments via GitHub Actions.
    - AMI: Ubuntu 22.04 LTS
    - Type: `t3.micro` (Free tier)
    - Key pair: Create new → Download `.pem` file
-   - Security group: Allow SSH (22) from My IP + Port 3001 from Anywhere
+   - Security group: Allow SSH (22) from **Anywhere-IPv4** (0.0.0.0/0) + Port 3001 from Anywhere
+   - ⚠️ **Important**: SSH must be from "Anywhere" for GitHub Actions to work (still secure with key-based auth)
 3. **Launch** → Note the **Public IP**
 
 ---
