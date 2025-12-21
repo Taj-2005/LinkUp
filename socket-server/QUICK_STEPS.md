@@ -57,7 +57,13 @@ docker run hello-world
 
 ## Step 4: Add GitHub Secrets (5 min)
 
-GitHub Repo → **Settings** → **Secrets and variables** → **Actions** → **New secret**
+**Where to add secrets:**
+1. Go to your GitHub repository
+2. Click **Settings** tab (top navigation)
+3. Click **Secrets and variables** → **Actions** (left sidebar)
+4. Click **"New repository secret"** button
+
+**See [GITHUB_SECRETS.md](./GITHUB_SECRETS.md) for detailed instructions with screenshots guide.**
 
 Add these 11 secrets:
 
