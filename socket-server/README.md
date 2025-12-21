@@ -81,29 +81,5 @@ All endpoints require Bearer token authentication.
 
 ## Deployment
 
-### AWS EC2 Deployment with GitHub Actions CI/CD
-
-**Cost**: Free for 12 months (AWS Free Tier), then ~$8-10/month
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete step-by-step instructions.
-
-**Quick Summary:**
-1. Create EC2 instance (t3.micro)
-2. Install Docker on EC2
-3. Set up GitHub Secrets
-4. Push to `main` branch → Automatic deployment!
-
-### Environment Variables
-
-Required environment variables:
-
-```env
-PORT=3001
-NODE_ENV=production
-MONGODB_URI=your_mongodb_connection_string
-JWT_ACCESS_SECRET=your_jwt_access_secret
-CORS_ORIGIN=https://your-frontend-domain.com
-ADMIN_UI_USERNAME=admin (optional)
-ADMIN_UI_PASSWORD=secure_password_here (optional)
-```
+Deployed to AWS EC2 via GitHub Actions CI/CD. See `.github/workflows/deploy-socket-server.yml` for deployment configuration.
 
