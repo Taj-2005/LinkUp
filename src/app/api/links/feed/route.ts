@@ -25,8 +25,29 @@ export async function GET() {
     const userIds = [...new Set(links.map((link) => link.userId))];
 
     const users = await User.find({ _id: { $in: userIds } })
-      .select("username user_avatar name")
+      .select("username user_avatar name accountPrivacy linked_to linked_by")
       .lean();
+
+    const userMap = new Map(
+      (users as Array<{ _id: unknown; accountPrivacy?: string; linked_to?: string[]; linked_by?: string[] }>).map((u) => [String(u._id), u])
+    );
+
+    const filteredLinks = links.filter((link) => {
+      const linkUserId = String(link.userId);
+      const linkUser = userMap.get(linkUserId);
+      
+      if (!linkUser) return false;
+      
+      const isPrivate = (linkUser.accountPrivacy || "public") === "private";
+      
+      if (!isPrivate) return true;
+      
+      const linkedTo = linkUser.linked_to || [];
+      const linkedBy = linkUser.linked_by || [];
+      const isLinked = linkedTo.includes(currentUserId) && linkedBy.includes(currentUserId);
+      
+      return isLinked;
+    });
 
     interface UserInfo {
       _id: unknown;
@@ -35,7 +56,7 @@ export async function GET() {
       name?: string;
     }
 
-    const userMap = new Map<string, UserInfo>(
+    const publicUserMap = new Map<string, UserInfo>(
       (users as UserInfo[]).map((u) => [String(u._id), u])
     );
 
@@ -48,15 +69,15 @@ export async function GET() {
       } | null;
     }
 
-    const linksWithUser: LinkWithUserInfo[] = links.map((link) => {
+    const linksWithUser: LinkWithUserInfo[] = filteredLinks.map((link) => {
       const linkObj = link as Record<string, unknown>;
       const userId = String(linkObj.userId || '');
       return {
         ...linkObj,
-        userInfo: userId && userMap.get(userId) ? {
-          username: userMap.get(userId)?.username,
-          user_avatar: userMap.get(userId)?.user_avatar,
-          name: userMap.get(userId)?.name,
+        userInfo: userId && publicUserMap.get(userId) ? {
+          username: publicUserMap.get(userId)?.username,
+          user_avatar: publicUserMap.get(userId)?.user_avatar,
+          name: publicUserMap.get(userId)?.name,
         } : null,
       };
     });

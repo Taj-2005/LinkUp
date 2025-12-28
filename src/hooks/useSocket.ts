@@ -147,11 +147,6 @@ export function useSocket() {
       processedEvents.current.add(eventId);
       cleanupOldEvents();
 
-      const validCount = typeof data.unseenCount === "number" && data.unseenCount >= 0 
-        ? data.unseenCount 
-        : 0;
-      setUnseenCount(validCount);
-      
       mutate("linkRequests", undefined, { revalidate: false });
     };
 

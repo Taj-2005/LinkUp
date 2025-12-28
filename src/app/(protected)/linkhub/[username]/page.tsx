@@ -10,6 +10,13 @@ import { useUsers } from "@/hooks/useUsers";
 import { IUser } from "@/models/User";
 import { getUser } from "@/utils/api";
 import { useSocketStore } from "@/store/useSocketStore";
+import { useUserLinks } from "@/hooks/useLinks";
+import { useLinkStatus } from "@/hooks/useLinkStatus";
+import LinkCard from "@/components/links/LinkCard";
+import LinksGridSkeleton from "@/components/links/LinksGridSkeleton";
+import EmptyState from "@/components/links/EmptyState";
+import LinkUpButton from "@/components/LinkUpButton";
+import { ILink } from "@/models/Link";
 
 export default function UserProfile() {
   const params = useParams();
@@ -25,6 +32,18 @@ export default function UserProfile() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  
+  const {
+    links,
+    isLoading: isLoadingLinks,
+  } = useUserLinks(user?._id);
+  
+  const { status: linkStatus } = useLinkStatus(user?._id || "");
+  
+  const isOwnProfile = currentUser?._id === user?._id;
+  const isPrivateAccount = (user?.accountPrivacy || "public") === "private";
+  const isLinked = linkStatus === "linked" || linkStatus === "linked-by";
+  const canViewLinks = isOwnProfile || !isPrivateAccount || isLinked;
 
   const openModal = useCallback((src: string) => {
     setModalSrc(src);
@@ -371,6 +390,69 @@ if (!user || userNotFound) {
             />
 
             <ProfileNavbar />
+
+            <div className="w-full max-w-4xl px-2 md:px-4 pb-4">
+              {!canViewLinks ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex flex-col items-center justify-center py-12 px-4 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="mb-6"
+                  >
+                    <div className="w-24 h-24 rounded-full bg-violet-600/20 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-12 h-12 text-violet-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                    </div>
+                  </motion.div>
+                  <h3 className="text-xl md:text-2xl font-bold text-primary-dark dark:text-white mb-2">
+                    This account is private
+                  </h3>
+                  <p className="text-sm md:text-base text-primary-light dark:text-gray-400 mb-6 max-w-md">
+                    Link with this user to see their posts.
+                  </p>
+                  {user && (
+                    <LinkUpButton receiverId={user._id} />
+                  )}
+                </motion.div>
+              ) : isLoadingLinks ? (
+                <LinksGridSkeleton />
+              ) : links.length === 0 ? (
+                <EmptyState
+                  message="No posts yet"
+                  subMessage="This user hasn't shared any posts yet"
+                  showButton={false}
+                />
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
+                  {links.map((link: ILink) => (
+                    <LinkCard
+                      key={link._id.toString()}
+                      link={link}
+                      onClick={() => {}}
+                      onLinkDeleted={() => {}}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

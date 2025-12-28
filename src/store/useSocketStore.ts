@@ -74,7 +74,12 @@ export const useSocketStore = create<SocketStore>((set) => {
 
             socket.on("unseenCount:update", (data: { unseenCount: number; notificationCount?: number; linkRequestCount?: number }) => {
                 const validCount = typeof data.unseenCount === "number" && data.unseenCount >= 0 ? data.unseenCount : 0;
-                set({ unseenCount: validCount });
+                set((state) => {
+                    if (state.unseenCount === 0 || validCount === 0) {
+                        return { unseenCount: validCount };
+                    }
+                    return state;
+                });
             });
 
             let storageHandler: ((e: StorageEvent) => void) | null = null;

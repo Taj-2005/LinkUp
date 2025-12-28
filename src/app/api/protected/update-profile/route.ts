@@ -13,6 +13,7 @@ type UpdatableUserFields = {
   location?: string;
   user_avatar?: string;
   sex?: string;
+  accountPrivacy?: "public" | "private";
 };
 
 export async function PATCH(req: Request) {
@@ -38,6 +39,7 @@ export async function PATCH(req: Request) {
       "location",
       "user_avatar",
       "sex",
+      "accountPrivacy",
     ] as const;
 
     updatableFields.forEach((field) => {

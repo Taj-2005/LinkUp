@@ -13,19 +13,21 @@ export function useNotifications() {
     fetchNotifications,
     {
       revalidateOnFocus: false,
-      revalidateIfStale: false,
-      revalidateOnMount: false,
+      revalidateIfStale: true,
+      revalidateOnMount: true,
       revalidateOnReconnect: false,
-      shouldRetryOnError: false,
+      shouldRetryOnError: true,
       dedupingInterval: 2000,
       keepPreviousData: true,
-      fallbackData: undefined,
+      fallbackData: [],
+      onError: () => {
+      },
     }
   );
 
   return {
     notifications: data || [],
-    isLoading: isLoading && !data,
+    isLoading: isLoading && data === undefined,
     isError: error,
     mutate,
   };

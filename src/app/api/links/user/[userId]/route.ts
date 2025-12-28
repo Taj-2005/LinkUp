@@ -14,14 +14,39 @@ export async function GET(
   const cookieStore = await cookies();
 
   try {
-    requireAuth(cookieStore);
+    const payload = requireAuth(cookieStore);
+    const currentUserId = payload.userId.toString();
     const { userId } = await params;
+
+    const profileUser = await User.findById(userId).select("username user_avatar name accountPrivacy linked_to linked_by").lean();
+    
+    if (!profileUser) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const isPrivateAccount = (profileUser.accountPrivacy || "public") === "private";
+    const isOwnProfile = currentUserId === userId;
+    
+    if (isPrivateAccount && !isOwnProfile) {
+      const profileUserObj = profileUser as { linked_to?: string[]; linked_by?: string[] };
+      const linkedTo = profileUserObj.linked_to || [];
+      const linkedBy = profileUserObj.linked_by || [];
+      const isLinked = linkedTo.includes(currentUserId) && linkedBy.includes(currentUserId);
+      
+      if (!isLinked) {
+        return NextResponse.json(
+          { links: [], isPrivate: true },
+          { status: 200 }
+        );
+      }
+    }
 
     const links = await Link.find({ userId })
       .sort({ createdAt: -1 })
       .lean();
-
-    const user = await User.findById(userId).select("username user_avatar name").lean();
 
     interface UserInfo {
       username?: string;
@@ -29,12 +54,14 @@ export async function GET(
       name?: string;
     }
 
+    const user = profileUser as UserInfo;
+
     const linksWithUser = links.map((link) => ({
       ...link,
-      userInfo: user && !Array.isArray(user) ? {
-        username: (user as UserInfo).username,
-        user_avatar: (user as UserInfo).user_avatar,
-        name: (user as UserInfo).name,
+      userInfo: user ? {
+        username: user.username,
+        user_avatar: user.user_avatar,
+        name: user.name,
       } : null,
     }));
 

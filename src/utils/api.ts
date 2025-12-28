@@ -40,6 +40,7 @@ type UpdateProfilePayload = Partial<{
   location: string;
   user_avatar: string;
   sex: "male" | "female" | "other";
+  accountPrivacy: "public" | "private";
 }>;
 
 function extractErrorMessage(error: unknown): string {

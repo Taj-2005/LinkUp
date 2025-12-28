@@ -75,29 +75,32 @@ export default function NotificationsPage() {
                 })
             );
             setRequests(requestsWithDetails);
-            
-            const actualUnseenRequests = requestsWithDetails.filter((r: LinkRequest) => !r.seen && r.status === "requested").length;
-            const actualUnreadNotifications = notifications.filter((n) => !n.read).length;
-            const correctCount = actualUnseenRequests + actualUnreadNotifications;
-            setUnseenCount(correctCount);
         } catch {
             setRequests([]);
-            const actualUnreadNotifications = notifications.filter((n) => !n.read).length;
-            setUnseenCount(actualUnreadNotifications);
         }
-    }, [setUnseenCount, notifications]);
+    }, []);
 
     useEffect(() => {
+        let isMounted = true;
         const loadAll = async () => {
-            setLoading(true);
-            await loadRequests();
-            setLoading(false);
+            try {
+                setLoading(true);
+                await loadRequests();
+            } catch {
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
         };
         loadAll();
+        return () => {
+            isMounted = false;
+        };
     }, [loadRequests]);
 
     useEffect(() => {
-        if (loading || notificationsLoading) return;
+        if (loading || (notificationsLoading && notifications.length === 0)) return;
         
         const actualUnreadNotifications = notifications.filter((n) => !n.read).length;
         const actualUnseenRequests = requests.filter((r) => !r.seen && r.status === "requested").length;
@@ -108,7 +111,7 @@ export default function NotificationsPage() {
     useEffect(() => {
         const markInteractionsAsRead = async () => {
             if (hasMarkedAsReadRef.current) return;
-            if (notifications.length === 0 || loading || notificationsLoading) return;
+            if (loading || (notificationsLoading && notifications.length === 0)) return;
             
             const unreadInteractionIds = notifications
                 .filter((n) => !n.read)
@@ -152,6 +155,7 @@ export default function NotificationsPage() {
                 setUnseenCount(correctCount);
             } catch (error) {
                 console.error("Failed to mark notifications as read:", error);
+                hasMarkedAsReadRef.current = false;
             }
         };
         
@@ -431,7 +435,7 @@ export default function NotificationsPage() {
     const showRequests = activeTab === "all" || activeTab === "requests";
     const showInteractions = activeTab === "all" || activeTab === "interactions";
 
-    const isLoading = (loading || notificationsLoading) && notifications.length === 0 && requests.length === 0;
+    const isLoading = loading || (notificationsLoading && notifications.length === 0 && requests.length === 0);
 
     const hasContent = requests.length > 0 || notifications.length > 0;
 

@@ -21,6 +21,7 @@ export interface IUser extends Document {
     savedLinks: string[];
     sex?: "male" | "female" | "other";
     isVerified: boolean;
+    accountPrivacy?: "public" | "private";
     verificationToken?: string;
     verificationTokenExpiry?: Date;
     createdAt: Date;
@@ -66,6 +67,12 @@ const UserSchema: Schema = new Schema<IUser>(
         },
 
         isVerified: { type: Boolean, default: false },
+
+        accountPrivacy: {
+            type: String,
+            enum: ["public", "private"],
+            default: "public",
+        },
 
         verificationToken: { type: String },
         verificationTokenExpiry: { type: Date },

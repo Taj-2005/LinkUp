@@ -20,6 +20,7 @@ export default function SettingsPanel() {
   const [bio, setBio] = useState(user?.bio || "");
   const [location, setLocation] = useState(user?.location || "");
   const [sex, setSex] = useState(user?.sex || "other");
+  const [accountPrivacy, setAccountPrivacy] = useState<"public" | "private">(user?.accountPrivacy || "public");
 
   const [saving, setSaving] = useState(false);
   const [usernameError, setUsernameError] = useState("");
@@ -117,6 +118,7 @@ export default function SettingsPanel() {
         bio,
         location,
         sex,
+        accountPrivacy,
       });
 
       await mutateCurrentUser();
@@ -134,6 +136,7 @@ export default function SettingsPanel() {
     setBio(user.bio || "");
     setLocation(user.location || "");
     setSex(user.sex || "other");
+    setAccountPrivacy(user.accountPrivacy || "public");
 
     }, [user]);
 
@@ -288,6 +291,37 @@ export default function SettingsPanel() {
               <option value="female" className="bg-right-nav-light dark:bg-right-nav-dark">Female</option>
               <option value="other" className="bg-right-nav-light dark:bg-right-nav-dark">Other</option>
             </select>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 text-primary-dark dark:text-white/90 text-xs md:text-sm mb-1">
+              <FiGlobe className="w-4 h-4" /> Account Privacy
+            </label>
+            <div className="flex items-center gap-3 p-3 md:p-4 rounded-xl bg-[#f3f3f3] dark:bg-[#262626] border border-[#cfcfcf] dark:border-white/10">
+              <span className="text-sm md:text-base text-primary-dark dark:text-white flex-1">
+                {accountPrivacy === "public" ? "Public Account" : "Private Account"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setAccountPrivacy(accountPrivacy === "public" ? "private" : "public")}
+                className={`
+                  relative w-12 h-6 rounded-full transition-colors duration-200
+                  ${accountPrivacy === "private" ? "bg-violet-600" : "bg-gray-400"}
+                `}
+              >
+                <span
+                  className={`
+                    absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200
+                    ${accountPrivacy === "private" ? "translate-x-6" : "translate-x-0"}
+                  `}
+                />
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {accountPrivacy === "public"
+                ? "Anyone can view your posts and links"
+                : "Only users you're linked with can view your posts and links"}
+            </p>
           </div>
         </div>
 

@@ -41,6 +41,10 @@ async function fetchUserLinks(userId: string): Promise<ILink[]> {
 
   const data = await res.json();
 
+  if (data.isPrivate) {
+    return [];
+  }
+
   const links = (data.links || []).sort((a: ILink, b: ILink) => {
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
