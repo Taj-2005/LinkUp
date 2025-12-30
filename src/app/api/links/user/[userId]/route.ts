@@ -27,13 +27,13 @@ export async function GET(
       );
     }
 
-    const isPrivateAccount = (profileUser.accountPrivacy || "public") === "private";
+    const profileUserTyped = profileUser as { accountPrivacy?: string; linked_to?: string[]; linked_by?: string[] };
+    const isPrivateAccount = (profileUserTyped.accountPrivacy || "public") === "private";
     const isOwnProfile = currentUserId === userId;
     
     if (isPrivateAccount && !isOwnProfile) {
-      const profileUserObj = profileUser as { linked_to?: string[]; linked_by?: string[] };
-      const linkedTo = profileUserObj.linked_to || [];
-      const linkedBy = profileUserObj.linked_by || [];
+      const linkedTo = profileUserTyped.linked_to || [];
+      const linkedBy = profileUserTyped.linked_by || [];
       const isLinked = linkedTo.includes(currentUserId) && linkedBy.includes(currentUserId);
       
       if (!isLinked) {

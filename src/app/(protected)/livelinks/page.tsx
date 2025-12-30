@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FiBell } from "react-icons/fi";
 import Profile from "@/components/home/Profile";
@@ -11,7 +11,7 @@ import PostModal from "@/components/links/PostModal";
 import FeedLinkSkeleton from "@/components/links/FeedLinkSkeleton";
 import EmptyState from "@/components/links/EmptyState";
 import { useUsers } from "@/hooks/useUsers";
-import { useFeedLinks } from "@/hooks/useLinks";
+import { useFeedLinksPaginated } from "@/hooks/useFeedLinksPaginated";
 import { useNavbarStore } from "@/store/useNavbarStore";
 import { useSocketStore } from "@/store/useSocketStore";
 import { useModalStore } from "@/store/useModalStore";
@@ -35,8 +35,9 @@ function HomeContent() {
   const isModalOpen = useModalStore((state) => state.isModalOpen);
   const setIsModalOpen = useModalStore((state) => state.setIsModalOpen);
   const globalSelectedLink = useModalStore((state) => state.selectedLink);
-  const { links, isLoading, mutate: mutateFeedLinks } = useFeedLinks();
+  const { links, isLoading, isLoadingMore, loadMore, hasMore, isReachingEnd, mutate: mutateFeedLinks } = useFeedLinksPaginated();
   const [selectedLink, setSelectedLink] = useState<LinkWithUser | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const modalLink = globalSelectedLink || selectedLink;
 
@@ -159,12 +160,76 @@ function HomeContent() {
     mutateCurrentUser();
   }, [mutateFeedLinks, mutateCurrentUser]);
 
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let ticking = false;
+
+    const checkAndLoad = () => {
+      if (isReachingEnd) return;
+      if (isLoadingMore) return;
+      if (!hasMore) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const threshold = 300;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+      if (distanceFromBottom < threshold || scrollHeight <= clientHeight) {
+        loadMore();
+      }
+    };
+
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        checkAndLoad();
+      });
+    };
+
+    checkAndLoad();
+
+    const timeoutId = setTimeout(() => {
+      checkAndLoad();
+    }, 200);
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      clearTimeout(timeoutId);
+      container.removeEventListener("scroll", handleScroll);
+    };
+  }, [hasMore, isLoadingMore, isReachingEnd, loadMore, links.length]);
+
+  useEffect(() => {
+    if (isLoadingMore || isReachingEnd || !hasMore) return;
+
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const timeoutId = setTimeout(() => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const threshold = 500;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+      if (distanceFromBottom < threshold || scrollHeight <= clientHeight) {
+        loadMore();
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [links.length, isLoadingMore, isReachingEnd, hasMore, loadMore]);
+
   return (
     <div className="w-full flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
 
       <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-col md:flex-row overflow-hidden bg-right-nav-light dark:bg-right-nav-dark">
         
-        <div className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-y-auto hide-scrollbar relative">
+        <div
+          ref={scrollContainerRef}
+          className="w-full max-w-[96vw] md:w-[70%] md:max-w-4xl bg-left-nav-light dark:bg-right-nav-dark flex flex-col h-full overflow-y-auto hide-scrollbar relative"
+        >
           <button
             onClick={() => {
               setSelectedItem("linkhub");
@@ -201,14 +266,25 @@ function HomeContent() {
                   subMessage="Be the first to share a link!"
                 />
               ) : (
-                memoizedLinks.map((link) => (
-                  <LinkCard
-                    key={link._id.toString()}
-                    link={link}
-                    onCommentClick={() => handleCommentClick(link)}
-                    onLinkUpdated={handleLinkUpdated}
-                  />
-                ))
+                <>
+                  {memoizedLinks.map((link) => (
+                    <LinkCard
+                      key={link._id.toString()}
+                      link={link}
+                      onCommentClick={() => handleCommentClick(link)}
+                      onLinkUpdated={handleLinkUpdated}
+                    />
+                  ))}
+                  {isLoadingMore && (
+                    <div className="flex justify-center py-4">
+                      <div className="flex gap-1">
+                        <span className="h-2 w-2 rounded-full bg-primary-dark dark:bg-primary-light/80 animate-dot1"></span>
+                        <span className="h-2 w-2 rounded-full bg-primary-dark/80 dark:bg-primary-light/60 animate-dot2"></span>
+                        <span className="h-2 w-2 rounded-full bg-primary-dark/60 dark:bg-primary-light/40 animate-dot3"></span>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

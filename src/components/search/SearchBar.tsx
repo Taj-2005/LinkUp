@@ -1,48 +1,30 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState } from "react";
 import User from "@/components/search/User";
 import Suggestions from "@/components/search/Suggestions";
 import useDebounce from "@/hooks/useDebounce";
 import { useUsers } from "@/hooks/useUsers";
+import { useUserSearch } from "@/hooks/useUserSearch";
 import { useBatchLinkStatus } from "@/hooks/useBatchLinkStatus";
 
 export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { currentUser, allUsers } = useUsers();
+  const { currentUser } = useUsers();
   const [isFocused, setIsFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const usersWithoutCurrent = useMemo(() =>
-    allUsers?.filter((u) => u._id !== currentUser?._id) || [],
-    [allUsers, currentUser]
-  );
-
-  const userIds = useMemo(() =>
-    usersWithoutCurrent.map((u) => u._id),
-    [usersWithoutCurrent]
-  );
-
-  const { statusMap, isLoading: isLoadingStatuses } = useBatchLinkStatus(userIds, {
-    enabled: usersWithoutCurrent.length > 0,
-  });
-
   const debouncedQuery = useDebounce(searchQuery, 500);
 
-  const filteredUsers = useMemo(() => {
-    if (!debouncedQuery.trim()) {
-      return usersWithoutCurrent;
-    }
+  const { users: searchUsers, isLoading: isLoadingSearch, isLoadingMore, loadMore, hasMore, isReachingEnd } = useUserSearch(debouncedQuery);
 
-    const q = debouncedQuery.toLowerCase();
-    return usersWithoutCurrent.filter(
-      (u) =>
-        u.username.toLowerCase().includes(q) ||
-        u.name.toLowerCase().includes(q)
-    );
-  }, [debouncedQuery, usersWithoutCurrent]);
+  const userIds = searchUsers.map((u) => u._id);
+  const { statusMap, isLoading: isLoadingStatuses } = useBatchLinkStatus(userIds, {
+    enabled: userIds.length > 0 && debouncedQuery.trim().length > 0,
+  });
 
   useEffect(() => {
     if (debouncedQuery.trim()) {
@@ -55,6 +37,37 @@ export default function SearchBar() {
       setIsSearching(false);
     }
   }, [debouncedQuery]);
+
+  useEffect(() => {
+    if (!debouncedQuery.trim()) return;
+
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (ticking) return;
+      if (isReachingEnd) return;
+      if (isLoadingMore) return;
+      if (!hasMore) return;
+
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const threshold = 200;
+
+        if (scrollHeight - scrollTop - clientHeight < threshold) {
+          loadMore();
+        }
+      });
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [debouncedQuery, hasMore, isLoadingMore, isReachingEnd, loadMore]);
 
   return (
     <div className="w-full h-full mx-auto bg-left-nav-light dark:bg-right-nav-dark rounded-xl flex flex-col min-h-0">
@@ -85,7 +98,6 @@ export default function SearchBar() {
 
       {!isFocused && searchQuery.trim() === "" && (
         <Suggestions
-          users={usersWithoutCurrent}
           currentUser={currentUser}
           linkStatusMap={statusMap}
           isLoadingStatuses={isLoadingStatuses}
@@ -93,8 +105,11 @@ export default function SearchBar() {
       )}
 
       {(isFocused || searchQuery.trim() !== "") && (
-        <div className="flex-1 overflow-y-auto hide-scrollbar p-2 md:p-4 pb-20 md:pb-4 space-y-3 md:space-y-4 min-h-0">
-          {isSearching ? (
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto hide-scrollbar p-2 md:p-4 pb-20 md:pb-4 space-y-3 md:space-y-4 min-h-0"
+        >
+          {isSearching || (isLoadingSearch && searchUsers.length === 0) ? (
             <div className="flex flex-col justify-center items-center py-12 gap-3 select-none">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-primary-light/20 dark:bg-primary-light/10 blur-xl animate-pulseSlow"></div>
@@ -127,15 +142,26 @@ export default function SearchBar() {
                 <span className="h-2 w-2 rounded-full bg-primary-dark/60 dark:bg-primary-light/40 animate-dot3"></span>
               </div>
             </div>
-          ) : filteredUsers.length > 0 ? (
-            filteredUsers.map((u) => (
-              <User
-                key={u._id}
-                user={u}
-                linkStatus={statusMap[u._id]?.status}
-                isLoadingStatus={isLoadingStatuses}
-              />
-            ))
+          ) : searchUsers.length > 0 ? (
+            <>
+              {searchUsers.map((u) => (
+                <User
+                  key={u._id}
+                  user={u}
+                  linkStatus={statusMap[u._id]?.status}
+                  isLoadingStatus={isLoadingStatuses}
+                />
+              ))}
+              {isLoadingMore && (
+                <div className="flex justify-center py-4">
+                  <div className="flex gap-1">
+                    <span className="h-2 w-2 rounded-full bg-primary-dark dark:bg-primary-light/80 animate-dot1"></span>
+                    <span className="h-2 w-2 rounded-full bg-primary-dark/80 dark:bg-primary-light/60 animate-dot2"></span>
+                    <span className="h-2 w-2 rounded-full bg-primary-dark/60 dark:bg-primary-light/40 animate-dot3"></span>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 select-none text-center">
               <div className="relative mb-4">

@@ -1,11 +1,40 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
 import { Link } from "@/models/Link";
 import { User } from "@/models/User";
 import { dbConnect } from "@/lib/dbConnect";
+import mongoose from "mongoose";
 
-export async function GET() {
+interface Cursor {
+  createdAt: string;
+  _id: string;
+}
+
+function parseCursor(cursor: string | null): Cursor | null {
+  if (!cursor) return null;
+  try {
+    const decoded = Buffer.from(cursor, "base64").toString("utf-8");
+    const parsed = JSON.parse(decoded);
+    if (parsed.createdAt && parsed._id) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function createCursor(link: { createdAt: Date | string; _id: string | mongoose.Types.ObjectId }): string {
+  const createdAtDate = link.createdAt instanceof Date ? link.createdAt : new Date(link.createdAt);
+  const cursor: Cursor = {
+    createdAt: createdAtDate.toISOString(),
+    _id: String(link._id),
+  };
+  return Buffer.from(JSON.stringify(cursor)).toString("base64");
+}
+
+export async function GET(req: NextRequest) {
   await dbConnect();
 
   const cookieStore = await cookies();
@@ -13,79 +42,143 @@ export async function GET() {
   try {
     const payload = requireAuth(cookieStore);
     const currentUserId = payload.userId.toString();
-    
-    const links = await Link.find({ userId: { $ne: currentUserId } })
-      .sort({ createdAt: -1 })
+
+    const { searchParams } = new URL(req.url);
+    const cursorParam = searchParams.get("cursor");
+    const cursor = parseCursor(cursorParam);
+
+    const currentUser = await User.findById(currentUserId)
+      .select("linked_to linked_by")
       .lean();
 
-    if (links.length === 0) {
-      return NextResponse.json({ links: [] }, { status: 200 });
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userIds = [...new Set(links.map((link) => link.userId))];
+    const matchStage: mongoose.FilterQuery<typeof Link> = {
+      userId: { $ne: currentUserId },
+    };
 
-    const users = await User.find({ _id: { $in: userIds } })
-      .select("username user_avatar name accountPrivacy linked_to linked_by")
-      .lean();
+    if (cursor) {
+      const cursorCreatedAt = new Date(cursor.createdAt);
+      const cursorId = new mongoose.Types.ObjectId(cursor._id);
+      
+      matchStage.$and = [
+        {
+          $or: [
+            { createdAt: { $lt: cursorCreatedAt } },
+            {
+              $and: [
+                { createdAt: cursorCreatedAt },
+                { _id: { $lt: cursorId } },
+              ],
+            },
+          ],
+        },
+      ];
+    }
 
-    const userMap = new Map(
-      (users as Array<{ _id: unknown; accountPrivacy?: string; linked_to?: string[]; linked_by?: string[] }>).map((u) => [String(u._id), u])
+    const pipeline: mongoose.PipelineStage[] = [
+      {
+        $match: matchStage,
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { linkUserId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    { $toString: "$_id" },
+                    "$$linkUserId",
+                  ],
+                },
+              },
+            },
+          ],
+          as: "userData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$userData",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { "userData.accountPrivacy": { $ne: "private" } },
+            {
+              $and: [
+                { "userData.accountPrivacy": "private" },
+                { "userData.linked_to": { $in: [currentUserId] } },
+                { "userData.linked_by": { $in: [currentUserId] } },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          userInfo: {
+            username: "$userData.username",
+            user_avatar: "$userData.user_avatar",
+            name: "$userData.name",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          imageUrl: 1,
+          description: 1,
+          location: 1,
+          likes: 1,
+          comments: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          userInfo: 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+          _id: -1,
+        },
+      },
+      {
+        $limit: 11,
+      },
+    ];
+
+    const results = await Link.aggregate(pipeline);
+
+    const hasMore = results.length > 10;
+    const paginatedLinks = hasMore ? results.slice(0, 10) : results;
+
+    let nextCursor: string | null = null;
+    if (hasMore && paginatedLinks.length > 0) {
+      const lastLink = paginatedLinks[paginatedLinks.length - 1];
+      if (lastLink && lastLink.createdAt) {
+        nextCursor = createCursor({
+          createdAt: lastLink.createdAt,
+          _id: lastLink._id,
+        });
+      }
+    }
+
+    return NextResponse.json(
+      {
+        links: paginatedLinks,
+        nextCursor,
+      },
+      { status: 200 }
     );
-
-    const filteredLinks = links.filter((link) => {
-      const linkUserId = String(link.userId);
-      const linkUser = userMap.get(linkUserId);
-      
-      if (!linkUser) return false;
-      
-      const isPrivate = (linkUser.accountPrivacy || "public") === "private";
-      
-      if (!isPrivate) return true;
-      
-      const linkedTo = linkUser.linked_to || [];
-      const linkedBy = linkUser.linked_by || [];
-      const isLinked = linkedTo.includes(currentUserId) && linkedBy.includes(currentUserId);
-      
-      return isLinked;
-    });
-
-    interface UserInfo {
-      _id: unknown;
-      username?: string;
-      user_avatar?: string;
-      name?: string;
-    }
-
-    const publicUserMap = new Map<string, UserInfo>(
-      (users as UserInfo[]).map((u) => [String(u._id), u])
-    );
-
-    interface LinkWithUserInfo {
-      [key: string]: unknown;
-      userInfo: {
-        username?: string;
-        user_avatar?: string;
-        name?: string;
-      } | null;
-    }
-
-    const linksWithUser: LinkWithUserInfo[] = filteredLinks.map((link) => {
-      const linkObj = link as Record<string, unknown>;
-      const userId = String(linkObj.userId || '');
-      return {
-        ...linkObj,
-        userInfo: userId && publicUserMap.get(userId) ? {
-          username: publicUserMap.get(userId)?.username,
-          user_avatar: publicUserMap.get(userId)?.user_avatar,
-          name: publicUserMap.get(userId)?.name,
-        } : null,
-      };
-    });
-
-    return NextResponse.json({ links: linksWithUser }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching feed links:", error);
-    
     const errorMessage = error instanceof Error ? error.message : "Failed to fetch links";
     const isUnauthorized = errorMessage.includes("Unauthorized");
     

@@ -21,7 +21,7 @@ export async function cleanupUnverifiedUsers(): Promise<CleanupResult> {
   const cutoffDate = new Date(Date.now() - SEVEN_DAYS_MS);
 
   const unverifiedUsers = await User.find({
-    isVerified: false,
+    isVerified: { $ne: true },
     createdAt: { $lt: cutoffDate },
   })
     .select("_id")

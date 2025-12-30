@@ -1,5 +1,6 @@
 import { authFetch } from "@/lib/authFetch";
 import { IUser } from "@/models/User";
+import { ILink } from "@/models/Link";
 
 export interface MeResponse {
   user: IUser;
@@ -182,4 +183,51 @@ export async function getUser(identifier: string) {
     console.error("Error fetching user:", error);
     return null;
   }
+}
+
+export interface SuggestionsResponse {
+  users: IUser[];
+}
+
+export interface PaginatedUsersResponse {
+  users: IUser[];
+  nextCursor: string | null;
+}
+
+export function getSuggestions(): Promise<SuggestionsResponse> {
+  return authFetch("/api/protected/users/suggestions") as Promise<SuggestionsResponse>;
+}
+
+export function getSuggestionsAll(cursor: string | null): Promise<PaginatedUsersResponse> {
+  const url = cursor
+    ? `/api/protected/users/suggestions/all?cursor=${encodeURIComponent(cursor)}`
+    : "/api/protected/users/suggestions/all";
+  return authFetch(url) as Promise<PaginatedUsersResponse>;
+}
+
+export function searchUsers(query: string, cursor: string | null): Promise<PaginatedUsersResponse> {
+  const params = new URLSearchParams({ q: query });
+  if (cursor) {
+    params.append("cursor", cursor);
+  }
+  return authFetch(`/api/protected/users/search?${params.toString()}`) as Promise<PaginatedUsersResponse>;
+}
+
+export interface PaginatedLinksResponse {
+  links: ILink[];
+  nextCursor: string | null;
+}
+
+export function getFeedLinks(cursor: string | null): Promise<PaginatedLinksResponse> {
+  const url = cursor
+    ? `/api/links/feed?cursor=${encodeURIComponent(cursor)}`
+    : "/api/links/feed";
+  return authFetch(url) as Promise<PaginatedLinksResponse>;
+}
+
+export function getStories(cursor: string | null): Promise<PaginatedUsersResponse> {
+  const url = cursor
+    ? `/api/protected/users/stories?cursor=${encodeURIComponent(cursor)}`
+    : "/api/protected/users/stories";
+  return authFetch(url) as Promise<PaginatedUsersResponse>;
 }
