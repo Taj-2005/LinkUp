@@ -319,8 +319,8 @@ export default function SettingsPanel() {
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {accountPrivacy === "public"
-                ? "Anyone can view your posts and links"
-                : "Only users you're linked with can view your posts and links"}
+                ? "Anyone can view your links"
+                : "Only users you're linked with can view your links"}
             </p>
           </div>
         </div>
