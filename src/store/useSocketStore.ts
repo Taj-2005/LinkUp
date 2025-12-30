@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
 import Cookies from "js-cookie";
+import { refreshTokenForSocket, getAccessToken } from "@/lib/socketAuthRefresh";
 
 const SOCKET_SERVER_URL = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL!
 
@@ -14,6 +15,7 @@ interface SocketStore {
 }
 
 let socketInstance: Socket | null = null;
+let isRefreshing = false;
 
 export const useSocketStore = create<SocketStore>((set) => {
     return {
@@ -62,14 +64,59 @@ export const useSocketStore = create<SocketStore>((set) => {
                 socket.emit("getUnseenCount");
             });
 
-            socket.on("disconnect", (reason) => {
+            let storageHandler: ((e: StorageEvent) => void) | null = null;
+
+            socket.on("disconnect", async (reason) => {
                 set({ isConnected: false });
                 console.log("Socket disconnected:", reason);
+
+                if (storageHandler && typeof window !== "undefined") {
+                    window.removeEventListener("storage", storageHandler);
+                }
+
+                const isServerDisconnect = reason === "io server disconnect";
+                
+                if (isServerDisconnect && !isRefreshing && socketInstance) {
+                    const token = getAccessToken();
+                    if (!token) {
+                        isRefreshing = true;
+                        const refreshSuccess = await refreshTokenForSocket();
+                        
+                        if (refreshSuccess) {
+                            const newToken = getAccessToken();
+                            if (newToken && socketInstance) {
+                                socketInstance.auth = { token: newToken };
+                                socketInstance.connect();
+                            }
+                        }
+                        isRefreshing = false;
+                    }
+                }
             });
 
-            socket.on("connect_error", (error) => {
-                console.error("Socket connection error:", error);
-                set({ unseenCount: 0 });
+            socket.on("connect_error", async (error) => {
+                const errorMessage = error.message || String(error);
+                const isAuthError = errorMessage.includes("Authentication error") || 
+                                   errorMessage.includes("Invalid token") ||
+                                   errorMessage.includes("No token provided");
+
+                if (isAuthError && !isRefreshing) {
+                    isRefreshing = true;
+                    const refreshSuccess = await refreshTokenForSocket();
+                    
+                    if (refreshSuccess) {
+                        const newToken = getAccessToken();
+                        if (newToken && socket) {
+                            socket.auth = { token: newToken };
+                            socket.disconnect();
+                            socket.connect();
+                        }
+                    }
+                    isRefreshing = false;
+                } else {
+                    console.error("Socket connection error:", error);
+                    set({ unseenCount: 0 });
+                }
             });
 
             socket.on("unseenCount:update", (data: { unseenCount: number; notificationCount?: number; linkRequestCount?: number }) => {
@@ -81,8 +128,6 @@ export const useSocketStore = create<SocketStore>((set) => {
                     return state;
                 });
             });
-
-            let storageHandler: ((e: StorageEvent) => void) | null = null;
 
             const handleTokenChange = () => {
                 const newToken = Cookies.get("accessTokenReadable") || Cookies.get("accessToken");
@@ -107,11 +152,6 @@ export const useSocketStore = create<SocketStore>((set) => {
                 window.addEventListener("storage", storageHandler);
             }
 
-            socket.on("disconnect", () => {
-                if (storageHandler && typeof window !== "undefined") {
-                    window.removeEventListener("storage", storageHandler);
-                }
-            });
         },
 
         disconnectSocket: () => {
