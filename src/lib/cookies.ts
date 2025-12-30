@@ -46,8 +46,17 @@ export function setAccessTokenCookie(response: NextResponse, token: string): voi
 }
 
 export function setRefreshTokenCookie(response: NextResponse, token: string): void {
+  const isProd = process.env.NODE_ENV === "production";
+  const expires = new Date();
+  expires.setTime(expires.getTime() + COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE * 1000);
+
   response.cookies.set("refreshToken", token, {
-    ...getCookieOptions(COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE),
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
+    expires,
   });
 }
 
