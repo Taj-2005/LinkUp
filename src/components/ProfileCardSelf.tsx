@@ -170,7 +170,7 @@ export default function ProfileCard() {
       setTempAvatar(null);
       setAvatarPreview(null);
       setIsPhotoOnlyMode(false);
-    } catch{
+    } catch {
     }
   };
 
@@ -365,8 +365,8 @@ export default function ProfileCard() {
                 avatarSrc
                   ? avatarSrc
                   : resolvedTheme === "dark"
-                  ? "/dark-profile.png"
-                  : "/light-profile.png"
+                    ? "/dark-profile.png"
+                    : "/light-profile.png"
               }
               alt="User Avatar"
               fill
@@ -415,7 +415,7 @@ export default function ProfileCard() {
             <div className="mt-4 flex flex-wrap gap-4 justify-center md:justify-start">
               <button
                 onClick={openEditModal}
-                className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 flex-shrink-0 transition-all duration-300 text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto"
+                className="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 flex-shrink-0 transition-all duration-300 text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 rounded-2xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base w-full md:w-auto cursor-pointer"
               >
                 Edit Profile
               </button>
@@ -463,7 +463,7 @@ export default function ProfileCard() {
                       setIsPhotoOnlyMode(false);
                       fileInputRef.current?.click();
                     }}
-                    className="px-4 md:px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold text-sm md:text-base w-full md:w-auto"
+                    className="px-4 md:px-5 py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold text-sm md:text-base w-full md:w-auto cursor-pointer"
                   >
                     Change photo
                   </button>
@@ -487,62 +487,60 @@ export default function ProfileCard() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto hide-scrollbar pr-2 -mr-2">
-                <div className="mb-5">
-                  <label className="text-sm text-white/90">Username</label>
-                  <input
-                    value={username}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (!val.trim()) {
-                        setUsernameError("Username cannot be empty");
-                        setShakeUsername(true);
-                        setTimeout(() => setShakeUsername(false), 400);
-                      } else setUsernameError("");
-                      setUsername(val);
-                    }}
-                    className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
-                      usernameError ? "border-red-500" : "border-white/30"
-                    } ${shakeUsername ? "shake" : ""}`}
-                  />
-                  {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
-                </div>
-
-                <div className="mb-5">
-                  <label className="text-sm text-white/90">Full Name</label>
-                  <input
-                    value={fullName}
-                    onChange={(e) => validateName(e.target.value)}
-                    className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${
-                      nameError ? "border-red-500" : "border-white/30"
-                    } ${shakeName ? "shake" : ""}`}
-                  />
-                  {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
-                </div>
-
-                <div className="mb-5">
-                  <label className="text-sm text-white/90">Location</label>
-                  <input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                  />
-                </div>
+                  <div className="mb-5">
+                    <label className="text-sm text-white/90">Username</label>
+                    <input
+                      value={username}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (!val.trim()) {
+                          setUsernameError("Username cannot be empty");
+                          setShakeUsername(true);
+                          setTimeout(() => setShakeUsername(false), 400);
+                        } else setUsernameError("");
+                        setUsername(val);
+                      }}
+                      className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${usernameError ? "border-red-500" : "border-white/30"
+                        } ${shakeUsername ? "shake" : ""}`}
+                    />
+                    {usernameError && <p className="text-red-400 text-sm">{usernameError}</p>}
+                  </div>
 
                   <div className="mb-5">
-                  <label className="text-sm text-white/90">Bio</label>
-                  <textarea
-                    value={bio}
-                    rows={4}
-                    onChange={(e) => setBio(e.target.value)}
-                    className="w-full px-4 py-3 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
-                  />
+                    <label className="text-sm text-white/90">Full Name</label>
+                    <input
+                      value={fullName}
+                      onChange={(e) => validateName(e.target.value)}
+                      className={`w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border text-white ${nameError ? "border-red-500" : "border-white/30"
+                        } ${shakeName ? "shake" : ""}`}
+                    />
+                    {nameError && <p className="text-red-400 text-sm">{nameError}</p>}
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="text-sm text-white/90">Location</label>
+                    <input
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full px-4 py-2 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
+                    />
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="text-sm text-white/90">Bio</label>
+                    <textarea
+                      value={bio}
+                      rows={4}
+                      onChange={(e) => setBio(e.target.value)}
+                      className="w-full px-4 py-3 mt-1 rounded-xl bg-white/20 border border-white/30 text-white"
+                    />
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-3 md:gap-4 pt-4 mt-4 border-t border-white/20 flex-shrink-0 sticky bottom-0 bg-white/10 dark:bg-black/20 -mx-4 md:-mx-8 px-4 md:px-8 pb-2">
                   <button
                     onClick={handleCancel}
-                    className="px-4 md:px-5 py-2 rounded-xl text-sm md:text-base text-black dark:text-white bg-white/20 border border-white/20 w-full md:w-auto"
+                    className="px-4 md:px-5 py-2 rounded-xl text-sm md:text-base text-black dark:text-white bg-white/20 border border-white/20 w-full md:w-auto cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -550,9 +548,7 @@ export default function ProfileCard() {
                   <button
                     onClick={handleEditSave}
                     disabled={isSaveDisabled}
-                    className={`px-5 md:px-6 py-2 rounded-xl font-semibold text-sm md:text-base bg-primary-light text-black dark:bg-primary-dark dark:text-white w-full md:w-auto ${
-                      isSaveDisabled ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`px-5 md:px-6 py-2 rounded-xl font-semibold text-sm md:text-base bg-primary-light text-black dark:bg-primary-dark dark:text-white w-full md:w-auto ${isSaveDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     Save
                   </button>
@@ -586,7 +582,7 @@ export default function ProfileCard() {
                     setIsPhotoOnlyMode(true);
                     fileInputRef.current?.click();
                   }}
-                  className="w-full py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold"
+                  className="w-full py-2 rounded-xl bg-primary-light text-black dark:bg-primary-dark dark:text-white font-semibold cursor-pointer"
                 >
                   Change Photo
                 </button>
@@ -612,10 +608,10 @@ export default function ProfileCard() {
                       setAvatarPreview(null);
                       setTempAvatar(null);
                       setAvatarOptionsModal(false);
-                    } catch{
+                    } catch {
                     }
                   }}
-                  className="w-full py-2 rounded-xl bg-red-500 text-white font-semibold"
+                  className="w-full py-2 rounded-xl bg-red-500 text-white font-semibold cursor-pointer"
                 >
                   Remove Photo
                 </button>
@@ -698,8 +694,8 @@ export default function ProfileCard() {
                   avatarSrc
                     ? avatarSrc
                     : resolvedTheme === "dark"
-                    ? "/dark-profile.png"
-                    : "/light-profile.png"
+                      ? "/dark-profile.png"
+                      : "/light-profile.png"
                 }
                 alt="Profile preview"
                 className="block max-w-[calc(95vw-2rem)] max-h-[calc(70vh-10rem)] object-contain rounded-lg shadow-xl"

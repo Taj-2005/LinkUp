@@ -119,15 +119,15 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
 
         setShowUnlinkModal(false);
         if (currentUser) {
-          showToastWithAvatar(
-            {
-              username: currentUser.username || "You",
-              user_avatar: currentUser.user_avatar,
-              name: currentUser.name,
-            },
-            "unlinked successfully",
-            { duration: 3000 }
-          );
+            showToastWithAvatar(
+                {
+                    username: currentUser.username || "You",
+                    user_avatar: currentUser.user_avatar,
+                    name: currentUser.name,
+                },
+                "unlinked successfully",
+                { duration: 3000 }
+            );
         }
 
         try {
@@ -145,7 +145,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
 
             mutate(
                 "all-users",
-                (users: { _id?: { toString(): string } | string; linked_to?: string[]; linked_by?: string[]; [key: string]: unknown }[] | undefined) => {
+                (users: { _id?: { toString(): string } | string; linked_to?: string[]; linked_by?: string[];[key: string]: unknown }[] | undefined) => {
                     if (!users) return users;
                     return users.map((user) => {
                         const userId = user._id?.toString();
@@ -207,7 +207,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
             await optimisticUpdateUser(currentUser._id, {
                 linked_to: previousLinkedTo,
                 linked_by: previousLinkedBy,
-            }); 
+            });
 
             await Promise.all([
                 mutateCurrentUser(),
@@ -230,11 +230,10 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
         return (
             <div className={`${skeletonBaseClasses} ${className} relative overflow-hidden skeleton-wiggle`}>
                 <div className="absolute inset-0 animate-shimmer opacity-60 pointer-events-none" />
-                <div className={`relative ${
-                    variant === "border"
-                        ? "h-3 md:h-4 w-12 md:w-16 bg-gray-300/70 dark:bg-gray-600/70 rounded"
-                        : "h-3 md:h-4 w-14 md:w-24 bg-gray-300/50 dark:bg-gray-600/50 rounded"
-                }`} />
+                <div className={`relative ${variant === "border"
+                    ? "h-3 md:h-4 w-12 md:w-16 bg-gray-300/70 dark:bg-gray-600/70 rounded"
+                    : "h-3 md:h-4 w-14 md:w-24 bg-gray-300/50 dark:bg-gray-600/50 rounded"
+                    }`} />
             </div>
         );
     }
@@ -267,7 +266,7 @@ export default function LinkUpButton({ receiverId, className = "", variant = "de
                     e.stopPropagation();
                     handleLinkUp(e);
                 }}
-                className={`${baseClasses} bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 ${className} ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                className={`${baseClasses} bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-pink-500 hover:via-purple-500 hover:to-violet-500 ${className} ${isDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                 disabled={isDisabled}
             >
                 {buttonText}

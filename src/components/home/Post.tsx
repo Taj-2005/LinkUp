@@ -46,8 +46,8 @@ export default function Post({ user, imageUrl }: PostProps) {
               user.user_avatar
                 ? user.user_avatar
                 : resolvedTheme === "dark"
-                ? "/dark-profile.png"
-                : "/light-profile.png"
+                  ? "/dark-profile.png"
+                  : "/light-profile.png"
             }
             fill
             unoptimized
@@ -83,26 +83,26 @@ export default function Post({ user, imageUrl }: PostProps) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
             <button
-              className="text-black dark:text-white hover:opacity-70 transition-opacity"
+              className="text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer"
               aria-label="Like"
             >
               <FiHeart size={24} />
             </button>
             <button
-              className="text-black dark:text-white hover:opacity-70 transition-opacity"
+              className="text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer"
               aria-label="Comment"
             >
               <FiMessageCircle size={24} />
             </button>
             <button
-              className="text-black dark:text-white hover:opacity-70 transition-opacity"
+              className="text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer"
               aria-label="LinkUp Share"
             >
               <FiLink size={24} />
             </button>
           </div>
           <button
-            className="text-black dark:text-white hover:opacity-70 transition-opacity"
+            className="text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer"
             aria-label="Save Link"
           >
             <FaRegBookmark size={24} />

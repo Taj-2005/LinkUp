@@ -27,7 +27,7 @@ export default function SettingsPage() {
           {selectedSetting && (
             <button
               onClick={() => setSelectedSetting(null)}
-              className="md:hidden mb-2 p-2 hover:bg-primary-light/10 dark:hover:bg-primary-dark/10 rounded-lg transition-colors flex-shrink-0 sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark"
+              className="md:hidden mb-2 p-2 hover:bg-primary-light/10 dark:hover:bg-primary-dark/10 rounded-lg transition-colors flex-shrink-0 sticky top-0 z-10 bg-left-nav-light dark:bg-right-nav-dark cursor-pointer"
               aria-label="Back to settings"
             >
               <ArrowLeft className="w-5 h-5 text-primary-dark dark:text-primary-light" />

@@ -32,14 +32,14 @@ export default function UserProfile() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSrc, setModalSrc] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
-  
+
   const {
     links,
     isLoading: isLoadingLinks,
   } = useUserLinks(user?._id);
-  
+
   const { status: linkStatus } = useLinkStatus(user?._id || "");
-  
+
   const isOwnProfile = currentUser?._id === user?._id;
   const isPrivateAccount = (user?.accountPrivacy || "public") === "private";
   const isLinked = linkStatus === "linked" || linkStatus === "linked-by";
@@ -126,7 +126,7 @@ export default function UserProfile() {
                 setSearching(false);
                 setUserNotFound(true);
               }
-            } catch{
+            } catch {
               setSearching(false);
               setUserNotFound(true);
             }
@@ -166,7 +166,7 @@ export default function UserProfile() {
             if (freshUser) {
               setUser(freshUser);
             }
-          } catch{
+          } catch {
           }
         }
       }
@@ -213,170 +213,170 @@ export default function UserProfile() {
     }
   }, [allUsers, user?._id, user]);
 
-if (!user || userNotFound) {
-  return (
-    <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
-      <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
-        <div className="w-full overflow-y-auto hide-scrollbar">
-          <div className="flex flex-col items-center justify-center min-h-[98vh] p-2 md:p-4">
+  if (!user || userNotFound) {
+    return (
+      <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
+        <div className="w-full m-2 md:m-2 h-[98vh] md:h-[98vh] rounded-2xl flex flex-row overflow-hidden bg-left-nav-light dark:bg-left-nav-dark">
+          <div className="w-full overflow-y-auto hide-scrollbar">
+            <div className="flex flex-col items-center justify-center min-h-[98vh] p-2 md:p-4">
 
-            <AnimatePresence mode="wait">
-              {searching ? (
-                <div className="w-full flex items-center justify-center pb-64">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8"
-                  >
+              <AnimatePresence mode="wait">
+                {searching ? (
+                  <div className="w-full flex items-center justify-center pb-64">
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5 }}
-                      className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark bg-gray-300 dark:bg-gray-700"
+                      className="flex flex-col md:flex-row items-center justify-center md:items-start gap-8"
                     >
-                      <div className="absolute inset-0 animate-shimmer opacity-60" />
-                    </motion.div>
-                    <div className="flex-1 flex flex-col justify-between w-full">
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mb-4 space-y-3"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative w-40 h-40 rounded-full overflow-hidden shadow-xl border-4 border-primary-light dark:border-primary-dark bg-gray-300 dark:bg-gray-700"
                       >
-                        <div className="relative h-7 w-48 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                          <div className="absolute inset-0 animate-shimmer opacity-60" />
-                        </div>
-                        <div className="relative h-5 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                          <div className="absolute inset-0 animate-shimmer opacity-60" />
-                        </div>
+                        <div className="absolute inset-0 animate-shimmer opacity-60" />
                       </motion.div>
-                      <div className="flex gap-8 text-center mb-6">
-                        {[1, 2, 3].map((i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
-                            className="space-y-2"
-                          >
-                            <div className="relative h-7 w-10 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                              <div className="absolute inset-0 animate-shimmer opacity-60" />
-                            </div>
-                            <div className="relative h-4 w-14 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
-                              <div className="absolute inset-0 animate-shimmer opacity-60" />
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                      <div className="flex flex-col gap-3 max-w-lg">
+                      <div className="flex-1 flex flex-col justify-between w-full">
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.2 }}
-                          className="flex items-center gap-2"
+                          transition={{ duration: 0.5, delay: 0.1 }}
+                          className="mb-4 space-y-3"
                         >
-                          <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded-md" />
-                          <div className="relative h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                          <div className="relative h-7 w-48 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                            <div className="absolute inset-0 animate-shimmer opacity-60" />
+                          </div>
+                          <div className="relative h-5 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
                             <div className="absolute inset-0 animate-shimmer opacity-60" />
                           </div>
                         </motion.div>
-                        {[100, 80, 60].map((w, i) => (
+                        <div className="flex gap-8 text-center mb-6">
+                          {[1, 2, 3].map((i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
+                              className="space-y-2"
+                            >
+                              <div className="relative h-7 w-10 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                                <div className="absolute inset-0 animate-shimmer opacity-60" />
+                              </div>
+                              <div className="relative h-4 w-14 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                                <div className="absolute inset-0 animate-shimmer opacity-60" />
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                        <div className="flex flex-col gap-3 max-w-lg">
                           <motion.div
-                            key={i}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
-                            className="relative h-4 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden"
-                            style={{ width: `${w}%` }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="flex items-center gap-2"
                           >
-                            <div className="absolute inset-0 animate-shimmer opacity-60" />
+                            <div className="w-6 h-6 bg-gray-300 dark:bg-gray-700 rounded-md" />
+                            <div className="relative h-4 w-32 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden">
+                              <div className="absolute inset-0 animate-shimmer opacity-60" />
+                            </div>
                           </motion.div>
-                        ))}
-                      </div>
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.45 }}
-                        className="mt-4"
-                      >
-                        <div className="relative h-10 w-36 bg-gray-300 dark:bg-gray-700 rounded-2xl overflow-hidden">
-                          <div className="absolute inset-0 animate-shimmer opacity-60" />
+                          {[100, 80, 60].map((w, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, delay: 0.25 + i * 0.1 }}
+                              className="relative h-4 bg-gray-300 dark:bg-gray-700 rounded-md overflow-hidden"
+                              style={{ width: `${w}%` }}
+                            >
+                              <div className="absolute inset-0 animate-shimmer opacity-60" />
+                            </motion.div>
+                          ))}
                         </div>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                </div>
-              ) : (
-                <motion.div
-                  key="notfound"
-                  className="flex flex-col items-center gap-6 py-20"
-                  initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.55, ease: "easeOut" }}
-                >
-
-                  <motion.div
-                    className="relative w-32 h-32 flex items-center justify-center"
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 120, damping: 15 }}
-                  >
-                    <motion.div
-                      className="absolute inset-0 blur-xl opacity-40"
-                      style={{
-                        background:
-                          "radial-gradient(circle at center, rgba(255,200,0,0.4), rgba(255,150,0,0.15), transparent)"
-                      }}
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    />
-
-                    <motion.div
-                      className="text-[80px] select-none pointer-events-none"
-                      animate={{ y: [-3, 3, -3] }}
-                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      🥺
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.45 }}
+                          className="mt-4"
+                        >
+                          <div className="relative h-10 w-36 bg-gray-300 dark:bg-gray-700 rounded-2xl overflow-hidden">
+                            <div className="absolute inset-0 animate-shimmer opacity-60" />
+                          </div>
+                        </motion.div>
+                      </div>
                     </motion.div>
+                  </div>
+                ) : (
+                  <motion.div
+                    key="notfound"
+                    className="flex flex-col items-center gap-6 py-20"
+                    initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.55, ease: "easeOut" }}
+                  >
+
+                    <motion.div
+                      className="relative w-32 h-32 flex items-center justify-center"
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 120, damping: 15 }}
+                    >
+                      <motion.div
+                        className="absolute inset-0 blur-xl opacity-40"
+                        style={{
+                          background:
+                            "radial-gradient(circle at center, rgba(255,200,0,0.4), rgba(255,150,0,0.15), transparent)"
+                        }}
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      />
+
+                      <motion.div
+                        className="text-[80px] select-none pointer-events-none"
+                        animate={{ y: [-3, 3, -3] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        🥺
+                      </motion.div>
+                    </motion.div>
+
+                    <motion.p
+                      className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35 }}
+                    >
+                      User Not Found
+                    </motion.p>
+
+                    <motion.p
+                      className="text-base text-gray-600 dark:text-gray-400 max-w-xs text-center leading-relaxed"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: 0.1 }}
+                    >
+                      We tried our best but couldn’t locate this profile.
+                    </motion.p>
+
+                    <motion.div
+                      className="h-1 w-24 bg-gray-300 dark:bg-gray-600 rounded-full mt-2"
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: "6rem", opacity: 1 }}
+                      transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
+                    />
                   </motion.div>
 
-                  <motion.p
-                    className="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35 }}
-                  >
-                    User Not Found
-                  </motion.p>
+                )}
+              </AnimatePresence>
 
-                  <motion.p
-                    className="text-base text-gray-600 dark:text-gray-400 max-w-xs text-center leading-relaxed"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: 0.1 }}
-                  >
-                    We tried our best but couldn’t locate this profile.
-                  </motion.p>
-
-                  <motion.div
-                    className="h-1 w-24 bg-gray-300 dark:bg-gray-600 rounded-full mt-2"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: "6rem", opacity: 1 }}
-                    transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
-                  />
-                </motion.div>
-
-              )}
-            </AnimatePresence>
-
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="flex flex-row justify-between items-start bg-primary-light dark:bg-primary-dark h-screen md:h-screen overflow-hidden">
@@ -446,8 +446,8 @@ if (!user || userNotFound) {
                     <LinkCard
                       key={link._id.toString()}
                       link={link}
-                      onClick={() => {}}
-                      onLinkDeleted={() => {}}
+                      onClick={() => { }}
+                      onLinkDeleted={() => { }}
                     />
                   ))}
                 </div>
@@ -476,7 +476,7 @@ if (!user || userNotFound) {
             >
               <motion.button
                 onClick={closeModal}
-                className="absolute -top-3 -right-3 z-50 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg p-1.5"
+                className="absolute -top-3 -right-3 z-50 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg p-1.5 cursor-pointer"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >

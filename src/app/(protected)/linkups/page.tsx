@@ -34,7 +34,7 @@ export default function Home() {
                 <h3 className="text-lg md:text-2xl font-bold px-4">Select a message to view conversation</h3>
 
                 <button
-                  className="mt-4 bg-primary-light dark:bg-primary-dark hover:brightness-110 text-right-nav-light dark:text-right-nav-dark font-semibold rounded-2xl px-6 md:px-8 py-2 md:py-3 shadow-md transition text-sm md:text-base"
+                  className="mt-4 bg-primary-light dark:bg-primary-dark hover:brightness-110 text-right-nav-light dark:text-right-nav-dark font-semibold rounded-2xl px-6 md:px-8 py-2 md:py-3 shadow-md transition text-sm md:text-base cursor-pointer"
                 >
                   Send Message
                 </button>

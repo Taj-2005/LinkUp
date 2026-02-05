@@ -136,8 +136,8 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
     return resolvedTheme === "dark" ? "/dark-profile.png" : "/light-profile.png";
   };
 
-  const imageUrl = isValidImageUrl(link.imageUrl) 
-    ? link.imageUrl! 
+  const imageUrl = isValidImageUrl(link.imageUrl)
+    ? link.imageUrl!
     : getPlaceholderImageUrl(resolvedTheme === "dark");
 
   const isOwner = currentUser?._id?.toString() === link.userId;
@@ -198,12 +198,12 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
               e.stopPropagation();
               setShowDeleteModal(true);
             }}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
             aria-label="Delete post"
           >
-            <FiTrash2 
-              size={16} 
-              className="text-gray-600 dark:text-gray-400 group-hover:text-white transition-transform group-hover:rotate-90" 
+            <FiTrash2
+              size={16}
+              className="text-gray-600 dark:text-gray-400 group-hover:text-white transition-transform group-hover:rotate-90"
             />
           </button>
         )}
@@ -228,9 +228,8 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
           <div className="flex items-center gap-4">
             <button
               onClick={handleLike}
-              className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
-                isLiked ? "text-red-500" : ""
-              }`}
+              className={`text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer ${isLiked ? "text-red-500" : ""
+                }`}
               aria-label="Like"
             >
               <FiHeart size={24} className={isLiked ? "fill-current" : ""} />
@@ -240,19 +239,18 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
                 e.stopPropagation();
                 onCommentClick();
               }}
-              className="text-black dark:text-white hover:opacity-70 transition-opacity"
+              className="text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer"
               aria-label="Comment"
             >
               <FiMessageCircle size={24} />
             </button>
           </div>
-            <button
-              onClick={handleSave}
-              className={`text-black dark:text-white hover:opacity-70 transition-opacity ${
-                isSaved ? "text-violet-600" : ""
+          <button
+            onClick={handleSave}
+            className={`text-black dark:text-white hover:opacity-70 transition-opacity cursor-pointer ${isSaved ? "text-violet-600" : ""
               }`}
-              aria-label="Save Link"
-            >
+            aria-label="Save Link"
+          >
             <FiBookmark size={24} className={isSaved ? "fill-current" : ""} />
           </button>
         </div>
@@ -284,7 +282,7 @@ export default function LinkCard({ link, onCommentClick, onLinkUpdated }: LinkCa
               e.stopPropagation();
               onCommentClick();
             }}
-            className="text-gray-500 dark:text-gray-400 text-sm hover:opacity-70 transition-opacity"
+            className="text-gray-500 dark:text-gray-400 text-sm hover:opacity-70 transition-opacity cursor-pointer"
           >
             View all {link.comments.length} {link.comments.length === 1 ? "comment" : "comments"}
           </button>

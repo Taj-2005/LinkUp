@@ -60,8 +60,8 @@ export default function VerificationPendingContent() {
       try {
 
         const res = await fetch("/api/auth/login-without-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: userEmail }),
         });
 
@@ -75,7 +75,7 @@ export default function VerificationPendingContent() {
           const { initializeSocket } = useSocketStore.getState();
           initializeSocket();
 
-            router.push("/livelinks");
+          router.push("/livelinks");
         } else {
           toast.error("Failed to log in. Please try signing in manually.");
         }
@@ -116,113 +116,113 @@ export default function VerificationPendingContent() {
 
   const theme = darkMode
     ? {
-        bg: "bg-[#3E434C]",
-        cardBg: "bg-[#212121] backdrop-blur-xl",
-        border: "border-[#181818]",
-        text: "text-slate-100",
-        textSecondary: "text-slate-400",
-        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-        link: "text-gray-400 hover:text-white",
-      }
+      bg: "bg-[#3E434C]",
+      cardBg: "bg-[#212121] backdrop-blur-xl",
+      border: "border-[#181818]",
+      text: "text-slate-100",
+      textSecondary: "text-slate-400",
+      button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
+      buttonText: "text-white",
+      link: "text-gray-400 hover:text-white",
+    }
     : {
-        bg: "bg-[#606468]",
-        cardBg: "bg-[#ffffff] backdrop-blur-xl",
-        border: "border-[#e1e1e1]",
-        text: "text-slate-900",
-        textSecondary: "text-slate-600",
-        button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-        link: "text-gray-600 hover:text-black",
-      };
+      bg: "bg-[#606468]",
+      cardBg: "bg-[#ffffff] backdrop-blur-xl",
+      border: "border-[#e1e1e1]",
+      text: "text-slate-900",
+      textSecondary: "text-slate-600",
+      button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
+      buttonText: "text-white",
+      link: "text-gray-600 hover:text-black",
+    };
 
   return (
     <div className={`max-h-screen flex flex-col items-center justify-center ${theme.bg} p-4 relative`}>
 
       {!userEmail && (
         <div className="min-h-screen flex flex-colitems-center justify-center p-6">
+          <motion.div
+            className="relative w-full max-w-md rounded-3xl p-8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] border border-[rgba(255,255,255,0.04)] backdrop-blur-md shadow-2xl"
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            aria-live="polite"
+          >
+            <motion.div
+              aria-hidden
+              className="absolute -inset-6 -z-10 rounded-3xl"
+              style={{
+                background:
+                  "radial-gradient(60% 40% at 10% 10%, rgba(124,58,237,0.08), transparent 12%), radial-gradient(60% 40% at 90% 90%, rgba(99,102,241,0.06), transparent 14%)",
+                mixBlendMode: "screen",
+                pointerEvents: "none",
+              }}
+              animate={{ opacity: [0.75, 0.9, 0.75] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            <div className="flex flex-col items-center gap-6 text-center">
               <motion.div
-                className="relative w-full max-w-md rounded-3xl p-8 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))] border border-[rgba(255,255,255,0.04)] backdrop-blur-md shadow-2xl"
-                initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-                aria-live="polite"
+                className="relative flex items-center justify-center w-[96px] h-[96px] rounded-2xl bg-gradient-to-tr from-[#2b254a]/40 to-[#1b1b1f]/40 border border-[rgba(255,255,255,0.03)]"
+                initial={{ scale: 0.86, rotate: -6, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 160, damping: 18 }}
               >
-                <motion.div
-                  aria-hidden
-                  className="absolute -inset-6 -z-10 rounded-3xl"
-                  style={{
-                    background:
-                      "radial-gradient(60% 40% at 10% 10%, rgba(124,58,237,0.08), transparent 12%), radial-gradient(60% 40% at 90% 90%, rgba(99,102,241,0.06), transparent 14%)",
-                    mixBlendMode: "screen",
-                    pointerEvents: "none",
-                  }}
-                  animate={{ opacity: [0.75, 0.9, 0.75] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                />
-
-                <div className="flex flex-col items-center gap-6 text-center">
-                  <motion.div
-                    className="relative flex items-center justify-center w-[96px] h-[96px] rounded-2xl bg-gradient-to-tr from-[#2b254a]/40 to-[#1b1b1f]/40 border border-[rgba(255,255,255,0.03)]"
-                    initial={{ scale: 0.86, rotate: -6, opacity: 0 }}
-                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 160, damping: 18 }}
-                  >
-                    <div className="w-20 h-20 relative">
-                      <Image src="/logo.png" alt="LinkUp logo" fill className="object-contain" />
-                    </div>
-
-                    <motion.div
-                      className="absolute -right-3 -top-3 text-3xl select-none"
-                      initial={{ y: -6, scale: 0.9, opacity: 0 }}
-                      animate={{ y: 0, scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.12, duration: 0.6, type: "spring", stiffness: 120 }}
-                    >
-                      ❗
-                    </motion.div>
-                  </motion.div>
-
-                  <motion.h2
-                    className="text-2xl sm:text-3xl font-extrabold text-white"
-                    initial={{ y: 8, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.08, duration: 0.36 }}
-                  >
-                    Verification link opened incorrectly
-                  </motion.h2>
-
-                  <motion.p
-                    className="max-w-xs text-sm sm:text-base text-slate-300 leading-relaxed"
-                    initial={{ y: 6, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.14, duration: 0.38 }}
-                  >
-                    We couldn&apos;t find an email address in the link. Open the verification link from the email you received or use the button below to request a fresh verification email.
-                  </motion.p>
-
-                  <motion.div
-                    className="flex gap-3 w-full max-w-xs"
-                    initial={{ y: 8, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2, duration: 0.36 }}
-                  >
-                    <button
-                      onClick={() => router.push("/signin")}
-                      className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white font-semibold shadow-md hover:shadow-lg active:translate-y-0.5 transform transition"
-                    >
-                      Go to Sign In
-                    </button>
-
-                    <button
-                      onClick={() => router.push("/signup")}
-                      className="flex-1 py-3 px-4 rounded-xl text-slate-100 font-semibold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600  hover:from-pink-600 hover:to-violet-600 transition"
-                    >
-                      Resend verification
-                    </button>
-                  </motion.div>
+                <div className="w-20 h-20 relative">
+                  <Image src="/logo.png" alt="LinkUp logo" fill className="object-contain" />
                 </div>
+
+                <motion.div
+                  className="absolute -right-3 -top-3 text-3xl select-none"
+                  initial={{ y: -6, scale: 0.9, opacity: 0 }}
+                  animate={{ y: 0, scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.12, duration: 0.6, type: "spring", stiffness: 120 }}
+                >
+                  ❗
+                </motion.div>
+              </motion.div>
+
+              <motion.h2
+                className="text-2xl sm:text-3xl font-extrabold text-white"
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.08, duration: 0.36 }}
+              >
+                Verification link opened incorrectly
+              </motion.h2>
+
+              <motion.p
+                className="max-w-xs text-sm sm:text-base text-slate-300 leading-relaxed"
+                initial={{ y: 6, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.14, duration: 0.38 }}
+              >
+                We couldn&apos;t find an email address in the link. Open the verification link from the email you received or use the button below to request a fresh verification email.
+              </motion.p>
+
+              <motion.div
+                className="flex gap-3 w-full max-w-xs"
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.36 }}
+              >
+                <button
+                  onClick={() => router.push("/signin")}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white font-semibold shadow-md hover:shadow-lg active:translate-y-0.5 transform transition cursor-pointer"
+                >
+                  Go to Sign In
+                </button>
+
+                <button
+                  onClick={() => router.push("/signup")}
+                  className="flex-1 py-3 px-4 rounded-xl text-slate-100 font-semibold bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600  hover:from-pink-600 hover:to-violet-600 transition cursor-pointer"
+                >
+                  Resend verification
+                </button>
               </motion.div>
             </div>
+          </motion.div>
+        </div>
       )}
 
       {userEmail && (
@@ -266,7 +266,7 @@ export default function VerificationPendingContent() {
               <button
                 onClick={handleResend}
                 disabled={resending || resent || isVerifying}
-                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${resending || resent || isVerifying ? "" : "cursor-pointer"}`}
               >
                 {resending ? (
                   <>

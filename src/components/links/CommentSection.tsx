@@ -56,19 +56,19 @@ export default function CommentSection({
     if (rollbackRef.current === null) {
       const currentIds = localComments.map(c => c._id.toString()).sort().join(',');
       const propsIds = propsComments.map(c => c._id.toString()).sort().join(',');
-      
+
       if (currentIds !== propsIds) {
         setLocalComments(propsComments);
       }
     }
   }, [propsComments, localComments]);
-  
+
   useEffect(() => {
     if (!socket || !isConnected) return;
 
     const handleLinkUpdate = (data: { link: ILink; timestamp?: string; eventId?: string }) => {
       const updatedLink = data.link;
-      
+
       if (updatedLink._id.toString() !== linkId) return;
 
       if (updatedLink.comments) {
@@ -154,7 +154,7 @@ export default function CommentSection({
 
     const handleLinkUpdate = (data: { link: ILink; timestamp?: string; eventId?: string }) => {
       const updatedLink = data.link;
-      
+
       if (updatedLink._id !== linkId) return;
 
       if (updatedLink.comments && Array.isArray(updatedLink.comments)) {
@@ -171,11 +171,11 @@ export default function CommentSection({
           const formattedComments = updatedLink.comments.map((serverComment: IComment) => {
             return {
               ...serverComment,
-              createdAt: serverComment.createdAt instanceof Date 
-                ? serverComment.createdAt 
+              createdAt: serverComment.createdAt instanceof Date
+                ? serverComment.createdAt
                 : new Date(serverComment.createdAt),
-              updatedAt: serverComment.updatedAt instanceof Date 
-                ? serverComment.updatedAt 
+              updatedAt: serverComment.updatedAt instanceof Date
+                ? serverComment.updatedAt
                 : new Date(serverComment.updatedAt),
               replies: (serverComment.replies || []).map((r: IReply) => ({
                 ...r,
@@ -285,7 +285,7 @@ export default function CommentSection({
     if (!replyText.trim() || !currentUser) return;
 
     const text = replyText.trim();
-    
+
     const optimisticReply = createOptimisticReply(
       currentUser._id,
       currentUser.username || "Unknown",
@@ -365,7 +365,7 @@ export default function CommentSection({
     if (!deleteModalState || deleteModalState.type !== "comment" || !isLinkOwner) return;
 
     const commentId = deleteModalState.commentId;
-    
+
     setDeleteModalState(null);
 
     const previousComments = [...localComments];
@@ -392,7 +392,7 @@ export default function CommentSection({
       },
       { revalidate: false }
     );
-    
+
     mutate(
       (key: unknown) => typeof key === "string" && key.startsWith("user-links-"),
       (links: ILink[] | undefined) => {
@@ -428,7 +428,7 @@ export default function CommentSection({
       })
       .catch((error) => {
         setLocalComments(previousComments);
-        
+
         mutate(
           "feed-links",
           (links: LinkWithUser[] | undefined) => {
@@ -565,7 +565,7 @@ export default function CommentSection({
       })
       .catch((error) => {
         setLocalComments(previousComments);
-        
+
         mutate(
           "feed-links",
           (links: LinkWithUser[] | undefined) => {
@@ -658,7 +658,7 @@ export default function CommentSection({
                             commentId: comment._id.toString(),
                           });
                         }}
-                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500"
+                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer"
                         aria-label="Delete comment"
                       >
                         <FiTrash2
@@ -680,7 +680,7 @@ export default function CommentSection({
                         replyingTo === comment._id.toString() ? null : comment._id.toString()
                       )
                     }
-                    className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-4 hover:text-violet-500 transition-colors"
+                    className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-4 hover:text-violet-500 transition-colors cursor-pointer"
                   >
                     {replyingTo === comment._id.toString() ? "Cancel" : "Reply"}
                   </button>
@@ -718,7 +718,7 @@ export default function CommentSection({
                                     replyId: reply._id.toString(),
                                   });
                                 }}
-                                className="absolute top-1.5 right-1.5 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                className="absolute top-1.5 right-1.5 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 cursor-pointer"
                                 aria-label="Delete reply"
                               >
                                 <FiTrash2
@@ -776,7 +776,7 @@ export default function CommentSection({
                     <button
                       type="submit"
                       disabled={!replyText.trim()}
-                      className="p-1.5 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all"
+                      className="p-1.5 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all cursor-pointer"
                     >
                       <FiSend size={14} />
                     </button>
@@ -787,7 +787,7 @@ export default function CommentSection({
           ))
         )}
       </div>
-          
+
       <div className="border-t border-gray-200 dark:border-gray-700 p-3 md:p-4 flex-shrink-0  bg-right-nav-light dark:bg-left-nav-dark z-10">
         <form onSubmit={handleAddComment} className="flex gap-2">
           <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
@@ -810,7 +810,7 @@ export default function CommentSection({
           <button
             type="submit"
             disabled={!newComment.trim()}
-            className="p-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all"
+            className="p-2 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:from-violet-500 hover:via-purple-500 hover:to-pink-500 transition-all cursor-pointer"
           >
             <FiSend size={18} />
           </button>

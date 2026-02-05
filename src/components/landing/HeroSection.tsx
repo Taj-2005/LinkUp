@@ -43,10 +43,10 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
         <FloatingOrbs />
       </div>
 
-        <motion.div
-          style={{ y, opacity, scale }}
-          className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 py-12 sm:py-16 md:py-20"
-        >
+      <motion.div
+        style={{ y, opacity, scale }}
+        className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 py-12 sm:py-16 md:py-20"
+      >
         <div className="max-w-5xl mx-auto text-center">
           {/* Badge */}
           <motion.div
@@ -96,7 +96,7 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
           >
             <motion.button
               onClick={onSignUp}
-              className="group relative px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white rounded-xl sm:rounded-2xl font-semibold hover:opacity-90 glow-primary transition-all w-full sm:w-auto"
+              className="group relative px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white rounded-xl sm:rounded-2xl font-semibold hover:opacity-90 glow-primary transition-all w-full sm:w-auto cursor-pointer"
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -105,7 +105,7 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
             </motion.button>
             <motion.button
               onClick={onSignIn}
-              className="px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg glass border border-white/10 text-white hover:bg-white/10 rounded-xl sm:rounded-2xl font-semibold transition-all w-full sm:w-auto active:bg-white/15"
+              className="px-6 sm:px-8 h-12 sm:h-14 text-base sm:text-lg glass border border-white/10 text-white hover:bg-white/10 rounded-xl sm:rounded-2xl font-semibold transition-all w-full sm:w-auto active:bg-white/15 cursor-pointer"
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -126,10 +126,10 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
                 initial={{ opacity: 0, scale: 0.8, rotateX: -15 }}
                 animate={{ opacity: 1, scale: 1, rotateX: 0 }}
                 transition={{ duration: 0.6, delay: 0.9 + index * 0.1 }}
-                whileHover={{ 
-                  scale: 1.05, 
+                whileHover={{
+                  scale: 1.05,
                   rotateY: 5,
-                  transition: { duration: 0.2 } 
+                  transition: { duration: 0.2 }
                 }}
                 className="perspective-1000"
               >
@@ -144,7 +144,7 @@ export default function HeroSection({ onSignUp, onSignIn }: HeroSectionProps) {
             ))}
           </motion.div>
         </div>
-        </motion.div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div

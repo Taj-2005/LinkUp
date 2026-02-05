@@ -48,7 +48,7 @@ function LinkHubContent() {
   const links = useMemo(() => {
     return selectedTab === "links" ? userLinks : savedLinks;
   }, [selectedTab, userLinks, savedLinks]);
-  
+
   const isLoading = selectedTab === "links" ? isLoadingUserLinks : isLoadingSavedLinks;
 
   const modalLink = globalSelectedLink || selectedLink;
@@ -76,7 +76,7 @@ function LinkHubContent() {
 
   useEffect(() => {
     const linkId = searchParams?.get("link");
-    
+
     if (!linkId) {
       if (isModalOpen && globalSelectedLink) {
         setIsModalOpen(false);
@@ -91,19 +91,19 @@ function LinkHubContent() {
     }
 
     const link = links.find((l) => l._id.toString() === linkId);
-    
+
     if (link) {
       setSelectedLinkGlobal(link);
       setSelectedLink(link);
       setIsModalOpen(true);
-      
+
       if (searchParams?.get("link") === linkId) {
         router.replace("/linkhub", { scroll: false });
       }
     } else if (!isLoading) {
       const otherTabLinks = selectedTab === "links" ? savedLinks : userLinks;
       const linkInOtherTab = otherTabLinks.find((l) => l._id.toString() === linkId);
-      
+
       if (linkInOtherTab) {
         setSelectedLinkGlobal(linkInOtherTab);
         setSelectedLink(linkInOtherTab);
@@ -166,7 +166,7 @@ function LinkHubContent() {
             <div className="flex justify-end items-end w-full p-4">
               <button
                 onClick={() => router.push("/settings")}
-                className="text-violet-300 hover:opacity-75 transition-all flex justify-end items-end hover:rotate-90"
+                className="text-violet-300 hover:opacity-75 transition-all flex justify-end items-end hover:rotate-90 cursor-pointer"
                 aria-label="Settings"
               >
                 <FiSettings size={30} />

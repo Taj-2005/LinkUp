@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {signup} from "@/utils/api"
+import { signup } from "@/utils/api"
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -146,35 +146,35 @@ export default function SignUpPage() {
 
   const theme = darkMode
     ? {
-        bg: "bg-[#3E434C]",
-        cardBg: "bg-[#212121] backdrop-blur-xl",
-        border: "border-[#181818]",
-        text: "text-slate-100",
-        textSecondary: "text-slate-400",
-        input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
-        inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
-        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
-        buttonSecondary: "bg-[#606468] hover:bg-[#3E434C] text-slate-300",
-        buttonText: "text-white",
-        link: "text-gray-400 hover:text-violet-400",
-        progress: "bg-[#181818]",
-        progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
-      }
+      bg: "bg-[#3E434C]",
+      cardBg: "bg-[#212121] backdrop-blur-xl",
+      border: "border-[#181818]",
+      text: "text-slate-100",
+      textSecondary: "text-slate-400",
+      input: "bg-[#181818] border-[#606468] text-white placeholder:text-slate-500",
+      inputFocus: "border-gray-400 ring-gray-400/20 bg-[#181818]",
+      button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
+      buttonSecondary: "bg-[#606468] hover:bg-[#3E434C] text-slate-300",
+      buttonText: "text-white",
+      link: "text-gray-400 hover:text-violet-400",
+      progress: "bg-[#181818]",
+      progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
+    }
     : {
-        bg: "bg-[#606468]",
-        cardBg: "bg-[#ffffff] backdrop-blur-xl",
-        border: "border-[#e1e1e1]",
-        text: "text-slate-900",
-        textSecondary: "text-slate-600",
-        input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
-        inputFocus: "border-gray-500 ring-gray-500/20 bg-[#ffffff]",
-        button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
-        buttonSecondary: "bg-[#e1e1e1] hover:bg-[#606468] text-slate-700",
-        buttonText: "text-white",
-        link: "text-gray-600 hover:text-violet-600",
-        progress: "bg-[#e1e1e1]",
-        progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
-      };
+      bg: "bg-[#606468]",
+      cardBg: "bg-[#ffffff] backdrop-blur-xl",
+      border: "border-[#e1e1e1]",
+      text: "text-slate-900",
+      textSecondary: "text-slate-600",
+      input: "bg-gray-100 border-[#606468] text-slate-900 placeholder:text-slate-400",
+      inputFocus: "border-gray-500 ring-gray-500/20 bg-[#ffffff]",
+      button: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 hover:from-violet-500 hover:via-purple-500 hover:to-pink-500",
+      buttonSecondary: "bg-[#e1e1e1] hover:bg-[#606468] text-slate-700",
+      buttonText: "text-white",
+      link: "text-gray-600 hover:text-violet-600",
+      progress: "bg-[#e1e1e1]",
+      progressFill: "bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600",
+    };
 
   const steps = [
     {
@@ -198,26 +198,26 @@ export default function SignUpPage() {
         <div className={`absolute bottom-20 right-10 w-96 h-96 ${darkMode ? 'bg-purple-500/10' : 'bg-purple-300/30'} rounded-full blur-3xl`} />
       </div>
 
-      {}
+      { }
 
       <div className={`${theme.cardBg} ${theme.border} border rounded-xl xs:rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg my-2 xs:my-4 sm:my-8 transition-all duration-500 relative z-10 flex flex-col max-h-[98vh] xs:max-h-[95vh] sm:max-h-[90vh] md:p-4`}>
         <div className="p-3 xs:p-4 sm:p-6 md:p-8 pb-2 xs:pb-3 sm:pb-4 md:pb-6 text-center flex-shrink-0">
           <div className={`inline-flex items-center justify-center rounded-2xl mb-2 xs:mb-3 sm:mb-4 relative`}>
-              <Image
-                  src={ darkMode ? "/logo.png":"/dark-logo.png"}
-                  alt="Logo"
-                  unoptimized
-                  width={533}
-                  height={191}
-                  className="w-28 xs:w-32 sm:w-36 md:w-44 lg:w-52 h-auto"
-              />
+            <Image
+              src={darkMode ? "/logo.png" : "/dark-logo.png"}
+              alt="Logo"
+              unoptimized
+              width={533}
+              height={191}
+              className="w-28 xs:w-32 sm:w-36 md:w-44 lg:w-52 h-auto"
+            />
           </div>
           <h1 className={`text-lg xs:text-xl sm:text-2xl font-bold ${theme.text} mb-1 xs:mb-1.5 sm:mb-2`}>{steps[currentStep].title}</h1>
           <p className={`${theme.textSecondary} text-xs`}>{steps[currentStep].subtitle}</p>
         </div>
 
         <div className="px-3 xs:px-4 sm:px-6 md:px-8 mb-3 xs:mb-4 sm:mb-6 flex-shrink-0">
-          {}
+          { }
           <div className={`h-2 ${theme.progress} rounded-full overflow-hidden shadow-inner`}>
             <motion.div
               className={`h-full ${theme.progressFill} transition-all duration-500 ease-out shadow-lg`}
@@ -227,7 +227,7 @@ export default function SignUpPage() {
             />
           </div>
 
-          {}
+          { }
           <div className="flex items-center justify-between mt-6 mb-2 relative">
             {steps.map((step, index) => {
               const isCompleted = index < currentStep;
@@ -235,7 +235,7 @@ export default function SignUpPage() {
 
               return (
                 <div key={index} className="flex items-center flex-1 relative z-10">
-                  {}
+                  { }
                   <div className="flex flex-col items-center flex-1">
                     <motion.div
                       className={`
@@ -243,8 +243,8 @@ export default function SignUpPage() {
                         ${isCompleted
                           ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg'
                           : isCurrent
-                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg ring-2 ring-violet-400/50'
-                          : `${theme.progress} ${theme.textSecondary} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-400'}`
+                            ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white shadow-lg ring-2 ring-violet-400/50'
+                            : `${theme.progress} ${theme.textSecondary} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-400'}`
                         }
                         transition-all duration-300
                         relative z-10
@@ -264,18 +264,17 @@ export default function SignUpPage() {
                         <span className={`text-xs font-semibold ${isCurrent ? 'text-white' : ''}`}>{index + 1}</span>
                       )}
                     </motion.div>
-              <span
-                      className={`text-xs mt-2 font-medium text-center transition-colors duration-300 ${
-                        isCompleted || isCurrent
+                    <span
+                      className={`text-xs mt-2 font-medium text-center transition-colors duration-300 ${isCompleted || isCurrent
                           ? darkMode ? 'text-violet-400' : 'text-violet-600'
                           : theme.textSecondary
-                      }`}
-              >
+                        }`}
+                    >
                       {step.title}
-              </span>
+                    </span>
                   </div>
 
-                  {}
+                  { }
                   {index < steps.length - 1 && (
                     <div className={`
                       absolute left-[calc(50%+20px)] right-[calc(50%+20px)] h-0.5 top-5
@@ -359,14 +358,13 @@ export default function SignUpPage() {
                       onFocus={() => setFocusedField("password")}
                       onBlur={() => setFocusedField("")}
                       placeholder="••••••••"
-                      className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
-                        focusedField === "password" ? `${theme.inputFocus} ring-2` : ""
-                      } transition-all duration-200 focus:outline-none pr-9 xs:pr-10 sm:pr-12`}
+                      className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "password" ? `${theme.inputFocus} ring-2` : ""
+                        } transition-all duration-200 focus:outline-none pr-9 xs:pr-10 sm:pr-12`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className={`absolute right-2.5 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors p-1`}
+                      className={`absolute right-2.5 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 ${theme.textSecondary} hover:${theme.text} transition-colors p-1 cursor-pointer`}
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -378,17 +376,16 @@ export default function SignUpPage() {
                         {[1, 2, 3].map((level) => (
                           <div
                             key={level}
-                            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                              level <= passwordStrength.strength
+                            className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength
                                 ? level === 1
                                   ? "bg-red-500"
                                   : level === 2
-                                  ? "bg-amber-500"
-                                  : "bg-emerald-500"
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
                                 : darkMode
-                                ? "bg-slate-700"
-                                : "bg-slate-200"
-                            }`}
+                                  ? "bg-slate-700"
+                                  : "bg-slate-200"
+                              }`}
                           />
                         ))}
                       </div>
@@ -414,9 +411,8 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("firstName")}
                     onBlur={() => setFocusedField("")}
                     placeholder="John"
-                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
-                      focusedField === "firstName" ? `${theme.inputFocus} ring-2` : ""
-                    } transition-all duration-200 focus:outline-none`}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "firstName" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
@@ -431,9 +427,8 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("lastName")}
                     onBlur={() => setFocusedField("")}
                     placeholder="Doe"
-                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
-                      focusedField === "lastName" ? `${theme.inputFocus} ring-2` : ""
-                    } transition-all duration-200 focus:outline-none`}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "lastName" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
@@ -446,9 +441,8 @@ export default function SignUpPage() {
                     type="button"
                     onClick={() => setIsSexDropdownOpen(!isSexDropdownOpen)}
                     onBlur={() => setTimeout(() => setIsSexDropdownOpen(false), 150)}
-                    className={`w-full px-3 py-2.5 xs:py-3 text-sm flex items-center justify-between rounded-lg xs:rounded-xl border ${theme.input} ${
-                      focusedField === "sex" ? `${theme.inputFocus} ring-2` : ""
-                    } transition-all duration-300 focus:outline-none hover:scale-[1.01] active:scale-[0.99]`}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm flex items-center justify-between rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "sex" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-300 focus:outline-none hover:scale-[1.01] active:scale-[0.99] cursor-pointer`}
                   >
                     <span className={`${theme.text}`}>
                       {sex === "male" ? "Male" : sex === "female" ? "Female" : "Other"}
@@ -496,9 +490,8 @@ export default function SignUpPage() {
                               scale: 1.02,
                             }}
                             whileTap={{ scale: 0.98 }}
-                            className={`w-full text-left px-4 py-3 text-sm ${
-                              theme.text
-                            } transition-all duration-200`}
+                            className={`w-full text-left px-4 py-3 text-sm ${theme.text
+                              } transition-all duration-200 cursor-pointer`}
                           >
                             {item.label}
                           </motion.button>
@@ -524,9 +517,8 @@ export default function SignUpPage() {
                     onFocus={() => setFocusedField("location")}
                     onBlur={() => setFocusedField("")}
                     placeholder="New York, USA"
-                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
-                      focusedField === "location" ? `${theme.inputFocus} ring-2` : ""
-                    } transition-all duration-200 focus:outline-none`}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "location" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-200 focus:outline-none`}
                   />
                 </div>
 
@@ -542,9 +534,8 @@ export default function SignUpPage() {
                     placeholder="Tell us about yourself..."
                     rows={4}
                     maxLength={500}
-                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${
-                      focusedField === "bio" ? `${theme.inputFocus} ring-2` : ""
-                    } transition-all duration-200 focus:outline-none resize-none`}
+                    className={`w-full px-3 py-2.5 xs:py-3 text-sm rounded-lg xs:rounded-xl border ${theme.input} ${focusedField === "bio" ? `${theme.inputFocus} ring-2` : ""
+                      } transition-all duration-200 focus:outline-none resize-none`}
                   />
                   <p className={`text-xs ${theme.textSecondary} mt-1.5 text-right`}>{bio.length}/500</p>
                 </div>
@@ -558,7 +549,7 @@ export default function SignUpPage() {
             {currentStep > 0 && (
               <button
                 onClick={handleBack}
-                className={`flex-1 ${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2`}
+                className={`flex-1 ${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2 cursor-pointer`}
               >
                 <ArrowLeft className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                 <span className="hidden xs:inline">Back</span>
@@ -575,13 +566,13 @@ export default function SignUpPage() {
                   hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
                   flex items-center justify-center gap-1.5 xs:gap-2
                   disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-                  relative overflow-hidden`}
+                  relative overflow-hidden cursor-pointer`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="relative z-10 flex items-center gap-1.5 xs:gap-2">
-                Next
-                <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                  Next
+                  <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
                 </span>
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600"
@@ -594,7 +585,7 @@ export default function SignUpPage() {
               <>
                 <motion.button
                   onClick={handleSkip}
-                  className={`${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200`}
+                  className={`${theme.buttonSecondary} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold transition-all duration-200 cursor-pointer`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -602,14 +593,14 @@ export default function SignUpPage() {
                 </motion.button>
                 <motion.button
                   onClick={handleSignup}
-                  className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2 relative overflow-hidden`}
+                  className={`flex-1 ${theme.button} ${theme.buttonText} py-2 xs:py-2.5 sm:py-3 px-2.5 xs:px-3 sm:px-4 rounded-lg xs:rounded-xl text-xs xs:text-sm font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1.5 xs:gap-2 relative overflow-hidden cursor-pointer`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span className="relative z-10 flex items-center gap-1.5 xs:gap-2">
-                  <Check className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
-                  <span className="hidden xs:inline">Create Account</span>
-                  <span className="xs:hidden">Create</span>
+                    <Check className="w-3.5 h-3.5 xs:w-4 xs:h-4" />
+                    <span className="hidden xs:inline">Create Account</span>
+                    <span className="xs:hidden">Create</span>
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600"
@@ -624,7 +615,7 @@ export default function SignUpPage() {
 
           <p className={`text-center text-xs ${theme.textSecondary}`}>
             {`Already have an account? `}
-            <a href="/signin" className={`font-semibold ${theme.link} transition-colors`}>
+            <a href="/signin" className={`font-semibold ${theme.link} transition-colors cursor-pointer`}>
               Sign in
             </a>
           </p>

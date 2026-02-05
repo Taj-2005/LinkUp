@@ -26,13 +26,13 @@ export default function Home() {
               setSelectedItem("linkhub");
               router.push("/notifications");
             }}
-            className="md:hidden absolute top-2 right-2 z-10 text-black dark:text-white hover:opacity-75 transition-opacity"
+            className="md:hidden absolute top-2 right-2 z-10 text-black dark:text-white hover:opacity-75 transition-opacity cursor-pointer"
             aria-label="Notifications"
           >
             <div className="relative">
               <FiBell size={24} />
               {unseenCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark"></span>
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark"></span>
               )}
             </div>
           </button>
@@ -48,14 +48,14 @@ export default function Home() {
                 setSelectedItem("settings");
                 router.push("/notifications");
               }}
-              className="text-black dark:text-white hover:opacity-75 transition-opacity flex justify-end items-end relative"
+              className="text-black dark:text-white hover:opacity-75 transition-opacity flex justify-end items-end relative cursor-pointer"
               aria-label="Notifications"
             >
               <FiBell size={30} />
               {unseenCount > 0 && (
-              <span className="absolute top-0 right-0 min-w-[20px] h-5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark flex items-center justify-center px-1 text-xs font-bold text-white">
-                {unseenCount > 99 ? '99+' : unseenCount}
-              </span>
+                <span className="absolute top-0 right-0 min-w-[20px] h-5 bg-red-500 rounded-full border-2 border-white dark:border-primary-dark flex items-center justify-center px-1 text-xs font-bold text-white">
+                  {unseenCount > 99 ? '99+' : unseenCount}
+                </span>
               )}
             </button>
           </div>

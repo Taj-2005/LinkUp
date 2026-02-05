@@ -101,22 +101,22 @@ export default function NotificationsPage() {
 
     useEffect(() => {
         if (loading || (notificationsLoading && notifications.length === 0)) return;
-        
+
         const actualUnreadNotifications = notifications.filter((n) => !n.read).length;
         const actualUnseenRequests = requests.filter((r) => !r.seen && r.status === "requested").length;
         const correctCount = actualUnreadNotifications + actualUnseenRequests;
         setUnseenCount(correctCount);
-    }, [notifications, requests, loading, notificationsLoading, setUnseenCount]); 
+    }, [notifications, requests, loading, notificationsLoading, setUnseenCount]);
 
     useEffect(() => {
         const markInteractionsAsRead = async () => {
             if (hasMarkedAsReadRef.current) return;
             if (loading || (notificationsLoading && notifications.length === 0)) return;
-            
+
             const unreadInteractionIds = notifications
                 .filter((n) => !n.read)
                 .map((n) => n._id);
-            
+
             if (unreadInteractionIds.length === 0) {
                 const actualUnreadCount = notifications.filter((n) => !n.read).length;
                 const actualUnseenRequests = requests.filter((r) => !r.seen && r.status === "requested").length;
@@ -124,9 +124,9 @@ export default function NotificationsPage() {
                 setUnseenCount(correctCount);
                 return;
             }
-            
+
             hasMarkedAsReadRef.current = true;
-            
+
             try {
                 await Promise.all(
                     unreadInteractionIds.map((id) =>
@@ -136,19 +136,19 @@ export default function NotificationsPage() {
                         })
                     )
                 );
-                
+
                 mutateNotifications(
                     (current: INotification[] | undefined): INotification[] => {
                         if (!current) return [];
-                        return current.map((n) => 
-                            unreadInteractionIds.includes(n._id) 
+                        return current.map((n) =>
+                            unreadInteractionIds.includes(n._id)
                                 ? { ...n, read: true } as INotification
                                 : n
                         );
                     },
                     { revalidate: false }
                 );
-                
+
                 const actualUnreadCount = notifications.filter((n) => !unreadInteractionIds.includes(n._id) && !n.read).length;
                 const actualUnseenRequests = requests.filter((r) => !r.seen && r.status === "requested").length;
                 const correctCount = actualUnreadCount + actualUnseenRequests;
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
                 hasMarkedAsReadRef.current = false;
             }
         };
-        
+
         markInteractionsAsRead();
     }, [notifications, loading, notificationsLoading, mutateNotifications, requests, setUnseenCount]);
 
@@ -198,7 +198,7 @@ export default function NotificationsPage() {
         const previousLinkedBy = currentUser?.linked_by || [];
 
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
-        
+
         try {
             if (currentUser?._id) {
                 const updatedLinkedBy = [...previousLinkedBy];
@@ -212,7 +212,7 @@ export default function NotificationsPage() {
 
                 mutate(
                     "all-users",
-                    (users: { _id: string; linked_to?: string[]; [key: string]: unknown }[] | undefined) => {
+                    (users: { _id: string; linked_to?: string[];[key: string]: unknown }[] | undefined) => {
                         if (!users) return users;
                         return users.map((user) => {
                             if (user._id === requesterId) {
@@ -258,20 +258,20 @@ export default function NotificationsPage() {
             loadRequests();
             const requester = requests.find((r) => r._id === requestId);
             if (requester?.requester) {
-              showToastWithAvatar(
-                {
-                  username: requester.requester.username || "Unknown",
-                  user_avatar: requester.requester.user_avatar,
-                  name: requester.requester.name,
-                },
-                "accepted your link request"
-              );
+                showToastWithAvatar(
+                    {
+                        username: requester.requester.username || "Unknown",
+                        user_avatar: requester.requester.user_avatar,
+                        name: requester.requester.name,
+                    },
+                    "accepted your link request"
+                );
             } else {
-              toast.success("Link request accepted!");
+                toast.success("Link request accepted!");
             }
         } catch (error) {
             setRequests(previousRequests);
-            
+
             if (currentUser?._id) {
                 await optimisticUpdateUser(currentUser._id, {
                     linked_by: previousLinkedBy,
@@ -295,9 +295,9 @@ export default function NotificationsPage() {
 
         const request = requests.find((r) => r._id === requestId);
         const requesterId = request?.requesterId;
-        
+
         setRequests((prev) => prev.filter((r) => r._id !== requestId));
-        
+
         try {
             if (currentUser?._id && requesterId) {
                 await Promise.all([
@@ -312,11 +312,11 @@ export default function NotificationsPage() {
             }
 
             await rejectLinkRequest(requestId);
-            
+
             if (socket) {
                 socket.emit("rejectLinkRequest", { requestId });
                 socket.emit("markRequestAsSeen", { requestId });
-            }   
+            }
 
             if (currentUser?._id && requesterId) {
                 await invalidateGlobalLinkUpCaches(currentUser._id, requesterId);
@@ -325,17 +325,17 @@ export default function NotificationsPage() {
             loadRequests();
             const rejectedRequest = previousRequests.find((r) => r._id === requestId);
             if (rejectedRequest?.requester) {
-              showToastWithAvatar(
-                {
-                  username: rejectedRequest.requester.username || "Unknown",
-                  user_avatar: rejectedRequest.requester.user_avatar,
-                  name: rejectedRequest.requester.name,
-                },
-                "rejected your link request",
-                { type: "info" }
-              );
+                showToastWithAvatar(
+                    {
+                        username: rejectedRequest.requester.username || "Unknown",
+                        user_avatar: rejectedRequest.requester.user_avatar,
+                        name: rejectedRequest.requester.name,
+                    },
+                    "rejected your link request",
+                    { type: "info" }
+                );
             } else {
-              toast.success("Link request rejected");
+                toast.success("Link request rejected");
             }
         } catch (error) {
             setRequests(previousRequests);
@@ -357,14 +357,14 @@ export default function NotificationsPage() {
             await authFetch("/api/notifications/clear", {
                 method: "DELETE",
             });
-            
+
             mutateNotifications(
                 (): INotification[] => {
                     return [];
                 },
                 { revalidate: false }
             );
-            
+
             toast.success("All interaction notifications cleared");
         } catch {
             toast.error("Failed to clear notifications");
@@ -400,12 +400,12 @@ export default function NotificationsPage() {
     };
 
     const [notificationActors, setNotificationActors] = useState<Record<string, { _id: string; username?: string; user_avatar?: string; name?: string } | null>>({});
-    
+
     useEffect(() => {
         const loadActors = async () => {
             const uniqueActorIds = [...new Set(notifications.map(n => n.actorId))];
             const actors: Record<string, { _id: string; username?: string; user_avatar?: string; name?: string } | null> = {};
-            
+
             await Promise.all(
                 uniqueActorIds.map(async (actorId) => {
                     try {
@@ -417,10 +417,10 @@ export default function NotificationsPage() {
                     }
                 })
             );
-            
+
             setNotificationActors(actors);
         };
-        
+
         if (notifications.length > 0) {
             loadActors();
         }
@@ -451,7 +451,7 @@ export default function NotificationsPage() {
                             <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={handleClearAll}
-                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap"
+                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-1 bg-gray-200 dark:bg-gray-700 rounded-lg hover:opacity-80 transition whitespace-nowrap cursor-pointer"
                                 >
                                     Clear All
                                 </button>
@@ -462,21 +462,19 @@ export default function NotificationsPage() {
                     <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 pb-0">
                         <button
                             onClick={() => setActiveTab("all")}
-                            className={`pb-2 px-4 text-sm font-semibold transition ${
-                                activeTab === "all"
+                            className={`pb-2 px-4 text-sm font-semibold transition cursor-pointer ${activeTab === "all"
                                     ? "text-violet-600 border-b-2 border-violet-600"
                                     : "text-gray-500 dark:text-gray-400"
-                            }`}
+                                }`}
                         >
                             All
                         </button>
                         <button
                             onClick={() => setActiveTab("requests")}
-                            className={`pb-2 px-4 text-sm font-semibold transition ${
-                                activeTab === "requests"
+                            className={`pb-2 px-4 text-sm font-semibold transition cursor-pointer ${activeTab === "requests"
                                     ? "text-violet-600 border-b-2 border-violet-600"
                                     : "text-gray-500 dark:text-gray-400"
-                            }`}
+                                }`}
                         >
                             Link Requests{" "}
                             {isLoading ? (
@@ -498,11 +496,10 @@ export default function NotificationsPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab("interactions")}
-                            className={`pb-2 px-4 text-sm font-semibold transition ${
-                                activeTab === "interactions"
+                            className={`pb-2 px-4 text-sm font-semibold transition cursor-pointer ${activeTab === "interactions"
                                     ? "text-violet-600 border-b-2 border-violet-600"
                                     : "text-gray-500 dark:text-gray-400"
-                            }`}
+                                }`}
                         >
                             Interactions{" "}
                             {isLoading ? (
@@ -523,8 +520,8 @@ export default function NotificationsPage() {
                             )}
                         </button>
                     </div>
-                    </div>
-                            
+                </div>
+
                 <div className="flex-1 overflow-y-auto hide-scrollbar px-4 md:px-6 pb-4 md:pb-6">
                     {isLoading ? (
                         <div className="space-y-4">
@@ -562,8 +559,8 @@ export default function NotificationsPage() {
                                                         request.requester.user_avatar
                                                             ? request.requester.user_avatar
                                                             : resolvedTheme === "dark"
-                                                            ? "/dark-profile.png"
-                                                            : "/light-profile.png"
+                                                                ? "/dark-profile.png"
+                                                                : "/light-profile.png"
                                                     }
                                                     fill
                                                     alt={`${request.requester.username} avatar`}
@@ -584,13 +581,13 @@ export default function NotificationsPage() {
                                         <div className="flex gap-3 md:gap-4">
                                             <button
                                                 onClick={() => handleAccept(request._id, request.requesterId)}
-                                                className="flex-1 bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base"
+                                                className="flex-1 bg-primary-light dark:bg-primary-dark text-right-nav-light dark:text-gray-100 px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold shadow-lg hover:brightness-110 transition text-sm md:text-base cursor-pointer"
                                             >
                                                 Accept
                                             </button>
                                             <button
                                                 onClick={() => handleReject(request._id)}
-                                                className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold hover:brightness-110 transition text-sm md:text-base"
+                                                className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold hover:brightness-110 transition text-sm md:text-base cursor-pointer"
                                             >
                                                 Reject
                                             </button>
@@ -609,9 +606,8 @@ export default function NotificationsPage() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, ease: "easeOut" }}
-                                        className={`bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-md border border-gray-200 dark:border-gray-700 ${
-                                            !notification.read ? "bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800" : ""
-                                        }`}
+                                        className={`bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-md border border-gray-200 dark:border-gray-700 ${!notification.read ? "bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800" : ""
+                                            }`}
                                     >
                                         <div className="flex items-center gap-4">
                                             {getNotificationIcon(notification.type) && (
@@ -623,8 +619,8 @@ export default function NotificationsPage() {
                                                         actor.user_avatar
                                                             ? actor.user_avatar
                                                             : resolvedTheme === "dark"
-                                                            ? "/dark-profile.png"
-                                                            : "/light-profile.png"
+                                                                ? "/dark-profile.png"
+                                                                : "/light-profile.png"
                                                     }
                                                     fill
                                                     alt={`${actor.username} avatar`}

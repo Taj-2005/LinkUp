@@ -50,23 +50,23 @@ export default function VerifyEmailContent() {
 
   const theme = darkMode
     ? {
-        bg: "bg-[#3E434C]",
-        cardBg: "bg-[#212121] backdrop-blur-xl",
-        border: "border-[#181818]",
-        text: "text-slate-100",
-        textSecondary: "text-slate-400",
-        button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-      }
+      bg: "bg-[#3E434C]",
+      cardBg: "bg-[#212121] backdrop-blur-xl",
+      border: "border-[#181818]",
+      text: "text-slate-100",
+      textSecondary: "text-slate-400",
+      button: "bg-gradient-to-r from-gray-600 to-gray-600 hover:from-gray-500 hover:to-gray-500",
+      buttonText: "text-white",
+    }
     : {
-        bg: "bg-[#606468]",
-        cardBg: "bg-[#ffffff] backdrop-blur-xl",
-        border: "border-[#e1e1e1]",
-        text: "text-slate-900",
-        textSecondary: "text-slate-600",
-        button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
-        buttonText: "text-white",
-      };
+      bg: "bg-[#606468]",
+      cardBg: "bg-[#ffffff] backdrop-blur-xl",
+      border: "border-[#e1e1e1]",
+      text: "text-slate-900",
+      textSecondary: "text-slate-600",
+      button: "bg-gradient-to-r from-gray-400 to-gray-400 hover:from-gray-500 hover:to-gray-500",
+      buttonText: "text-white",
+    };
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme.bg} transition-all duration-500 p-4 relative overflow-hidden`}>
@@ -119,7 +119,7 @@ export default function VerifyEmailContent() {
               </div>
               <button
                 onClick={() => router.push("/signin")}
-                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200`}
+                className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer`}
               >
                 Go to Sign In
               </button>
@@ -145,13 +145,13 @@ export default function VerifyEmailContent() {
               <div className="space-y-3">
                 <button
                   onClick={() => router.push("/signup")}
-                  className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200`}
+                  className={`w-full ${theme.button} ${theme.buttonText} py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 cursor-pointer`}
                 >
                   Back to Sign Up
                 </button>
                 <button
                   onClick={() => router.push("/signin")}
-                  className={`w-full ${darkMode ? 'bg-[#606468] hover:bg-[#3E434C]' : 'bg-[#e1e1e1] hover:bg-[#606468]'} text-slate-300 py-3 px-4 rounded-xl font-semibold transition-all duration-200`}
+                  className={`w-full ${darkMode ? 'bg-[#606468] hover:bg-[#3E434C]' : 'bg-[#e1e1e1] hover:bg-[#606468]'} text-slate-300 py-3 px-4 rounded-xl font-semibold transition-all duration-200 cursor-pointer`}
                 >
                   Go to Sign In
                 </button>
